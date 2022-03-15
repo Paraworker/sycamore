@@ -6,7 +6,7 @@
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,
-    VIEW_TYPE_XDG_TOPLEVEL,
+    VIEW_TYPE_XDG_SHELL,
     VIEW_TYPE_XWAYLAND,
 };
 
@@ -28,7 +28,7 @@ struct sycamore_view {
 
 };
 
-struct sycamore_xdg_toplevel_view {
+struct sycamore_xdg_shell_view {
     struct sycamore_view base_view;
 
     struct wlr_xdg_toplevel *xdg_toplevel;
@@ -42,13 +42,11 @@ struct sycamore_xdg_toplevel_view {
 };
 
 /* All type of views should call this to map */
-void sycamore_view_map(struct sycamore_view* view);
-
+void map_view(struct sycamore_view* view);
 /* All type of views should call this to unmap */
-void sycamore_view_unmap(struct sycamore_view* view);
-
+void unmap_view(struct sycamore_view* view);
+void focus_view(struct sycamore_view *view);
 struct sycamore_view *desktop_view_at(struct sycamore_server *server, double lx, double ly,
         struct wlr_surface **surface, double *sx, double *sy);
-void focus_view(struct sycamore_view *view);
 
 #endif //SYCAMORE_VIEW_H

@@ -4,13 +4,13 @@
 
 #include "sycamore/desktop/view.h"
 
-void sycamore_view_map(struct sycamore_view* view) {
+void map_view(struct sycamore_view* view) {
     wl_list_insert(&view->server->mapped_views, &view->link);
 
     focus_view(view);
 }
 
-void sycamore_view_unmap(struct sycamore_view* view) {
+void unmap_view(struct sycamore_view* view) {
     wl_list_remove(&view->link);
     if (view->server->seat->cursor->grabbed_view == view) {
         view->server->seat->cursor->grabbed_view = NULL;

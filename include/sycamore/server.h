@@ -10,6 +10,7 @@
 
 #include "sycamore/input/seat.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
+#include "sycamore/desktop/shell/layer_shell.h"
 #include "sycamore/desktop/view.h"
 
 struct sycamore_server {
@@ -32,6 +33,7 @@ struct sycamore_server {
 
     struct sycamore_seat* seat;
     struct sycamore_xdg_shell* xdg_shell;
+    struct sycamore_layer_shell* layer_shell;
 
     struct wl_list mapped_views;
     struct sycamore_view* activated_view;

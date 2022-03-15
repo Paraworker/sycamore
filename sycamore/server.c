@@ -72,6 +72,12 @@ static bool server_init(struct sycamore_server* server) {
         return false;
     }
 
+    server->layer_shell = sycamore_layer_shell_create(server, server->wl_display);
+    if (!server->xdg_shell) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_layer_shell");
+        return false;
+    }
+
     wl_list_init(&server->mapped_views);
     server->activated_view = NULL;
 
@@ -97,6 +103,9 @@ void server_destroy(struct sycamore_server* server) {
     }
     if (server->xdg_shell) {
         sycamore_xdg_shell_destroy(server->xdg_shell);
+    }
+    if (server->layer_shell) {
+        sycamore_layer_shell_destroy(server->layer_shell);
     }
 
     if (server->output_layout) {
