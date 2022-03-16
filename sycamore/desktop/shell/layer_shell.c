@@ -4,7 +4,7 @@
 
 #include "sycamore/desktop/layer.h"
 
-void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
+static void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
     struct sycamore_layer_shell* layer_shell =
             wl_container_of(listener, layer_shell, new_layer_shell_surface);
     struct wlr_layer_surface_v1* layer_surface = data;
@@ -43,7 +43,6 @@ struct sycamore_layer_shell* sycamore_layer_shell_create(
     layer_shell->new_layer_shell_surface.notify = handle_new_layer_shell_surface;
     wl_signal_add(&layer_shell->wlr_layer_shell->events.new_surface,
                   &layer_shell->new_layer_shell_surface);
-
 
     return layer_shell;
 }

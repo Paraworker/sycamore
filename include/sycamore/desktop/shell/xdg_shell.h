@@ -8,6 +8,7 @@
 
 struct sycamore_xdg_shell {
     struct wlr_xdg_shell *wlr_xdg_shell;
+
     struct wl_listener new_xdg_shell_surface;
 
     struct sycamore_server* server;

@@ -300,11 +300,6 @@ struct sycamore_cursor* sycamore_cursor_create(struct sycamore_seat* seat,
         return NULL;
     }
 
-    cursor->seat = seat;
-    cursor->mode = CURSOR_MODE_PASSTHROUGH;
-    cursor->grabbed_view = NULL;
-    cursor->setted_to_default = false;
-
     cursor->wlr_cursor = wlr_cursor_create();
     if (!cursor->wlr_cursor) {
         sycamore_cursor_destroy(cursor);
@@ -338,6 +333,11 @@ struct sycamore_cursor* sycamore_cursor_create(struct sycamore_seat* seat,
     cursor->cursor_frame.notify = cursor_frame;
     wl_signal_add(&cursor->wlr_cursor->events.frame,
                   &cursor->cursor_frame);
+
+    cursor->seat = seat;
+    cursor->mode = CURSOR_MODE_PASSTHROUGH;
+    cursor->grabbed_view = NULL;
+    cursor->setted_to_default = false;
 
     return cursor;
 }

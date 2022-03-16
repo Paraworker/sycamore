@@ -111,8 +111,8 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
         return NULL;
     }
 
-    view->base_view.type = VIEW_TYPE_XDG_SHELL;
     view->xdg_toplevel = toplevel;
+    view->base_view.type = VIEW_TYPE_XDG_SHELL;
     view->base_view.server = server;
     view->base_view.scene_node = wlr_scene_xdg_surface_create(
             &server->scene->node, toplevel->base);
@@ -146,7 +146,7 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
 }
 
 
-void handle_new_xdg_shell_surface(struct wl_listener *listener, void *data) {
+static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *data) {
     /* This event is raised when wlr_xdg_shell receives a new xdg surface from a
      * client, either a toplevel (application window) or popup. */
     struct sycamore_xdg_shell *xdg_shell =
@@ -196,7 +196,7 @@ struct sycamore_xdg_shell* sycamore_xdg_shell_create(struct sycamore_server* ser
 
     xdg_shell->wlr_xdg_shell = wlr_xdg_shell_create(display);
     if (!xdg_shell->wlr_xdg_shell) {
-        wlr_log(WLR_ERROR, "Unable to create_wlr__xdg_shell");
+        wlr_log(WLR_ERROR, "Unable to create_wlr_xdg_shell");
         sycamore_xdg_shell_destroy(xdg_shell);
         return NULL;
     }

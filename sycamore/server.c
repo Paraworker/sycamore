@@ -58,6 +58,7 @@ static bool server_init(struct sycamore_server* server) {
         wlr_log(WLR_ERROR, "Unable to create scene");
         return false;
     }
+
     wlr_scene_attach_output_layout(server->scene, server->output_layout);
 
     server->seat = sycamore_seat_create(server, server->wl_display, server->output_layout);
@@ -79,7 +80,7 @@ static bool server_init(struct sycamore_server* server) {
     }
 
     wl_list_init(&server->mapped_views);
-    server->activated_view = NULL;
+    server->desktop_focused_view = NULL;
 
     wlr_subcompositor_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
@@ -111,7 +112,6 @@ void server_destroy(struct sycamore_server* server) {
     if (server->output_layout) {
         wlr_output_layout_destroy(server->output_layout);
     }
-
     if (server->backend) {
         wlr_backend_destroy(server->backend);
     }

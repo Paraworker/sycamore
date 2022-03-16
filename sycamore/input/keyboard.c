@@ -1,7 +1,8 @@
 #include "sycamore/input/keyboard.h"
 #include <stdlib.h>
+#include <wlr/util/log.h>
 
-static void keyboard_handle_modifiers(
+static void handle_keyboard_modifiers(
         struct wl_listener *listener, void *data) {
     /* This event is raised when a modifier key, such as shift or alt, is
      * pressed. We simply communicate this to the client. */
@@ -48,7 +49,7 @@ static bool handle_keybinding(struct sycamore_server *server, xkb_keysym_t sym) 
     return true;
 }
 
-static void keyboard_handle_key(
+static void handle_keyboard_key(
         struct wl_listener *listener, void *data) {
     /* This event is raised when a key is pressed or released. */
     struct sycamore_keyboard *keyboard =
@@ -82,7 +83,7 @@ static void keyboard_handle_key(
     }
 }
 
-static void keyboard_handle_destroy(struct wl_listener *listener, void *data) {
+static void handle_keyboard_destroy(struct wl_listener *listener, void *data) {
     /* This event is raised by the keyboard base wlr_input_device to signal
      * the destruction of the wlr_keyboard. It will no longer receive events
      * and should be destroyed.
@@ -102,12 +103,18 @@ void sycamore_keyboard_destroy(struct sycamore_keyboard* keyboard) {
     wl_list_remove(&keyboard->key.link);
     wl_list_remove(&keyboard->destroy.link);
     wl_list_remove(&keyboard->link);
+
     free(keyboard);
 }
 
 struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
         struct wlr_input_device *device) {
     struct sycamore_keyboard *keyboard = calloc(1, sizeof(struct sycamore_keyboard));
+    if (!keyboard) {
+        wlr_log(WLR_ERROR, "Unable to allocate sycamore_keyboard");
+        return NULL;
+    }
+
     keyboard->seat = seat;
     keyboard->device = device;
 
@@ -122,17 +129,16 @@ struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
     xkb_context_unref(context);
 
     /* Set up listeners for keyboard events. */
-    keyboard->modifiers.notify = keyboard_handle_modifiers;
+    keyboard->modifiers.notify = handle_keyboard_modifiers;
     wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
-    keyboard->key.notify = keyboard_handle_key;
+    keyboard->key.notify = handle_keyboard_key;
     wl_signal_add(&device->keyboard->events.key, &keyboard->key);
-    keyboard->destroy.notify = keyboard_handle_destroy;
+    keyboard->destroy.notify = handle_keyboard_destroy;
     wl_signal_add(&device->events.destroy, &keyboard->destroy);
 
     wlr_seat_set_keyboard(seat->wlr_seat, device);
 
-    /* And add the keyboard to the list of keyboards */
-    wl_list_insert(&seat->keyboards, &keyboard->link);
+    return keyboard;
 }
 
 

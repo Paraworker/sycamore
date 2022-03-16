@@ -3,15 +3,15 @@
 
 #include <stdbool.h>
 #include <wlr/backend.h>
-#include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
-#include <wlr/types/wlr_compositor.h>
+#include <wlr/render/allocator.h>
 #include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_compositor.h>
 
 #include "sycamore/input/seat.h"
+#include "sycamore/desktop/view.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/shell/layer_shell.h"
-#include "sycamore/desktop/view.h"
 
 struct sycamore_server {
     struct wl_display *wl_display;
@@ -36,7 +36,7 @@ struct sycamore_server {
     struct sycamore_layer_shell* layer_shell;
 
     struct wl_list mapped_views;
-    struct sycamore_view* activated_view;
+    struct sycamore_view* desktop_focused_view;
 
     const char *socket;
 };

@@ -15,8 +15,8 @@ void unmap_view(struct sycamore_view* view) {
     if (view->server->seat->cursor->grabbed_view == view) {
         view->server->seat->cursor->grabbed_view = NULL;
     }
-    if (view->server->activated_view == view) {
-        view->server->activated_view = NULL;
+    if (view->server->desktop_focused_view == view) {
+        view->server->desktop_focused_view = NULL;
     }
 
     double sx, sy;
@@ -29,7 +29,7 @@ void focus_view(struct sycamore_view *view) {
         return;
     }
     struct sycamore_server *server = view->server;
-    struct sycamore_view *prev_view = server->activated_view;
+    struct sycamore_view *prev_view = server->desktop_focused_view;
     if (prev_view == view) {
         /* Don't re-focus an already focused view. */
         return;
@@ -51,7 +51,6 @@ void focus_view(struct sycamore_view *view) {
 
     /* Activate the new view */
     view->interface.set_activated(view, true);
-    server->activated_view = view;
 
     /* Tell the seat to have the keyboard enter this surface. wlroots will keep
      * track of this and automatically send key events to the appropriate
@@ -61,6 +60,8 @@ void focus_view(struct sycamore_view *view) {
                                    keyboard->keycodes,
                                    keyboard->num_keycodes,
                                    &keyboard->modifiers);
+
+    server->desktop_focused_view = view;
 }
 
 struct sycamore_view* desktop_view_at(
