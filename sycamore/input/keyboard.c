@@ -10,7 +10,6 @@ static void handle_keyboard_modifiers(
      * pressed. We simply communicate this to the client. */
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, modifiers);
-    struct wlr_event_keyboard_key *event = data;
     /*
      * A seat can only have one keyboard, but this is a limitation of the
      * Wayland protocol - not wlroots. We assign all connected keyboards to the
