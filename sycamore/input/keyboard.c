@@ -1,6 +1,8 @@
-#include "sycamore/input/keyboard.h"
 #include <stdlib.h>
 #include <wlr/util/log.h>
+
+#include "sycamore/input/keyboard.h"
+#include "sycamore/input/keybinding.h"
 
 static void handle_keyboard_modifiers(
         struct wl_listener *listener, void *data) {
@@ -8,6 +10,7 @@ static void handle_keyboard_modifiers(
      * pressed. We simply communicate this to the client. */
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, modifiers);
+    struct wlr_event_keyboard_key *event = data;
     /*
      * A seat can only have one keyboard, but this is a limitation of the
      * Wayland protocol - not wlroots. We assign all connected keyboards to the
@@ -18,35 +21,6 @@ static void handle_keyboard_modifiers(
     /* Send modifiers to the client. */
     wlr_seat_keyboard_notify_modifiers(keyboard->seat->wlr_seat,
                                        &keyboard->device->keyboard->modifiers);
-}
-
-static bool handle_keybinding(struct sycamore_server *server, xkb_keysym_t sym) {
-    /*
-     * Here we handle compositor keybindings. This is when the compositor is
-     * processing keys, rather than passing them on to the client for its own
-     * processing.
-     *
-     * This function assumes Alt is held down.
-     */
-    switch (sym) {
-        case XKB_KEY_Escape:
-            wl_display_terminate(server->wl_display);
-            break;
-        case XKB_KEY_Tab:
-            /* Cycle to the next view */
-            if (wl_list_length(&server->mapped_views) < 2) {
-                break;
-            }
-            struct sycamore_view *next_view = wl_container_of(
-                    server->mapped_views.prev, next_view, link);
-            focus_view(next_view);
-            double sx, sy;
-            update_pointer_focus(server->seat->cursor, &sx, &sy);
-            break;
-        default:
-            return false;
-    }
-    return true;
 }
 
 static void handle_keyboard_key(
@@ -65,13 +39,14 @@ static void handle_keyboard_key(
             keyboard->device->keyboard->xkb_state, keycode, &syms);
 
     bool handled = false;
-    uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
-    if ((modifiers & WLR_MODIFIER_ALT) &&
-        event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-        /* If alt is held down and this button was _pressed_, we attempt to
+    if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+        /* If this button was pressed, we attempt to
          * process it as a compositor keybinding. */
+        uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
+
         for (int i = 0; i < nsyms; i++) {
-            handled = handle_keybinding(keyboard->seat->server, syms[i]);
+            handled = handle_keybinding(keyboard->seat->server->keybinding_manager,
+                                        modifiers, syms[i]);
         }
     }
 

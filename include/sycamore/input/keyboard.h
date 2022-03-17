@@ -1,6 +1,8 @@
 #ifndef SYCAMORE_KEYBOARD_H
 #define SYCAMORE_KEYBOARD_H
 
+#include <wlr/types/wlr_input_device.h>
+
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 

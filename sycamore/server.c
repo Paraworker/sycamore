@@ -79,6 +79,12 @@ static bool server_init(struct sycamore_server* server) {
         return false;
     }
 
+    server->keybinding_manager = sycamore_keybinding_manager_create(server);
+    if (!server->keybinding_manager) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_keybinding_manager");
+        return false;
+    }
+
     wl_list_init(&server->mapped_views);
     server->desktop_focused_view = NULL;
 
@@ -107,6 +113,9 @@ void server_destroy(struct sycamore_server* server) {
     }
     if (server->layer_shell) {
         sycamore_layer_shell_destroy(server->layer_shell);
+    }
+    if (server->keybinding_manager) {
+        sycamore_keybinding_manager_destroy(server->keybinding_manager);
     }
 
     if (server->output_layout) {

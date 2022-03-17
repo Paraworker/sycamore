@@ -12,6 +12,7 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/shell/layer_shell.h"
+#include "sycamore/input/keybinding.h"
 
 struct sycamore_server {
     struct wl_display *wl_display;
@@ -34,6 +35,7 @@ struct sycamore_server {
     struct sycamore_seat* seat;
     struct sycamore_xdg_shell* xdg_shell;
     struct sycamore_layer_shell* layer_shell;
+    struct sycamore_keybinding_manager* keybinding_manager;
 
     struct wl_list mapped_views;
     struct sycamore_view* desktop_focused_view;
