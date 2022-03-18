@@ -142,10 +142,10 @@ static void cursor_motion(struct wl_listener *listener, void *data) {
      * pointer motion event (i.e. a delta) */
     struct sycamore_cursor *cursor =
             wl_container_of(listener, cursor, cursor_motion);
-    struct wlr_event_pointer_motion *event = data;
+    struct wlr_pointer_motion_event *event = data;
 
     /* move the cursor */
-    wlr_cursor_move(cursor->wlr_cursor, event->device,
+    wlr_cursor_move(cursor->wlr_cursor, &event->pointer->base,
                     event->delta_x, event->delta_y);
 
     process_cursor_motion(cursor, event->time_msec);
@@ -160,8 +160,8 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data) {
      * emits these events. */
     struct sycamore_cursor *cursor =
             wl_container_of(listener, cursor, cursor_motion_absolute);
-    struct wlr_event_pointer_motion_absolute *event = data;
-    wlr_cursor_warp_absolute(cursor->wlr_cursor, event->device, event->x, event->y);
+    struct wlr_pointer_motion_absolute_event *event = data;
+    wlr_cursor_warp_absolute(cursor->wlr_cursor, &event->pointer->base, event->x, event->y);
     process_cursor_motion(cursor, event->time_msec);
 }
 
@@ -170,7 +170,7 @@ static void cursor_button(struct wl_listener *listener, void *data) {
      * event. */
     struct sycamore_cursor *cursor =
             wl_container_of(listener, cursor, cursor_button);
-    struct wlr_event_pointer_button *event = data;
+    struct wlr_pointer_button_event *event = data;
 
     /* Notify the client with pointer focus that a button press has occurred */
     wlr_seat_pointer_notify_button(cursor->seat->wlr_seat,
@@ -197,7 +197,7 @@ static void cursor_axis(struct wl_listener *listener, void *data) {
      * for example when you move the scroll wheel. */
     struct sycamore_cursor *cursor =
             wl_container_of(listener, cursor, cursor_axis);
-    struct wlr_event_pointer_axis *event = data;
+    struct wlr_pointer_axis_event *event = data;
     /* Notify the client with pointer focus of the axis event. */
     wlr_seat_pointer_notify_axis(cursor->seat->wlr_seat,
                                  event->time_msec, event->orientation, event->delta,

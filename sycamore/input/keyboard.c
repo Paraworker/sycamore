@@ -7,15 +7,10 @@
 static void handle_keyboard_modifiers(
         struct wl_listener *listener, void *data) {
     /* This event is raised when a modifier key, such as shift or alt, is
-     * pressed. We simply communicate this to the client. */
+     * pressed or released. */
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, modifiers);
-    /*
-     * A seat can only have one keyboard, but this is a limitation of the
-     * Wayland protocol - not wlroots. We assign all connected keyboards to the
-     * same seat. You can swap out the underlying wlr_keyboard like this and
-     * wlr_seat handles this transparently.
-     */
+
     wlr_seat_set_keyboard(keyboard->seat->wlr_seat, keyboard->device);
     /* Send modifiers to the client. */
     wlr_seat_keyboard_notify_modifiers(keyboard->seat->wlr_seat,
@@ -27,7 +22,7 @@ static void handle_keyboard_key(
     /* This event is raised when a key is pressed or released. */
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, key);
-    struct wlr_event_keyboard_key *event = data;
+    struct wlr_keyboard_key_event *event = data;
     struct wlr_seat *seat = keyboard->seat->wlr_seat;
 
     /* Translate libinput keycode -> xkbcommon */
@@ -42,8 +37,7 @@ static void handle_keyboard_key(
         /* If this button was pressed, we attempt to
          * process it as a compositor keybinding. */
         uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
-
-        for (int i = 0; i < nsyms; i++) {
+        for (int i = 0; i < nsyms; ++i) {
             handled = handle_keybinding(keyboard->seat->server->keybinding_manager,
                                         modifiers, syms[i]);
         }
