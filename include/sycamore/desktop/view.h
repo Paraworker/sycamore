@@ -18,10 +18,20 @@ struct sycamore_view {
     enum sycamore_view_type type;
     int x, y;
 
+    bool is_fullscreen;
+
+    struct {
+        int x;
+        int y;
+        int width;
+        int height;
+    }restore;
+
     struct {
         void (*destroy)(struct sycamore_view *view);
         void (*set_activated)(struct sycamore_view *view, bool activated);
         void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
+        void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
         struct wlr_surface* (*get_wlr_surface)(struct sycamore_view *view);
         void (*get_geometry)(struct sycamore_view *view, struct wlr_box* box);
     }interface;
@@ -38,6 +48,7 @@ struct sycamore_xdg_shell_view {
     struct wl_listener destroy;
     struct wl_listener request_move;
     struct wl_listener request_resize;
+    struct wl_listener request_fullscreen;
     struct wl_listener request_maximize;
 };
 
