@@ -41,7 +41,7 @@ void focus_view(struct sycamore_view *view) {
          * it no longer has focus and the client will repaint accordingly, e.g.
          * stop displaying a caret.
          */
-        prev_view->interface.set_activated(prev_view, false);
+        prev_view->interface->set_activated(prev_view, false);
     }
 
     /* Move the view to the front */
@@ -50,13 +50,13 @@ void focus_view(struct sycamore_view *view) {
     wl_list_insert(&server->mapped_views, &view->link);
 
     /* Activate the new view */
-    view->interface.set_activated(view, true);
+    view->interface->set_activated(view, true);
 
     /* Tell the seat to have the keyboard enter this surface. wlroots will keep
      * track of this and automatically send key events to the appropriate
      * clients without additional work on your part. */
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat->wlr_seat);
-    wlr_seat_keyboard_notify_enter(server->seat->wlr_seat, view->interface.get_wlr_surface(view),
+    wlr_seat_keyboard_notify_enter(server->seat->wlr_seat, view->interface->get_wlr_surface(view),
                                    keyboard->keycodes,
                                    keyboard->num_keycodes,
                                    &keyboard->modifiers);

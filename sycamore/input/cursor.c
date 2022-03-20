@@ -108,7 +108,7 @@ static void process_cursor_resize(struct sycamore_cursor *cursor, uint32_t time)
     }
 
     struct wlr_box geo_box;
-    view->interface.get_geometry(view, &geo_box);
+    view->interface->get_geometry(view, &geo_box);
 
     view->x = new_left - geo_box.x;
     view->y = new_top - geo_box.y;
@@ -117,7 +117,7 @@ static void process_cursor_resize(struct sycamore_cursor *cursor, uint32_t time)
     int new_height = new_bottom - new_top;
 
     wlr_scene_node_set_position(view->scene_node, view->x, view->y);
-    view->interface.set_size(view, new_width, new_height);
+    view->interface->set_size(view, new_width, new_height);
 }
 
 static void process_cursor_motion(struct sycamore_cursor *cursor, uint32_t time) {
@@ -234,7 +234,7 @@ void set_interactive(struct sycamore_view *view,
     if (!focused_surface) {
         return;
     }
-    if (view->interface.get_wlr_surface(view) !=
+    if (view->interface->get_wlr_surface(view) !=
         wlr_surface_get_root_surface(focused_surface)) {
         return;
     }
@@ -254,7 +254,7 @@ void set_interactive(struct sycamore_view *view,
         server->seat->cursor->grab_y = server->seat->cursor->wlr_cursor->y - view->y;
     } else {
         struct wlr_box geo_box;
-        view->interface.get_geometry(view, &geo_box);
+        view->interface->get_geometry(view, &geo_box);
 
         double border_x = (view->x + geo_box.x) +
                           ((edges & WLR_EDGE_RIGHT) ? geo_box.width : 0);

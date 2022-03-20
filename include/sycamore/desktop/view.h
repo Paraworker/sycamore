@@ -10,10 +10,21 @@ enum sycamore_view_type {
     VIEW_TYPE_XWAYLAND,
 };
 
+struct sycamore_view;
+
+struct sycamore_view_interface{
+    void (*destroy)(struct sycamore_view *view);
+    void (*set_activated)(struct sycamore_view *view, bool activated);
+    void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
+    void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
+    struct wlr_surface* (*get_wlr_surface)(struct sycamore_view *view);
+    void (*get_geometry)(struct sycamore_view *view, struct wlr_box* box);
+};
+
 /* the base view */
 struct sycamore_view {
     struct wl_list link;
-    struct sycamore_server *server;
+    const struct sycamore_view_interface* interface;
     struct wlr_scene_node *scene_node;
     enum sycamore_view_type type;
     int x, y;
@@ -27,15 +38,7 @@ struct sycamore_view {
         int height;
     }restore;
 
-    struct {
-        void (*destroy)(struct sycamore_view *view);
-        void (*set_activated)(struct sycamore_view *view, bool activated);
-        void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
-        void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
-        struct wlr_surface* (*get_wlr_surface)(struct sycamore_view *view);
-        void (*get_geometry)(struct sycamore_view *view, struct wlr_box* box);
-    }interface;
-
+    struct sycamore_server *server;
 };
 
 struct sycamore_xdg_shell_view {
@@ -52,9 +55,7 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_maximize;
 };
 
-/* All type of views should call this to map */
 void map_view(struct sycamore_view* view);
-/* All type of views should call this to unmap */
 void unmap_view(struct sycamore_view* view);
 void focus_view(struct sycamore_view *view);
 struct sycamore_view *desktop_view_at(struct sycamore_server *server, double lx, double ly,
