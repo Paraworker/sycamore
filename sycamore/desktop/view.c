@@ -1,16 +1,17 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
 #include "sycamore/desktop/view.h"
 
-void map_view(struct sycamore_view* view) {
+void view_map(struct sycamore_view* view) {
     wl_list_insert(&view->server->mapped_views, &view->link);
 
     focus_view(view);
 }
 
-void unmap_view(struct sycamore_view* view) {
+void view_unmap(struct sycamore_view* view) {
     wl_list_remove(&view->link);
     if (view->server->seat->cursor->grabbed_view == view) {
         view->server->seat->cursor->grabbed_view = NULL;
@@ -69,7 +70,7 @@ struct sycamore_view* desktop_view_at(
         struct wlr_surface **surface, double *sx, double *sy) {
     /* This returns the topmost node in the scene at the given layout coords.
      * we only care about surface nodes as we are specifically looking for a
-     * surface in the surface tree of a tinywl_view. */
+     * surface in the surface tree of a sycamore_view. */
     struct wlr_scene_node *node = wlr_scene_node_at(
             &server->scene->node, lx, ly, sx, sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {
@@ -82,6 +83,41 @@ struct sycamore_view* desktop_view_at(
         node = node->parent;
     }
     return node->data;
+}
+
+void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, bool fullscreen) {
+    if (fullscreen == view->is_fullscreen) {
+        return;
+    }
+
+    view->is_fullscreen = fullscreen;
+    view->interface->set_fullscreen(view, fullscreen);
+
+    if (fullscreen) {
+        view->restore.x = view->x;
+        view->restore.y = view->y;
+
+        struct wlr_box window_box;
+        view->interface->get_geometry(view, &window_box);
+        view->restore.width = window_box.width;
+        view->restore.height = window_box.height;
+
+        struct wlr_box fullscreen_box;
+        wlr_output_layout_get_box(view->server->output_layout,
+                                  output, &fullscreen_box);
+        view->x = fullscreen_box.x;
+        view->y = fullscreen_box.y;
+
+        wlr_scene_node_set_position(view->scene_node , fullscreen_box.x, fullscreen_box.y);
+        view->interface->set_size(view, fullscreen_box.width, fullscreen_box.height);
+    } else {
+        /* Restore from fullscreen mode */
+        view->x = view->restore.x;
+        view->y = view->restore.y;
+
+        view->interface->set_size(view, view->restore.width, view->restore.height);
+        wlr_scene_node_set_position(view->scene_node , view->restore.x, view->restore.y);
+    }
 }
 
 

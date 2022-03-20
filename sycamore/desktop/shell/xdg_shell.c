@@ -4,19 +4,18 @@
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/cursor.h"
-#include "sycamore/output/output.h"
 
 void handle_xdg_shell_view_map(struct wl_listener *listener, void *data) {
     /* Called when the surface is mapped, or ready to display on-screen. */
     struct sycamore_xdg_shell_view* view =
             wl_container_of(listener, view, map);
-    map_view(&view->base_view);
+    view_map(&view->base_view);
 }
 
 void handle_xdg_shell_view_unmap(struct wl_listener *listener, void *data) {
     /* Called when the surface is unmapped, and should no longer be shown. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, unmap);
-    unmap_view(&view->base_view);
+    view_unmap(&view->base_view);
 }
 
 void handle_xdg_shell_view_request_move(struct wl_listener *listener, void *data) {
@@ -41,10 +40,9 @@ void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *da
 }
 
 void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {
-    struct sycamore_xdg_shell_view *view =
-            wl_container_of(listener, view, request_fullscreen);
-    view->base_view.interface->set_fullscreen(&view->base_view,
-                                             view->xdg_toplevel->requested.fullscreen);
+    struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_fullscreen);
+    view_set_fullscreen(&view->base_view, view->xdg_toplevel->requested.fullscreen_output,
+                        view->xdg_toplevel->requested.fullscreen);
 }
 
 void handle_xdg_shell_view_request_maximize(struct wl_listener *listener, void *data) {
@@ -99,37 +97,6 @@ void sycamore_xdg_shell_view_set_size(struct sycamore_view* view, uint32_t width
 void sycamore_xdg_shell_view_set_fullscreen(struct sycamore_view* view, bool fullscreen) {
     struct sycamore_xdg_shell_view* xdg_shell_view =
             wl_container_of(view, xdg_shell_view, base_view);
-    if (fullscreen == view->is_fullscreen) {
-        return;
-    }
-
-    if (fullscreen) {
-        struct wlr_box fullscreen_box;
-        wlr_output_layout_get_box(xdg_shell_view->base_view.server->output_layout,
-                                  NULL, &fullscreen_box);
-        view->restore.x = view->x;
-        view->restore.y = view->y;
-
-        view->x = fullscreen_box.x;
-        view->y = fullscreen_box.y;
-
-        struct wlr_box window_box;
-        wlr_xdg_surface_get_geometry(xdg_shell_view->xdg_toplevel->base, &window_box);
-        view->restore.width = window_box.width;
-        view->restore.height = window_box.height;
-
-        wlr_scene_node_set_position(view->scene_node , fullscreen_box.x, fullscreen_box.y);
-        wlr_xdg_toplevel_set_size(xdg_shell_view->xdg_toplevel,
-                                  fullscreen_box.width, fullscreen_box.height);
-    } else {
-        view->x = view->restore.x;
-        view->y = view->restore.y;
-
-        wlr_xdg_toplevel_set_size(xdg_shell_view->xdg_toplevel,
-                                  view->restore.width, view->restore.height);
-        wlr_scene_node_set_position(view->scene_node , view->restore.x, view->restore.y);
-    }
-    view->is_fullscreen = fullscreen;
     wlr_xdg_toplevel_set_fullscreen(xdg_shell_view->xdg_toplevel, fullscreen);
 }
 
