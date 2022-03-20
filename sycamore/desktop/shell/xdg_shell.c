@@ -65,33 +65,33 @@ void sycamore_xdg_shell_view_destroy(struct sycamore_view* view) {
         return;
     }
 
-    struct sycamore_xdg_shell_view* xdg_toplevel_view =
-            wl_container_of(view, xdg_toplevel_view, base_view);
+    struct sycamore_xdg_shell_view* xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
 
-    wl_list_remove(&xdg_toplevel_view->map.link);
-    wl_list_remove(&xdg_toplevel_view->unmap.link);
-    wl_list_remove(&xdg_toplevel_view->destroy.link);
-    wl_list_remove(&xdg_toplevel_view->request_move.link);
-    wl_list_remove(&xdg_toplevel_view->request_resize.link);
-    wl_list_remove(&xdg_toplevel_view->request_maximize.link);
+    wl_list_remove(&xdg_shell_view->map.link);
+    wl_list_remove(&xdg_shell_view->unmap.link);
+    wl_list_remove(&xdg_shell_view->destroy.link);
+    wl_list_remove(&xdg_shell_view->request_move.link);
+    wl_list_remove(&xdg_shell_view->request_resize.link);
+    wl_list_remove(&xdg_shell_view->request_maximize.link);
 
-    free(xdg_toplevel_view);
+    free(xdg_shell_view);
 }
 
 /* sycamore_xdg_shell_view interface */
 void sycamore_xdg_shell_view_set_activated(struct sycamore_view* view, bool activated) {
-    struct sycamore_xdg_shell_view* xdg_toplevel_view =
-            wl_container_of(view, xdg_toplevel_view, base_view);
+    struct sycamore_xdg_shell_view* xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
 
-    wlr_xdg_toplevel_set_activated(xdg_toplevel_view->xdg_toplevel, activated);
+    wlr_xdg_toplevel_set_activated(xdg_shell_view->xdg_toplevel, activated);
 }
 
 /* sycamore_xdg_shell_view interface */
 void sycamore_xdg_shell_view_set_size(struct sycamore_view* view, uint32_t width, uint32_t height) {
-    struct sycamore_xdg_shell_view* xdg_toplevel_view =
-            wl_container_of(view, xdg_toplevel_view, base_view);
+    struct sycamore_xdg_shell_view* xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
 
-    wlr_xdg_toplevel_set_size(xdg_toplevel_view->xdg_toplevel,
+    wlr_xdg_toplevel_set_size(xdg_shell_view->xdg_toplevel,
                               width, height);
 }
 
@@ -129,9 +129,9 @@ void sycamore_xdg_shell_view_set_fullscreen(struct sycamore_view* view, bool ful
         view->x = view->restore.x;
         view->y = view->restore.y;
 
-        wlr_scene_node_set_position(view->scene_node , view->restore.x, view->restore.y);
         wlr_xdg_toplevel_set_size(xdg_shell_view->xdg_toplevel,
                                   view->restore.width, view->restore.height);
+        wlr_scene_node_set_position(view->scene_node , view->restore.x, view->restore.y);
     }
     view->is_fullscreen = fullscreen;
     wlr_xdg_toplevel_set_fullscreen(xdg_shell_view->xdg_toplevel, fullscreen);
@@ -139,9 +139,9 @@ void sycamore_xdg_shell_view_set_fullscreen(struct sycamore_view* view, bool ful
 
 /* sycamore_xdg_shell_view interface */
 struct wlr_surface* sycamore_xdg_shell_view_get_wlr_surface(struct sycamore_view* view) {
-    struct sycamore_xdg_shell_view* xdg_toplevel_view =
-            wl_container_of(view, xdg_toplevel_view, base_view);
-    return xdg_toplevel_view->xdg_toplevel->base->surface;
+    struct sycamore_xdg_shell_view* xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
+    return xdg_shell_view->xdg_toplevel->base->surface;
 }
 
 struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_server* server,
