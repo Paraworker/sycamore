@@ -5,9 +5,10 @@
 
 #include "sycamore/desktop/view.h"
 
-void view_map(struct sycamore_view* view) {
+void view_map(struct sycamore_view* view, struct wlr_output* output, bool maximized, bool fullscreen) {
+    view_set_maximized(view, maximized);
+    view_set_fullscreen(view, output, fullscreen);
     wl_list_insert(&view->server->mapped_views, &view->link);
-
     focus_view(view);
 }
 
@@ -94,13 +95,13 @@ void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, 
     view->interface->set_fullscreen(view, fullscreen);
 
     if (fullscreen) {
-        view->restore.x = view->x;
-        view->restore.y = view->y;
+        view->fullscreen_restore.x = view->x;
+        view->fullscreen_restore.y = view->y;
 
         struct wlr_box window_box;
         view->interface->get_geometry(view, &window_box);
-        view->restore.width = window_box.width;
-        view->restore.height = window_box.height;
+        view->fullscreen_restore.width = window_box.width;
+        view->fullscreen_restore.height = window_box.height;
 
         struct wlr_box fullscreen_box;
         wlr_output_layout_get_box(view->server->output_layout,
@@ -112,12 +113,46 @@ void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, 
         view->interface->set_size(view, fullscreen_box.width, fullscreen_box.height);
     } else {
         /* Restore from fullscreen mode */
-        view->x = view->restore.x;
-        view->y = view->restore.y;
+        view->x = view->fullscreen_restore.x;
+        view->y = view->fullscreen_restore.y;
 
-        view->interface->set_size(view, view->restore.width, view->restore.height);
-        wlr_scene_node_set_position(view->scene_node , view->restore.x, view->restore.y);
+        view->interface->set_size(view, view->fullscreen_restore.width, view->fullscreen_restore.height);
+        wlr_scene_node_set_position(view->scene_node , view->fullscreen_restore.x, view->fullscreen_restore.y);
     }
 }
 
+void view_set_maximized(struct sycamore_view* view, bool maximized) {
+    if (maximized == view->is_maximized) {
+        return;
+    }
+
+    view->is_maximized = maximized;
+    view->interface->set_maximized(view, maximized);
+
+    if (maximized) {
+        view->maximized_restore.x = view->x;
+        view->maximized_restore.y = view->y;
+
+        struct wlr_box window_box;
+        view->interface->get_geometry(view, &window_box);
+        view->maximized_restore.width = window_box.width;
+        view->maximized_restore.height = window_box.height;
+
+        struct wlr_box max_box;
+        wlr_output_layout_get_box(view->server->output_layout,
+                                  NULL, &max_box);
+        view->x = max_box.x;
+        view->y = max_box.y;
+
+        wlr_scene_node_set_position(view->scene_node , max_box.x, max_box.y);
+        view->interface->set_size(view, max_box.width, max_box.height);
+    } else {
+        /* Restore from maximized mode */
+        view->x = view->maximized_restore.x;
+        view->y = view->maximized_restore.y;
+
+        view->interface->set_size(view, view->maximized_restore.width, view->maximized_restore.height);
+        wlr_scene_node_set_position(view->scene_node , view->maximized_restore.x, view->maximized_restore.y);
+    }
+}
 
