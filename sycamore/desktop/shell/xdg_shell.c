@@ -47,7 +47,7 @@ void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void
 }
 
 void handle_xdg_shell_view_request_maximized(struct wl_listener *listener, void *data) {
-    struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_maximized);
+    struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_maximize);
     view_set_maximized(&view->base_view, view->xdg_toplevel->requested.maximized);
 }
 
@@ -72,7 +72,7 @@ void sycamore_xdg_shell_view_destroy(struct sycamore_view* view) {
     wl_list_remove(&xdg_shell_view->destroy.link);
     wl_list_remove(&xdg_shell_view->request_move.link);
     wl_list_remove(&xdg_shell_view->request_resize.link);
-    wl_list_remove(&xdg_shell_view->request_maximized.link);
+    wl_list_remove(&xdg_shell_view->request_maximize.link);
 
     free(xdg_shell_view);
 }
@@ -168,8 +168,8 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
     wl_signal_add(&toplevel->events.request_resize, &view->request_resize);
     view->request_fullscreen.notify = handle_xdg_shell_view_request_fullscreen;
     wl_signal_add(&toplevel->events.request_fullscreen, &view->request_fullscreen);
-    view->request_maximized.notify = handle_xdg_shell_view_request_maximized;
-    wl_signal_add(&toplevel->events.request_maximize, &view->request_maximized);
+    view->request_maximize.notify = handle_xdg_shell_view_request_maximized;
+    wl_signal_add(&toplevel->events.request_maximize, &view->request_maximize);
 
     return view;
 }

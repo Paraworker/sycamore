@@ -33,19 +33,8 @@ struct sycamore_view {
     bool is_maximized;
     bool is_fullscreen;
 
-    struct {
-        int x;
-        int y;
-        int width;
-        int height;
-    } maximized_restore;
-
-    struct {
-        int x;
-        int y;
-        int width;
-        int height;
-    } fullscreen_restore;
+    struct wlr_box maximize_restore;
+    struct wlr_box fullscreen_restore;
 
     struct sycamore_server *server;
 };
@@ -61,7 +50,7 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_move;
     struct wl_listener request_resize;
     struct wl_listener request_fullscreen;
-    struct wl_listener request_maximized;
+    struct wl_listener request_maximize;
 };
 
 void view_map(struct sycamore_view* view, struct wlr_output* output, bool maximized, bool fullscreen);
