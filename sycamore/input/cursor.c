@@ -5,6 +5,7 @@
 
 #include "sycamore/input/cursor.h"
 #include "sycamore/desktop/view.h"
+#include "sycamore/desktop/desktop.h"
 
 struct wlr_surface* update_pointer_focus(struct sycamore_cursor *cursor,
                                          double* sx, double* sy) {

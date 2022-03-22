@@ -66,26 +66,6 @@ void focus_view(struct sycamore_view *view) {
     server->desktop_focused_view = view;
 }
 
-struct sycamore_view* desktop_view_at(
-        struct sycamore_server *server, double lx, double ly,
-        struct wlr_surface **surface, double *sx, double *sy) {
-    /* This returns the topmost node in the scene at the given layout coords.
-     * we only care about surface nodes as we are specifically looking for a
-     * surface in the surface tree of a sycamore_view. */
-    struct wlr_scene_node *node = wlr_scene_node_at(
-            &server->scene->node, lx, ly, sx, sy);
-    if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {
-        return NULL;
-    }
-    *surface = wlr_scene_surface_from_node(node)->surface;
-    /* Find the node corresponding to the sycamore_view at the root of this
-     * surface tree, it is the only one for which we set the data field. */
-    while (node != NULL && node->data == NULL) {
-        node = node->parent;
-    }
-    return node->data;
-}
-
 void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, bool fullscreen) {
     if (fullscreen == view->is_fullscreen) {
         return;
