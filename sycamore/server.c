@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
 
 #include "sycamore/server.h"
 #include "sycamore/output/output.h"
@@ -90,6 +91,7 @@ static bool server_init(struct sycamore_server* server) {
 
     wlr_subcompositor_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
+    wlr_xdg_output_manager_v1_create(server->wl_display, server->output_layout);
 
     server->socket = wl_display_add_socket_auto(server->wl_display);
     if (!server->socket) {
