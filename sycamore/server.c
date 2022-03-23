@@ -42,15 +42,15 @@ static bool server_init(struct sycamore_server* server) {
     server->backend_new_input.notify = handle_backend_new_input;
     wl_signal_add(&server->backend->events.new_input, &server->backend_new_input);
 
-    server->compositor = wlr_compositor_create(server->wl_display, server->renderer);
-    if (!server->compositor) {
-        wlr_log(WLR_ERROR, "Unable to create compositor");
-        return false;
-    }
-
     server->output_layout = wlr_output_layout_create();
     if (!server->output_layout) {
         wlr_log(WLR_ERROR, "Unable to create output_layout");
+        return false;
+    }
+
+    server->compositor = wlr_compositor_create(server->wl_display, server->renderer);
+    if (!server->compositor) {
+        wlr_log(WLR_ERROR, "Unable to create compositor");
         return false;
     }
 
@@ -59,8 +59,13 @@ static bool server_init(struct sycamore_server* server) {
         wlr_log(WLR_ERROR, "Unable to create scene");
         return false;
     }
-
     wlr_scene_attach_output_layout(server->scene, server->output_layout);
+
+    server->presentation = wlr_presentation_create(server->wl_display, server->backend);
+    if (!server->presentation) {
+        wlr_log(WLR_ERROR, "Unable to create presentation");
+        return false;
+    }
 
     server->seat = sycamore_seat_create(server, server->wl_display, server->output_layout);
     if (!server->seat) {

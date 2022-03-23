@@ -7,6 +7,7 @@
 #include <wlr/render/allocator.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_presentation_time.h>
 
 #include "sycamore/input/seat.h"
 #include "sycamore/desktop/view.h"
@@ -26,11 +27,11 @@ struct sycamore_server {
     struct wl_listener backend_new_input;
 
     struct wlr_compositor* compositor;
+    struct wlr_scene *scene;
+    struct wlr_presentation* presentation;
 
     struct wlr_output_layout *output_layout;
     struct wl_listener output_layout_change;
-
-    struct wlr_scene *scene;
 
     struct sycamore_seat* seat;
     struct sycamore_xdg_shell* xdg_shell;
