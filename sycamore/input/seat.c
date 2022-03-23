@@ -16,8 +16,9 @@ static void new_pointer(struct sycamore_seat *seat,
     wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
     wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
 
-    set_touchpad_tap_to_click(device);
-    set_touchpad_natural_scroll(device);
+    touchpad_set_tap_to_click(device);
+    touchpad_set_natural_scroll(device);
+    touchpad_set_accel_speed(device, 0.3);
 }
 
 static void new_keyboard(struct sycamore_seat *seat,
