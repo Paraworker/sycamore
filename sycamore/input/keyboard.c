@@ -11,10 +11,10 @@ static void handle_keyboard_modifiers(
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, modifiers);
 
-    wlr_seat_set_keyboard(keyboard->seat->wlr_seat, keyboard->device);
+    wlr_seat_set_keyboard(keyboard->seat->wlr_seat, keyboard->wlr_keyboard);
     /* Send modifiers to the client. */
     wlr_seat_keyboard_notify_modifiers(keyboard->seat->wlr_seat,
-                                       &keyboard->device->keyboard->modifiers);
+                                       &keyboard->wlr_keyboard->modifiers);
 }
 
 static void handle_keyboard_key(
@@ -30,13 +30,13 @@ static void handle_keyboard_key(
     /* Get a list of keysyms based on the keymap for this keyboard */
     const xkb_keysym_t *syms;
     int nsyms = xkb_state_key_get_syms(
-            keyboard->device->keyboard->xkb_state, keycode, &syms);
+            keyboard->wlr_keyboard->xkb_state, keycode, &syms);
 
     bool handled = false;
     if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
         /* If this button was pressed, we attempt to
          * process it as a compositor keybinding. */
-        uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->device->keyboard);
+        uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
         for (int i = 0; i < nsyms; ++i) {
             handled = handle_keybinding(keyboard->seat->server->keybinding_manager,
                                         modifiers, syms[i]);
@@ -45,7 +45,7 @@ static void handle_keyboard_key(
 
     if (!handled) {
         /* Otherwise, we pass it along to the client. */
-        wlr_seat_set_keyboard(seat, keyboard->device);
+        wlr_seat_set_keyboard(seat, keyboard->wlr_keyboard);
         wlr_seat_keyboard_notify_key(seat, event->time_msec,
                                      event->keycode, event->state);
     }
@@ -84,7 +84,7 @@ struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
     }
 
     keyboard->seat = seat;
-    keyboard->device = device;
+    keyboard->wlr_keyboard = device->keyboard;
 
     /* Prepare an XKB keymap and assign it to the keyboard. This
      * assumes the defaults (e.g. layout = "us"). */
@@ -104,7 +104,7 @@ struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
     keyboard->destroy.notify = handle_keyboard_destroy;
     wl_signal_add(&device->events.destroy, &keyboard->destroy);
 
-    wlr_seat_set_keyboard(seat->wlr_seat, device);
+    wlr_seat_set_keyboard(seat->wlr_seat, keyboard->wlr_keyboard);
 
     return keyboard;
 }

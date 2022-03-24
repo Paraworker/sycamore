@@ -8,7 +8,7 @@
 
 struct sycamore_keyboard {
     struct wl_list link;
-    struct wlr_input_device *device;
+    struct wlr_keyboard *wlr_keyboard;
 
     struct wl_listener modifiers;
     struct wl_listener key;
