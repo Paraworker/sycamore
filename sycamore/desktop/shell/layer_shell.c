@@ -1,15 +1,34 @@
-#include <sycamore/desktop/shell/layer_shell.h>
+#include "sycamore/desktop/shell/layer_shell.h"
 #include <wlr/util/log.h>
 #include <stdlib.h>
 
 #include "sycamore/desktop/layer.h"
+
+void handle_sycamore_layer_map(struct wl_listener *listener, void *data) {
+    struct sycamore_layer* layer = wl_container_of(listener, layer, map);
+    sycamore_layer_map(layer);
+}
+
+void handle_sycamore_layer_unmap(struct wl_listener *listener, void *data) {
+    struct sycamore_layer* layer = wl_container_of(listener, layer, unmap);
+    sycamore_layer_unmap(layer);
+}
+
+void handle_sycamore_layer_destroy(struct wl_listener *listener, void *data) {
+    struct sycamore_layer* layer = wl_container_of(listener, layer, destroy);
+    layer->wlr_layer_surface = NULL;
+    sycamore_layer_destroy(layer);
+}
 
 static void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
     struct sycamore_layer_shell* layer_shell =
             wl_container_of(listener, layer_shell, new_layer_shell_surface);
     struct wlr_layer_surface_v1* layer_surface = data;
 
-
+    if (!sycamore_layer_create(layer_shell->server, layer_surface)) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_layer");
+        return;
+    }
 }
 
 void sycamore_layer_shell_destroy(struct sycamore_layer_shell* layer_shell) {

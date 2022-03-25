@@ -1,8 +1,7 @@
 #ifndef SYCAMORE_VIEW_H
 #define SYCAMORE_VIEW_H
 
-#include "sycamore/server.h"
-#include <wlr/types/wlr_xdg_shell.h>
+#include "sycamore/desktop/desktop.h"
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,
@@ -24,10 +23,11 @@ struct sycamore_view_interface{
 
 /* the base view */
 struct sycamore_view {
+    enum desktop_element_type element_type;
     struct wl_list link;
     const struct sycamore_view_interface* interface;
     struct wlr_scene_node *scene_node;
-    enum sycamore_view_type type;
+    enum sycamore_view_type view_type;
     int x, y;
 
     bool is_maximized;

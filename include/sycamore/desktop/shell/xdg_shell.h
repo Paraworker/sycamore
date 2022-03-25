@@ -2,9 +2,7 @@
 #define SYCAMORE_XDG_SHELL_H
 
 #include <wlr/types/wlr_xdg_shell.h>
-
 #include "sycamore/server.h"
-#include "sycamore/desktop/view.h"
 
 struct sycamore_xdg_shell {
     struct wlr_xdg_shell *wlr_xdg_shell;

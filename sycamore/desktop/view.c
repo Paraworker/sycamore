@@ -4,6 +4,7 @@
 #include <wlr/util/log.h>
 
 #include "sycamore/desktop/view.h"
+#include "sycamore/desktop/desktop.h"
 
 void view_map(struct sycamore_view* view, struct wlr_output* output, bool maximized, bool fullscreen) {
     view_set_maximized(view, maximized);
@@ -22,12 +23,15 @@ void view_unmap(struct sycamore_view* view) {
     }
 
     double sx, sy;
-    update_pointer_focus(view->server->seat->cursor, &sx, &sy);
+    struct sycamore_cursor* cursor = view->server->seat->cursor;
+    struct wlr_surface* surface = desktop_surface_at(view->server,
+            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
+    update_pointer_focus(cursor, surface, sx, sy);
 }
 
 void focus_view(struct sycamore_view *view) {
     /* Note: this function only deals with keyboard focus. */
-    if (view == NULL || view->type == VIEW_TYPE_UNKNOWN) {
+    if (view == NULL || view->view_type == VIEW_TYPE_UNKNOWN) {
         return;
     }
     struct sycamore_server *server = view->server;

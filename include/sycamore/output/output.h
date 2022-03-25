@@ -10,10 +10,12 @@ struct sycamore_output {
     struct wl_listener frame;
     struct wl_listener destroy;
 
+    struct wl_list layers[4]; // sycamore_layer::link
+    struct wlr_box usable_area;
+
     struct sycamore_server* server;
 };
 
-/* This event is raised by the backend when a new output (aka a display or monitor) becomes available. */
 void handle_backend_new_output(struct wl_listener *listener, void *data);
 
 struct sycamore_output* sycamore_output_create(struct sycamore_server* server,

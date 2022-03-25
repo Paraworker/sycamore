@@ -1,4 +1,5 @@
 #include "sycamore/output/output.h"
+#include "sycamore/desktop/layer.h"
 #include <stdlib.h>
 #include <wlr/util/log.h>
 
@@ -33,22 +34,60 @@ struct sycamore_output* sycamore_output_create(struct sycamore_server* server,
         return NULL;
     }
 
+    wlr_output->data = output;
+    output->wlr_output = wlr_output;
+    output->server = server;
+
+    for (int i = 0; i < 4; ++i) {
+        wl_list_init(&output->layers[i]);
+    }
+
     /* Sets up a listener for the frame notify event. */
     output->frame.notify = handle_output_frame;
     wl_signal_add(&wlr_output->events.frame, &output->frame);
     output->destroy.notify = handle_output_destroy;
     wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
-    output->wlr_output = wlr_output;
-    output->server = server;
+    /* Adds this to the output layout. The add_auto function arranges all_outputs
+     * from left-to-right in the order they appear. A more sophisticated
+     * compositor would let the user configure the arrangement of all_outputs in the
+     * layout.
+     *
+     * The output layout utility automatically adds a wl_output global to the
+     * display, which Wayland clients can see to find out information about the
+     * output (such as DPI, scale factor, manufacturer, etc).
+     */
+    wlr_output_layout_add_auto(server->output_layout, wlr_output);
 
+    wl_list_insert(&server->all_outputs, &output->link);
     return output;
+}
+
+void sycamore_output_disable(struct sycamore_output* output) {
+    if (!output) {
+        return;
+    }
+
+    /* Destroy all layers */
+    for (int i = 0; i < 4; ++i) {
+        struct sycamore_layer *layer, *next;
+        wl_list_for_each_safe(layer, next, &output->layers[i], link) {
+            if (layer->mapped) {
+                sycamore_layer_unmap(layer);
+            }
+            sycamore_layer_destroy(layer);
+        }
+    }
+
+
 }
 
 void sycamore_output_destroy(struct sycamore_output* output) {
     if (!output) {
         return;
     }
+
+    sycamore_output_disable(output);
 
     wl_list_remove(&output->frame.link);
     wl_list_remove(&output->destroy.link);
@@ -94,18 +133,5 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_output");
         return;
     }
-
-    wl_list_insert(&server->all_outputs, &output->link);
-
-    /* Adds this to the output layout. The add_auto function arranges all_outputs
-     * from left-to-right in the order they appear. A more sophisticated
-     * compositor would let the user configure the arrangement of all_outputs in the
-     * layout.
-     *
-     * The output layout utility automatically adds a wl_output global to the
-     * display, which Wayland clients can see to find out information about the
-     * output (such as DPI, scale factor, manufacturer, etc).
-     */
-    wlr_output_layout_add_auto(server->output_layout, wlr_output);
 }
 

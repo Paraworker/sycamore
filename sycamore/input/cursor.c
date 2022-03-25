@@ -7,43 +7,25 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/desktop.h"
 
-struct wlr_surface* update_pointer_focus(struct sycamore_cursor *cursor,
-                                         double* sx, double* sy) {
-    struct wlr_surface *surface = NULL;
-    struct sycamore_view *view = desktop_view_at(cursor->seat->server,
-                                               cursor->wlr_cursor->x, cursor->wlr_cursor->y, &surface, sx, sy);
-
-    if (!view && cursor->setted_to_default == false) {
-        /* If there's no view under the cursor, set the cursor image to a
-         * default. This is what makes the cursor image to default again
-         * when you move out of views.
-         *
-         * The had_setted_to_default variable can make sure to set image only once. */
+void update_pointer_focus(struct sycamore_cursor* cursor, struct wlr_surface* surface, double sx, double sy) {
+    if (!surface && cursor->default_setted == false) {
+        /* If there's no surface under the cursor, set the cursor image to a default
+         * default_setted makes sure to set only once. */
         wlr_xcursor_manager_set_cursor_image(
                 cursor->xcursor_manager, "left_ptr", cursor->wlr_cursor);
-
-        cursor->setted_to_default = true;
-    } else if (view && cursor->setted_to_default == true){
-        cursor->setted_to_default = false;
+        cursor->default_setted = true;
+    } else if (surface && cursor->default_setted == true){
+        cursor->default_setted = false;
     }
 
     struct wlr_seat* seat = cursor->seat->wlr_seat;
     if (surface && seat->pointer_state.focused_surface != surface) {
-        /*
-         * Send pointer enter events.
-         *
-         * The enter event gives the surface "pointer focus", which is distinct
-         * from keyboard focus.
-         *
-         * Note that wlroots will avoid sending duplicate enter events. */
-        wlr_seat_pointer_notify_enter(seat, surface, *sx, *sy);
-
+        /* The enter event gives the surface "pointer focus".
+         * wlroots will avoid sending duplicate enter events. */
+        wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
     } else if (!surface && seat->pointer_state.focused_surface) {
-        /* Clear pointer focus so future button events and such are not sent to
-         * the last client to have the cursor over it. */
         wlr_seat_pointer_clear_focus(seat);
     }
-    return surface;
 }
 
 static void process_cursor_move(struct sycamore_cursor *cursor, uint32_t time) {
@@ -132,7 +114,9 @@ static void process_cursor_motion(struct sycamore_cursor *cursor, uint32_t time)
 
     /* mode is passthrough, update the pointer focus and send the motion event. */
     double sx, sy;
-    struct wlr_surface* surface = update_pointer_focus(cursor, &sx, &sy);
+    struct wlr_surface* surface = desktop_surface_at(cursor->seat->server,
+            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
+    update_pointer_focus(cursor, surface, sx, sy);
     if (surface) {
         wlr_seat_pointer_notify_motion(cursor->seat->wlr_seat, time, sx, sy);
     }
@@ -178,18 +162,20 @@ static void cursor_button(struct wl_listener *listener, void *data) {
                                    event->time_msec, event->button, event->state);
 
     if (event->state == WLR_BUTTON_PRESSED) {
-        /* Focus that client if the button was pressed */
-        double sx, sy;
-        struct wlr_surface *surface = NULL;
-        struct sycamore_view *view = desktop_view_at(cursor->seat->server,
-                                                   cursor->wlr_cursor->x, cursor->wlr_cursor->y, &surface, &sx, &sy);
+        /* Focus the view if the button was pressed */
+        struct sycamore_view *view =
+                desktop_view_at(cursor->seat->server,
+                                cursor->wlr_cursor->x, cursor->wlr_cursor->y);
+
         focus_view(view);
     } else if (cursor->mode != CURSOR_MODE_PASSTHROUGH) {
         /* If you released any buttons and the cursor mode is not passthrough
          * we exit interactive move/resize mode. */
         cursor->mode = CURSOR_MODE_PASSTHROUGH;
         double sx, sy;
-        update_pointer_focus(cursor, &sx, &sy);
+        struct wlr_surface* surface = desktop_surface_at(cursor->seat->server,
+                cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
+        update_pointer_focus(cursor, surface, sx, sy);
     }
 }
 
@@ -338,7 +324,7 @@ struct sycamore_cursor* sycamore_cursor_create(struct sycamore_seat* seat,
     cursor->seat = seat;
     cursor->mode = CURSOR_MODE_PASSTHROUGH;
     cursor->grabbed_view = NULL;
-    cursor->setted_to_default = false;
+    cursor->default_setted = false;
 
     return cursor;
 }

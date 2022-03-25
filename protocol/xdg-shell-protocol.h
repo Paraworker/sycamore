@@ -1268,7 +1268,7 @@ struct xdg_toplevel_interface {
 	 *
 	 * This request must be used in response to some sort of user
 	 * action like a button press, key press, or touch down event. The
-	 * passed serial is used to determine the type of interactive move
+	 * passed serial is used to determine the layer_type of interactive move
 	 * (touch, pointer, etc).
 	 *
 	 * The server may ignore move requests depending on the state of
@@ -1295,7 +1295,7 @@ struct xdg_toplevel_interface {
 	 *
 	 * This request must be used in response to some sort of user
 	 * action like a button press, key press, or touch down event. The
-	 * passed serial is used to determine the type of interactive
+	 * passed serial is used to determine the layer_type of interactive
 	 * resize (touch, pointer, etc).
 	 *
 	 * The server may ignore resize requests depending on the state of

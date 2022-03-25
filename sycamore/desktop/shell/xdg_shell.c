@@ -142,16 +142,18 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
         return NULL;
     }
 
-    view->base_view.type = VIEW_TYPE_XDG_SHELL;
+    view->base_view.element_type = ELEMENT_TYPE_VIEW;
+    view->base_view.view_type = VIEW_TYPE_XDG_SHELL;
     view->xdg_toplevel = toplevel;
     view->base_view.interface = &xdg_shell_view_interface;
     view->base_view.is_fullscreen = false;
     view->base_view.is_maximized = false;
     view->base_view.server = server;
+
     view->base_view.scene_node = wlr_scene_xdg_surface_create(
             &server->scene->node, toplevel->base);
     view->base_view.scene_node->data = &view->base_view;
-    view->xdg_toplevel->base->data = view->base_view.scene_node;
+    view->xdg_toplevel->base->surface->data = view->base_view.scene_node;
 
     /* Listen to the various events it can emit */
     view->map.notify = handle_xdg_shell_view_map;
@@ -181,17 +183,14 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
     struct sycamore_xdg_shell *xdg_shell =
             wl_container_of(listener, xdg_shell, new_xdg_shell_surface);
     struct wlr_xdg_surface *xdg_surface = data;
+    if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_NONE) {
+        return;
+    }
 
-    /* We must add xdg popups to the scene graph so they get rendered. The
-     * wlroots scene graph provides a helper for this, but to use it we must
-     * provide the proper parent scene node of the xdg popup. To enable this,
-     * we always set the user data field of xdg_surfaces to the corresponding
-     * scene node. */
     if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
-        struct wlr_xdg_surface *parent = wlr_xdg_surface_from_wlr_surface(
-                xdg_surface->popup->parent);
-        struct wlr_scene_node *parent_node = parent->data;
-        xdg_surface->data = wlr_scene_xdg_surface_create(
+        struct wlr_surface *parent_surface = xdg_surface->popup->parent;
+        struct wlr_scene_node *parent_node = parent_surface->data;
+        xdg_surface->surface->data = wlr_scene_xdg_surface_create(
                 parent_node, xdg_surface);
         return;
     }

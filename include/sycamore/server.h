@@ -10,7 +10,6 @@
 #include <wlr/types/wlr_presentation_time.h>
 
 #include "sycamore/input/seat.h"
-#include "sycamore/desktop/view.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/shell/layer_shell.h"
 #include "sycamore/input/keybinding.h"
