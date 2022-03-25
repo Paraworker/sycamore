@@ -68,6 +68,8 @@ static bool server_init(struct sycamore_server* server) {
         return false;
     }
 
+    wlr_scene_set_presentation(server->scene, server->presentation);
+
     server->seat = sycamore_seat_create(server, server->wl_display, server->output_layout);
     if (!server->seat) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_seat");
