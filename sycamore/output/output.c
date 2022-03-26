@@ -7,10 +7,10 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
      * generally at the output's refresh rate (e.g. 60Hz). */
     struct sycamore_output *output = wl_container_of(listener, output, frame);
-    struct wlr_scene *scene = output->server->scene;
+    struct sycamore_scene *scene = output->server->scene;
 
     struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(
-            scene, output->wlr_output);
+            scene->wlr_scene, output->wlr_output);
 
     /* Render the scene if needed and commit the output */
     wlr_scene_output_commit(scene_output);
@@ -34,13 +34,13 @@ struct sycamore_output* sycamore_output_create(struct sycamore_server* server,
         return NULL;
     }
 
-    wlr_output->data = output;
-    output->wlr_output = wlr_output;
-    output->server = server;
-
     for (int i = 0; i < 4; ++i) {
         wl_list_init(&output->layers[i]);
     }
+
+    wlr_output->data = output;
+    output->wlr_output = wlr_output;
+    output->server = server;
 
     /* Sets up a listener for the frame notify event. */
     output->frame.notify = handle_output_frame;
@@ -78,7 +78,6 @@ void sycamore_output_disable(struct sycamore_output* output) {
             sycamore_layer_destroy(layer);
         }
     }
-
 
 }
 
@@ -134,4 +133,3 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         return;
     }
 }
-

@@ -46,7 +46,7 @@ void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void
                         view->xdg_toplevel->requested.fullscreen);
 }
 
-void handle_xdg_shell_view_request_maximized(struct wl_listener *listener, void *data) {
+void handle_xdg_shell_view_request_maximize(struct wl_listener *listener, void *data) {
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_maximize);
     view_set_maximized(&view->base_view, view->xdg_toplevel->requested.maximized);
 }
@@ -133,7 +133,7 @@ static const struct sycamore_view_interface xdg_shell_view_interface = {
     .get_geometry = sycamore_xdg_shell_view_get_geometry,
 };
 
-struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_server* server,
+struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_server *server,
                                                                struct wlr_xdg_toplevel* toplevel) {
     struct sycamore_xdg_shell_view* view =
             calloc(1, sizeof(struct sycamore_xdg_shell_view));
@@ -142,7 +142,7 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
         return NULL;
     }
 
-    view->base_view.element_type = ELEMENT_TYPE_VIEW;
+    view->base_view.scene_descriptor = SCENE_DESC_VIEW;
     view->base_view.view_type = VIEW_TYPE_XDG_SHELL;
     view->xdg_toplevel = toplevel;
     view->base_view.interface = &xdg_shell_view_interface;
@@ -151,7 +151,7 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
     view->base_view.server = server;
 
     view->base_view.scene_node = wlr_scene_xdg_surface_create(
-            &server->scene->node, toplevel->base);
+            &server->scene->trees.shell_view->node, toplevel->base);
     view->base_view.scene_node->data = &view->base_view;
     view->xdg_toplevel->base->surface->data = view->base_view.scene_node;
 
@@ -170,7 +170,7 @@ struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(struct sycamore_s
     wl_signal_add(&toplevel->events.request_resize, &view->request_resize);
     view->request_fullscreen.notify = handle_xdg_shell_view_request_fullscreen;
     wl_signal_add(&toplevel->events.request_fullscreen, &view->request_fullscreen);
-    view->request_maximize.notify = handle_xdg_shell_view_request_maximized;
+    view->request_maximize.notify = handle_xdg_shell_view_request_maximize;
     wl_signal_add(&toplevel->events.request_maximize, &view->request_maximize);
 
     return view;

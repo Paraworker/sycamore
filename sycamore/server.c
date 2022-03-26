@@ -43,24 +43,17 @@ static bool server_init(struct sycamore_server* server) {
     server->backend_new_input.notify = handle_backend_new_input;
     wl_signal_add(&server->backend->events.new_input, &server->backend_new_input);
 
-    server->output_layout = wlr_output_layout_create();
-    if (!server->output_layout) {
-        wlr_log(WLR_ERROR, "Unable to create output_layout");
-        return false;
-    }
-
     server->compositor = wlr_compositor_create(server->wl_display, server->renderer);
     if (!server->compositor) {
         wlr_log(WLR_ERROR, "Unable to create compositor");
         return false;
     }
 
-    server->scene = wlr_scene_create();
-    if (!server->scene) {
-        wlr_log(WLR_ERROR, "Unable to create scene");
+    server->output_layout = wlr_output_layout_create();
+    if (!server->output_layout) {
+        wlr_log(WLR_ERROR, "Unable to create output_layout");
         return false;
     }
-    wlr_scene_attach_output_layout(server->scene, server->output_layout);
 
     server->presentation = wlr_presentation_create(server->wl_display, server->backend);
     if (!server->presentation) {
@@ -68,11 +61,16 @@ static bool server_init(struct sycamore_server* server) {
         return false;
     }
 
-    wlr_scene_set_presentation(server->scene, server->presentation);
-
     server->seat = sycamore_seat_create(server, server->wl_display, server->output_layout);
     if (!server->seat) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_seat");
+        return false;
+    }
+
+    server->scene = sycamore_scene_create(server, server->output_layout,
+                                          server->presentation);
+    if (!server->scene) {
+        wlr_log(WLR_ERROR, "Unable to create scene");
         return false;
     }
 
@@ -118,6 +116,9 @@ void server_destroy(struct sycamore_server* server) {
 
     if (server->seat) {
         sycamore_seat_destroy(server->seat);
+    }
+    if (server->scene) {
+        sycamore_scene_destroy(server->scene);
     }
     if (server->xdg_shell) {
         sycamore_xdg_shell_destroy(server->xdg_shell);

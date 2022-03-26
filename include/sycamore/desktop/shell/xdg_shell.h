@@ -17,6 +17,6 @@ struct sycamore_xdg_shell* sycamore_xdg_shell_create(
 void sycamore_xdg_shell_destroy(struct sycamore_xdg_shell* xdg_shell);
 
 struct sycamore_xdg_shell_view* sycamore_xdg_shell_view_create(
-        struct sycamore_server* server, struct wlr_xdg_toplevel* toplevel);
+        struct sycamore_server *server, struct wlr_xdg_toplevel* toplevel);
 
 #endif //SYCAMORE_XDG_SHELL_H

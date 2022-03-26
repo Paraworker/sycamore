@@ -5,7 +5,7 @@
 
 #include "sycamore/input/cursor.h"
 #include "sycamore/desktop/view.h"
-#include "sycamore/desktop/desktop.h"
+#include "sycamore/desktop/scene.h"
 
 void update_pointer_focus(struct sycamore_cursor* cursor, struct wlr_surface* surface, double sx, double sy) {
     if (!surface && cursor->default_setted == false) {
@@ -114,7 +114,7 @@ static void process_cursor_motion(struct sycamore_cursor *cursor, uint32_t time)
 
     /* mode is passthrough, update the pointer focus and send the motion event. */
     double sx, sy;
-    struct wlr_surface* surface = desktop_surface_at(cursor->seat->server,
+    struct wlr_surface* surface = desktop_surface_at(cursor->seat->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     update_pointer_focus(cursor, surface, sx, sy);
     if (surface) {
@@ -164,7 +164,7 @@ static void cursor_button(struct wl_listener *listener, void *data) {
     if (event->state == WLR_BUTTON_PRESSED) {
         /* Focus the view if the button was pressed */
         struct sycamore_view *view =
-                desktop_view_at(cursor->seat->server,
+                desktop_view_at(cursor->seat->server->scene,
                                 cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 
         focus_view(view);
@@ -173,7 +173,7 @@ static void cursor_button(struct wl_listener *listener, void *data) {
          * we exit interactive move/resize mode. */
         cursor->mode = CURSOR_MODE_PASSTHROUGH;
         double sx, sy;
-        struct wlr_surface* surface = desktop_surface_at(cursor->seat->server,
+        struct wlr_surface* surface = desktop_surface_at(cursor->seat->server->scene,
                 cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
         update_pointer_focus(cursor, surface, sx, sy);
     }

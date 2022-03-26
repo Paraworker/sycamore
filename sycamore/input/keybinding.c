@@ -36,7 +36,7 @@ static void cycle_view(struct sycamore_server *server, struct sycamore_keybindin
 
     double sx, sy;
     struct sycamore_cursor* cursor = server->seat->cursor;
-    struct wlr_surface* surface = desktop_surface_at(server,
+    struct wlr_surface* surface = desktop_surface_at(server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     update_pointer_focus(cursor, surface, sx, sy);
 }

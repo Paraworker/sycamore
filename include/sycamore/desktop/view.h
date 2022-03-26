@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_VIEW_H
 #define SYCAMORE_VIEW_H
 
-#include "sycamore/desktop/desktop.h"
+#include "sycamore/desktop/scene.h"
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,
@@ -23,7 +23,7 @@ struct sycamore_view_interface{
 
 /* the base view */
 struct sycamore_view {
-    enum desktop_element_type element_type;
+    enum scene_descriptor_type scene_descriptor;
     struct wl_list link;
     const struct sycamore_view_interface* interface;
     struct wlr_scene_node *scene_node;

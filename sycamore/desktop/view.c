@@ -4,7 +4,7 @@
 #include <wlr/util/log.h>
 
 #include "sycamore/desktop/view.h"
-#include "sycamore/desktop/desktop.h"
+#include "sycamore/desktop/scene.h"
 
 void view_map(struct sycamore_view* view, struct wlr_output* output, bool maximized, bool fullscreen) {
     view_set_maximized(view, maximized);
@@ -24,7 +24,7 @@ void view_unmap(struct sycamore_view* view) {
 
     double sx, sy;
     struct sycamore_cursor* cursor = view->server->seat->cursor;
-    struct wlr_surface* surface = desktop_surface_at(view->server,
+    struct wlr_surface* surface = desktop_surface_at(view->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     update_pointer_focus(cursor, surface, sx, sy);
 }
@@ -93,6 +93,8 @@ void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, 
         view->x = fullscreen_box.x;
         view->y = fullscreen_box.y;
 
+        wlr_scene_node_place_above(&view->server->scene->trees.shell_view->node,
+                                   &view->server->scene->trees.shell_top->node);
         wlr_scene_node_set_position(view->scene_node , fullscreen_box.x, fullscreen_box.y);
         view->interface->set_size(view, fullscreen_box.width, fullscreen_box.height);
     } else {
@@ -100,6 +102,8 @@ void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, 
         view->x = view->fullscreen_restore.x;
         view->y = view->fullscreen_restore.y;
 
+        wlr_scene_node_place_below(&view->server->scene->trees.shell_view->node,
+                                   &view->server->scene->trees.shell_top->node);
         view->interface->set_size(view, view->fullscreen_restore.width, view->fullscreen_restore.height);
         wlr_scene_node_set_position(view->scene_node , view->fullscreen_restore.x, view->fullscreen_restore.y);
     }
