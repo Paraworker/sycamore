@@ -59,7 +59,9 @@ struct sycamore_output* sycamore_output_create(struct sycamore_server* server,
      */
     wlr_output_layout_add_auto(server->output_layout, wlr_output);
 
+    wlr_output_layout_get_box(server->output_layout, wlr_output, &output->usable_area);
     wl_list_insert(&server->all_outputs, &output->link);
+
     return output;
 }
 
