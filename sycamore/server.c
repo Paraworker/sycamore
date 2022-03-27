@@ -114,6 +114,17 @@ void server_destroy(struct sycamore_server* server) {
         return;
     }
 
+    if (server->backend) {
+        wlr_backend_destroy(server->backend);
+    }
+    if (server->wl_display) {
+        wl_display_destroy_clients(server->wl_display);
+        wl_display_destroy(server->wl_display);
+    }
+    if (server->output_layout) {
+        wlr_output_layout_destroy(server->output_layout);
+    }
+
     if (server->seat) {
         sycamore_seat_destroy(server->seat);
     }
@@ -128,17 +139,6 @@ void server_destroy(struct sycamore_server* server) {
     }
     if (server->keybinding_manager) {
         sycamore_keybinding_manager_destroy(server->keybinding_manager);
-    }
-
-    if (server->output_layout) {
-        wlr_output_layout_destroy(server->output_layout);
-    }
-    if (server->backend) {
-        wlr_backend_destroy(server->backend);
-    }
-    if (server->wl_display) {
-        wl_display_destroy_clients(server->wl_display);
-        wl_display_destroy(server->wl_display);
     }
 
     free(server);
