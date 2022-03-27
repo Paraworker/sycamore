@@ -4,8 +4,7 @@
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/keybinding.h"
 
-static void handle_keyboard_modifiers(
-        struct wl_listener *listener, void *data) {
+static void handle_keyboard_modifiers(struct wl_listener *listener, void *data) {
     /* This event is raised when a modifier key, such as shift or alt, is
      * pressed or released. */
     struct sycamore_keyboard *keyboard =
@@ -17,8 +16,7 @@ static void handle_keyboard_modifiers(
                                        &keyboard->wlr_keyboard->modifiers);
 }
 
-static void handle_keyboard_key(
-        struct wl_listener *listener, void *data) {
+static void handle_keyboard_key(struct wl_listener *listener, void *data) {
     /* This event is raised when a key is pressed or released. */
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, key);

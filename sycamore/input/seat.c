@@ -164,11 +164,12 @@ struct sycamore_seat* sycamore_seat_create(struct sycamore_server* server,
     }
 
     seat->server = server;
+    wl_list_init(&seat->keyboards);
 
     seat->wlr_seat = wlr_seat_create(display, "seat0");
     if (!seat->wlr_seat) {
         wlr_log(WLR_ERROR, "Unable to create wlr_seat");
-        sycamore_seat_destroy(seat);
+        free(seat);
         return NULL;
     }
 
@@ -178,8 +179,6 @@ struct sycamore_seat* sycamore_seat_create(struct sycamore_server* server,
         sycamore_seat_destroy(seat);
         return NULL;
     }
-
-    wl_list_init(&seat->keyboards);
 
     seat->request_cursor.notify = handle_seat_request_cursor;
     wl_signal_add(&seat->wlr_seat->events.request_set_cursor,

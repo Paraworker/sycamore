@@ -225,7 +225,7 @@ struct sycamore_xdg_shell* sycamore_xdg_shell_create(struct sycamore_server* ser
     xdg_shell->wlr_xdg_shell = wlr_xdg_shell_create(display);
     if (!xdg_shell->wlr_xdg_shell) {
         wlr_log(WLR_ERROR, "Unable to create_wlr_xdg_shell");
-        sycamore_xdg_shell_destroy(xdg_shell);
+        free(xdg_shell);
         return NULL;
     }
 
