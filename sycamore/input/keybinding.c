@@ -46,6 +46,18 @@ static void terminate_server(struct sycamore_server *server, struct sycamore_key
     wl_display_terminate(server->wl_display);
 }
 
+/* action */
+static void switch_vt(struct sycamore_server *server, struct sycamore_keybinding* keybinding)
+{
+    struct wlr_session *session = wlr_backend_get_session(server->backend);
+
+    if (session != NULL)
+    {
+        unsigned vt = keybinding->sym - XKB_KEY_XF86Switch_VT_1 + 1;
+        wlr_session_change_vt(session, vt);
+    }
+}
+
 static struct sycamore_modifiers_node* sycamore_modifiers_node_create(struct sycamore_keybinding_manager* manager, uint32_t modifiers) {
     struct sycamore_modifiers_node* node = calloc(1, sizeof(struct sycamore_modifiers_node));
     if (!node) {
@@ -127,7 +139,12 @@ struct sycamore_keybinding_manager* sycamore_keybinding_manager_create(struct sy
         return NULL;
     }
     sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_Escape, terminate_server);
-
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_1, switch_vt);
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_2, switch_vt);
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_3, switch_vt);
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_4, switch_vt);
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_5, switch_vt);
+    sycamore_keybinding_create(ctrl_alt, ctrl_alt->modifiers, XKB_KEY_XF86Switch_VT_6, switch_vt);
     return manager;
 }
 
