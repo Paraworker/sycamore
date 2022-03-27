@@ -3,6 +3,7 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
+#include "sycamore/output/output.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/scene.h"
 
@@ -129,9 +130,8 @@ void view_set_maximized(struct sycamore_view* view, bool maximized) {
         view->maximize_restore.width = window_box.width;
         view->maximize_restore.height = window_box.height;
 
-        struct wlr_box max_box;
-        wlr_output_layout_get_box(view->server->output_layout,
-                                  NULL, &max_box);
+        struct sycamore_output *output = wl_container_of(view->server->all_outputs.prev, output, link);
+        struct wlr_box max_box = output->usable_area;
         view->x = max_box.x;
         view->y = max_box.y;
 
