@@ -42,9 +42,11 @@ struct sycamore_server {
 };
 
 struct sycamore_server *server_create();
-bool server_start(struct sycamore_server *server);
-void server_run(struct sycamore_server *server);
-void server_destroy(struct sycamore_server *server);
 
+bool server_start(struct sycamore_server *server);
+
+void server_run(struct sycamore_server *server);
+
+void server_destroy(struct sycamore_server *server);
 
 #endif //SYCAMORE_SERVER_H

@@ -20,6 +20,7 @@ struct sycamore_seat {
 
 struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
         struct wl_display *display, struct wlr_output_layout *output_layout);
+
 void sycamore_seat_destroy(struct sycamore_seat *seat);
 
 void handle_backend_new_input(struct wl_listener *listener, void *data);

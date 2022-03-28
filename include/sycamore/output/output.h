@@ -18,8 +18,9 @@ struct sycamore_output {
 
 void handle_backend_new_output(struct wl_listener *listener, void *data);
 
+void sycamore_output_destroy(struct sycamore_output *output);
+
 struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
                                                struct wlr_output *wlr_output);
-void sycamore_output_destroy(struct sycamore_output *output);
 
 #endif //SYCAMORE_OUTPUT_H
