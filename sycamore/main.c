@@ -4,7 +4,6 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <wlr/util/log.h>
-
 #include "sycamore/server.h"
 
 int main(int argc, char **argv) {

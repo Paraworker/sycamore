@@ -1,17 +1,17 @@
-#include "sycamore/input/keybinding.h"
-#include "sycamore/desktop/view.h"
 #include <stdlib.h>
 #include <wlr/util/log.h>
+#include "sycamore/input/keybinding.h"
+#include "sycamore/desktop/view.h"
 
-bool handle_keybinding(struct sycamore_keybinding_manager* manager, uint32_t modifiers, xkb_keysym_t sym) {
+bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t modifiers, xkb_keysym_t sym) {
     if (modifiers == 0) {
         return false;
     }
 
-    struct sycamore_modifiers_node* node;
+    struct sycamore_modifiers_node *node;
     wl_list_for_each(node, &manager->modifiers_nodes, link) {
         if (modifiers == node->modifiers) {
-            struct sycamore_keybinding* keybinding;
+            struct sycamore_keybinding *keybinding;
             wl_list_for_each(keybinding, &node->keybindings, link) {
                 if (sym == keybinding->sym) {
                     keybinding->action(manager->server, keybinding);
@@ -24,7 +24,7 @@ bool handle_keybinding(struct sycamore_keybinding_manager* manager, uint32_t mod
 }
 
 /* action */
-static void cycle_view(struct sycamore_server *server, struct sycamore_keybinding* keybinding) {
+static void cycle_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     /* Cycle to the next view */
     if (wl_list_length(&server->mapped_views) < 2) {
         return;
@@ -35,19 +35,19 @@ static void cycle_view(struct sycamore_server *server, struct sycamore_keybindin
     focus_view(next_view);
 
     double sx, sy;
-    struct sycamore_cursor* cursor = server->seat->cursor;
-    struct wlr_surface* surface = desktop_surface_at(server->scene,
+    struct sycamore_cursor *cursor = server->seat->cursor;
+    struct wlr_surface *surface = desktop_surface_at(server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     update_pointer_focus(cursor, surface, sx, sy);
 }
 
 /* action */
-static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding* keybinding) {
+static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     wl_display_terminate(server->wl_display);
 }
 
 /* action */
-static void switch_vt(struct sycamore_server *server, struct sycamore_keybinding* keybinding)
+static void switch_vt(struct sycamore_server *server, struct sycamore_keybinding *keybinding)
 {
     struct wlr_session *session = wlr_backend_get_session(server->backend);
 
@@ -58,8 +58,8 @@ static void switch_vt(struct sycamore_server *server, struct sycamore_keybinding
     }
 }
 
-static struct sycamore_modifiers_node* sycamore_modifiers_node_create(struct sycamore_keybinding_manager* manager, uint32_t modifiers) {
-    struct sycamore_modifiers_node* node = calloc(1, sizeof(struct sycamore_modifiers_node));
+static struct sycamore_modifiers_node *sycamore_modifiers_node_create(struct sycamore_keybinding_manager *manager, uint32_t modifiers) {
+    struct sycamore_modifiers_node *node = calloc(1, sizeof(struct sycamore_modifiers_node));
     if (!node) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_modifiers_node");
         return NULL;
@@ -73,10 +73,10 @@ static struct sycamore_modifiers_node* sycamore_modifiers_node_create(struct syc
     return node;
 }
 
-static struct sycamore_keybinding * sycamore_keybinding_create(struct sycamore_modifiers_node *node,
+static struct sycamore_keybinding *sycamore_keybinding_create(struct sycamore_modifiers_node *node,
         uint32_t modifiers, xkb_keysym_t sym,
-        void (*action)(struct sycamore_server *server, struct sycamore_keybinding* keybinding)) {
-    struct sycamore_keybinding* keybinding = calloc(1, sizeof(struct sycamore_keybinding));
+        void (*action)(struct sycamore_server *server, struct sycamore_keybinding *keybinding)) {
+    struct sycamore_keybinding *keybinding = calloc(1, sizeof(struct sycamore_keybinding));
     if (!keybinding) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_keybinding");
         return NULL;
@@ -91,7 +91,7 @@ static struct sycamore_keybinding * sycamore_keybinding_create(struct sycamore_m
     return keybinding;
 }
 
-void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager* manager) {
+void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager *manager) {
     if (!manager) {
         return;
     }
@@ -110,8 +110,8 @@ void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager* man
     free(manager);
 }
 
-struct sycamore_keybinding_manager* sycamore_keybinding_manager_create(struct sycamore_server* server) {
-    struct sycamore_keybinding_manager* manager =
+struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sycamore_server *server) {
+    struct sycamore_keybinding_manager *manager =
             calloc(1, sizeof(struct sycamore_keybinding_manager));
     if (!manager) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_keybinding_manager");
@@ -122,7 +122,7 @@ struct sycamore_keybinding_manager* sycamore_keybinding_manager_create(struct sy
     manager->server = server;
 
     /* alt */
-    struct sycamore_modifiers_node* alt = sycamore_modifiers_node_create(manager, WLR_MODIFIER_ALT);
+    struct sycamore_modifiers_node *alt = sycamore_modifiers_node_create(manager, WLR_MODIFIER_ALT);
     if (!alt) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node");
         sycamore_keybinding_manager_destroy(manager);
@@ -131,7 +131,7 @@ struct sycamore_keybinding_manager* sycamore_keybinding_manager_create(struct sy
     sycamore_keybinding_create(alt, alt->modifiers, XKB_KEY_Tab, cycle_view);
 
     /* ctrl+alt */
-    struct sycamore_modifiers_node* ctrl_alt =
+    struct sycamore_modifiers_node *ctrl_alt =
             sycamore_modifiers_node_create(manager, WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT);
     if (!ctrl_alt) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node");

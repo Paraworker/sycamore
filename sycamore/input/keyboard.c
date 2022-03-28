@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <wlr/util/log.h>
-
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/keybinding.h"
 
@@ -60,7 +59,7 @@ static void handle_keyboard_destroy(struct wl_listener *listener, void *data) {
     sycamore_keyboard_destroy(keyboard);
 }
 
-void sycamore_keyboard_destroy(struct sycamore_keyboard* keyboard) {
+void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard) {
     if (!keyboard) {
         return;
     }
@@ -73,7 +72,7 @@ void sycamore_keyboard_destroy(struct sycamore_keyboard* keyboard) {
     free(keyboard);
 }
 
-struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
+struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
         struct wlr_input_device *device) {
     struct sycamore_keyboard *keyboard = calloc(1, sizeof(struct sycamore_keyboard));
     if (!keyboard) {

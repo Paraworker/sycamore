@@ -1,6 +1,5 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/util/log.h>
-
 #include "sycamore/input/libinput.h"
 
 static bool set_accel_speed(struct libinput_device *device, double speed) {
@@ -54,7 +53,7 @@ bool scroll_methods_is_touchpad(struct libinput_device* device) {
     return false;
 }
 
-void touchpad_set_natural_scroll(struct wlr_input_device* device) {
+void touchpad_set_natural_scroll(struct wlr_input_device *device) {
     if (!wlr_input_device_is_libinput(device)) {
         /* We can only do this on libinput devices */
         wlr_log(WLR_DEBUG, "%s is not a libinput_device", device->name);
@@ -66,7 +65,7 @@ void touchpad_set_natural_scroll(struct wlr_input_device* device) {
     }
 }
 
-void touchpad_set_tap_to_click(struct wlr_input_device* device) {
+void touchpad_set_tap_to_click(struct wlr_input_device *device) {
     if (!wlr_input_device_is_libinput(device)) {
         /* We can only do this on libinput devices */
         wlr_log(WLR_DEBUG, "%s is not a libinput_device", device->name);

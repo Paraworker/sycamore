@@ -7,12 +7,11 @@
 #include <wlr/render/allocator.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_presentation_time.h>
-
 #include "sycamore/input/seat.h"
+#include "sycamore/input/keybinding.h"
 #include "sycamore/desktop/scene.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/shell/layer_shell.h"
-#include "sycamore/input/keybinding.h"
 
 struct sycamore_server {
     struct wl_display *wl_display;
@@ -30,22 +29,22 @@ struct sycamore_server {
     struct wl_listener output_layout_change;
     struct wlr_presentation *presentation;
 
-    struct sycamore_seat* seat;
+    struct sycamore_seat *seat;
     struct sycamore_scene *scene;
-    struct sycamore_xdg_shell* xdg_shell;
-    struct sycamore_layer_shell* layer_shell;
-    struct sycamore_keybinding_manager* keybinding_manager;
+    struct sycamore_xdg_shell *xdg_shell;
+    struct sycamore_layer_shell *layer_shell;
+    struct sycamore_keybinding_manager *keybinding_manager;
 
     struct wl_list mapped_views;
-    struct sycamore_view* desktop_focused_view;
+    struct sycamore_view *desktop_focused_view;
 
     const char *socket;
 };
 
-struct sycamore_server* server_create();
-bool server_start(struct sycamore_server* server);
-void server_run(struct sycamore_server* server);
-void server_destroy(struct sycamore_server* server);
+struct sycamore_server *server_create();
+bool server_start(struct sycamore_server *server);
+void server_run(struct sycamore_server *server);
+void server_destroy(struct sycamore_server *server);
 
 
 #endif //SYCAMORE_SERVER_H

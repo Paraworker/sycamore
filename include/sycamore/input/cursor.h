@@ -34,10 +34,10 @@ struct sycamore_cursor {
     struct sycamore_seat *seat;
 };
 
-void sycamore_cursor_destroy(struct sycamore_cursor* cursor);
-void update_pointer_focus(struct sycamore_cursor* cursor, struct wlr_surface* surface, double sx, double sy);
+void sycamore_cursor_destroy(struct sycamore_cursor *cursor);
+void update_pointer_focus(struct sycamore_cursor *cursor, struct wlr_surface *surface, double sx, double sy);
 void set_interactive(struct sycamore_view *view, enum cursor_mode mode, uint32_t edges);
-struct sycamore_cursor* sycamore_cursor_create(struct sycamore_seat* seat,
-                                               struct wlr_output_layout* output_layout);
+struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
+                                               struct wlr_output_layout *output_layout);
 
 #endif //SYCAMORE_CURSOR_H

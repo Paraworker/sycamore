@@ -4,8 +4,6 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/util/log.h>
-
-
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/input/keyboard.h"
@@ -24,7 +22,7 @@ static void new_pointer(struct sycamore_seat *seat,
 static void new_keyboard(struct sycamore_seat *seat,
                                 struct wlr_input_device *device) {
 
-    struct sycamore_keyboard* keyboard = sycamore_keyboard_create(seat, device);
+    struct sycamore_keyboard *keyboard = sycamore_keyboard_create(seat, device);
     if (!keyboard) {
         wlr_log(WLR_ERROR, "Unable to create keyboard");
         return;
@@ -63,7 +61,7 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
      * available. */
     struct sycamore_server *server =
             wl_container_of(listener, server, backend_new_input);
-    struct sycamore_seat* seat = server->seat;
+    struct sycamore_seat *seat = server->seat;
     struct wlr_input_device *device = data;
     switch (device->type) {
         case WLR_INPUT_DEVICE_KEYBOARD:
@@ -129,14 +127,14 @@ static void handle_seat_request_set_selection(struct wl_listener *listener, void
 }
 
 static void handle_seat_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_seat* seat = wl_container_of(listener, seat, destroy);
+    struct sycamore_seat *seat = wl_container_of(listener, seat, destroy);
 
     seat->wlr_seat = NULL;
     seat->server->seat = NULL;
     sycamore_seat_destroy(seat);
 }
 
-void sycamore_seat_destroy(struct sycamore_seat* seat) {
+void sycamore_seat_destroy(struct sycamore_seat *seat) {
     if (!seat) {
         return;
     }
@@ -155,9 +153,9 @@ void sycamore_seat_destroy(struct sycamore_seat* seat) {
     free(seat);
 }
 
-struct sycamore_seat* sycamore_seat_create(struct sycamore_server* server,
-        struct wl_display* display, struct wlr_output_layout* output_layout) {
-    struct sycamore_seat* seat = calloc(1, sizeof(struct sycamore_seat));
+struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
+        struct wl_display *display, struct wlr_output_layout *output_layout) {
+    struct sycamore_seat *seat = calloc(1, sizeof(struct sycamore_seat));
     if (!seat) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_seat");
         return NULL;

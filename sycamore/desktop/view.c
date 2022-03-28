@@ -2,19 +2,18 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
-
 #include "sycamore/output/output.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/scene.h"
 
-void view_map(struct sycamore_view* view, struct wlr_output* output, bool maximized, bool fullscreen) {
+void view_map(struct sycamore_view *view, struct wlr_output *output, bool maximized, bool fullscreen) {
     view_set_maximized(view, maximized);
     view_set_fullscreen(view, output, fullscreen);
     wl_list_insert(&view->server->mapped_views, &view->link);
     focus_view(view);
 }
 
-void view_unmap(struct sycamore_view* view) {
+void view_unmap(struct sycamore_view *view) {
     wl_list_remove(&view->link);
     if (view->server->seat->cursor->grabbed_view == view) {
         view->server->seat->cursor->grabbed_view = NULL;
@@ -24,8 +23,8 @@ void view_unmap(struct sycamore_view* view) {
     }
 
     double sx, sy;
-    struct sycamore_cursor* cursor = view->server->seat->cursor;
-    struct wlr_surface* surface = desktop_surface_at(view->server->scene,
+    struct sycamore_cursor *cursor = view->server->seat->cursor;
+    struct wlr_surface *surface = desktop_surface_at(view->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     update_pointer_focus(cursor, surface, sx, sy);
 }
@@ -74,7 +73,7 @@ void focus_view(struct sycamore_view *view) {
     server->desktop_focused_view = view;
 }
 
-void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, bool fullscreen) {
+void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *output, bool fullscreen) {
     if (fullscreen == view->is_fullscreen) {
         return;
     }
@@ -113,7 +112,7 @@ void view_set_fullscreen(struct sycamore_view* view, struct wlr_output* output, 
     }
 }
 
-void view_set_maximized(struct sycamore_view* view, bool maximized) {
+void view_set_maximized(struct sycamore_view *view, bool maximized) {
     if (maximized == view->is_maximized) {
         return;
     }

@@ -1,7 +1,7 @@
-#include "sycamore/output/output.h"
-#include "sycamore/desktop/layer.h"
 #include <stdlib.h>
 #include <wlr/util/log.h>
+#include "sycamore/output/output.h"
+#include "sycamore/desktop/layer.h"
 
 static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
@@ -21,12 +21,12 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
 }
 
 static void handle_output_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_output* output = wl_container_of(listener, output, destroy);
+    struct sycamore_output *output = wl_container_of(listener, output, destroy);
     output->wlr_output = NULL;
     sycamore_output_destroy(output);
 }
 
-struct sycamore_output* sycamore_output_create(struct sycamore_server* server,
+struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
         struct wlr_output *wlr_output) {
     struct sycamore_output *output = calloc(1, sizeof(struct sycamore_output));
     if (!output) {
@@ -65,7 +65,7 @@ struct sycamore_output* sycamore_output_create(struct sycamore_server* server,
     return output;
 }
 
-void sycamore_output_disable(struct sycamore_output* output) {
+void sycamore_output_disable(struct sycamore_output *output) {
     if (!output) {
         return;
     }
@@ -83,7 +83,7 @@ void sycamore_output_disable(struct sycamore_output* output) {
 
 }
 
-void sycamore_output_destroy(struct sycamore_output* output) {
+void sycamore_output_destroy(struct sycamore_output *output) {
     if (!output) {
         return;
     }

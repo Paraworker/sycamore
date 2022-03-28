@@ -2,7 +2,6 @@
 #define SYCAMORE_KEYBOARD_H
 
 #include <wlr/types/wlr_input_device.h>
-
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 
@@ -17,9 +16,9 @@ struct sycamore_keyboard {
     struct sycamore_seat *seat;
 };
 
-struct sycamore_keyboard* sycamore_keyboard_create(struct sycamore_seat* seat,
+struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
         struct wlr_input_device *device);
-void sycamore_keyboard_destroy(struct sycamore_keyboard* keyboard);
+void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard);
 
 
 

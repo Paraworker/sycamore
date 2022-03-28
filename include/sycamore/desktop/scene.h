@@ -11,7 +11,7 @@ enum scene_descriptor_type {
 };
 
 struct sycamore_scene {
-    struct wlr_scene* wlr_scene;
+    struct wlr_scene *wlr_scene;
 
     struct {
         struct wlr_scene_tree *shell_background;
@@ -21,7 +21,7 @@ struct sycamore_scene {
         struct wlr_scene_tree *shell_overlay;
     } trees;
 
-    struct sycamore_server* server;
+    struct sycamore_server *server;
 };
 
 struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,

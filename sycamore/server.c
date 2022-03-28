@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include <wlr/util/log.h>
 #include <wlr/backend.h>
+#include <wlr/util/log.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/render/allocator.h>
 #include <wlr/types/wlr_compositor.h>
@@ -9,11 +9,10 @@
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_viewporter.h>
-
 #include "sycamore/server.h"
 #include "sycamore/output/output.h"
 
-static bool server_init(struct sycamore_server* server) {
+static bool server_init(struct sycamore_server *server) {
     wlr_log(WLR_INFO, "Initializing Wayland server");
 
     server->wl_display = wl_display_create();
@@ -70,7 +69,7 @@ static bool server_init(struct sycamore_server* server) {
     server->scene = sycamore_scene_create(server, server->output_layout,
                                           server->presentation);
     if (!server->scene) {
-        wlr_log(WLR_ERROR, "Unable to create scene");
+        wlr_log(WLR_ERROR, "Unable to create sycamore_scene");
         return false;
     }
 
@@ -109,7 +108,7 @@ static bool server_init(struct sycamore_server* server) {
     return server;
 }
 
-void server_destroy(struct sycamore_server* server) {
+void server_destroy(struct sycamore_server *server) {
     if (!server) {
         return;
     }
@@ -145,8 +144,8 @@ void server_destroy(struct sycamore_server* server) {
 }
 
 /* Return NULL if create failed */
-struct sycamore_server* server_create() {
-    struct sycamore_server* server = calloc(1, sizeof(struct sycamore_server));
+struct sycamore_server *server_create() {
+    struct sycamore_server *server = calloc(1, sizeof(struct sycamore_server));
     if (!server) {
         wlr_log(WLR_ERROR, "Unable to allocate server");
         return NULL;
@@ -160,7 +159,7 @@ struct sycamore_server* server_create() {
 }
 
 /* Start the backend */
-bool server_start(struct sycamore_server* server) {
+bool server_start(struct sycamore_server *server) {
     wlr_log(WLR_INFO, "Starting backend on wayland display '%s'",
             server->socket);
 
@@ -172,7 +171,7 @@ bool server_start(struct sycamore_server* server) {
 }
 
 /* Start the wayland event loop */
-void server_run(struct sycamore_server* server) {
+void server_run(struct sycamore_server *server) {
     wlr_log(WLR_INFO, "Running Sycamore on WAYLAND_DISPLAY=%s",
             server->socket);
 

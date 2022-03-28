@@ -1,13 +1,13 @@
-#include "sycamore/desktop/layer.h"
-#include "sycamore/output/output.h"
 #include <stdlib.h>
 #include <wlr/util/log.h>
+#include "sycamore/desktop/layer.h"
+#include "sycamore/output/output.h"
 
-void sycamore_layer_map(struct sycamore_layer* layer) {
+void sycamore_layer_map(struct sycamore_layer *layer) {
     layer->mapped = true;
 }
 
-void sycamore_layer_unmap(struct sycamore_layer* layer) {
+void sycamore_layer_unmap(struct sycamore_layer *layer) {
     layer->mapped = false;
 }
 
@@ -37,14 +37,14 @@ struct wlr_scene_layer_surface_v1 *sycamore_layer_add_to_scene(struct sycamore_s
     return scene_layer_surface;
 }
 
-struct sycamore_layer* sycamore_layer_create(struct sycamore_server* server, struct wlr_layer_surface_v1* layer_surface) {
+struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, struct wlr_layer_surface_v1 *layer_surface) {
     struct sycamore_layer *sycamore_layer = calloc(1, sizeof(struct sycamore_layer));
     if (!sycamore_layer) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_layer");
         return NULL;
     }
 
-    struct sycamore_output* output = NULL;
+    struct sycamore_output *output = NULL;
     if (!layer_surface->output) {
         output = wl_container_of(server->all_outputs.next, output, link);
         layer_surface->output = output->wlr_output;
@@ -78,7 +78,7 @@ struct sycamore_layer* sycamore_layer_create(struct sycamore_server* server, str
     return sycamore_layer;
 }
 
-void sycamore_layer_destroy(struct sycamore_layer* layer) {
+void sycamore_layer_destroy(struct sycamore_layer *layer) {
     if (!layer) {
         return;
     }
