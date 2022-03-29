@@ -29,6 +29,7 @@ static bool server_init(struct sycamore_server *server) {
     }
 
     wlr_renderer_init_wl_display(server->renderer, server->wl_display);
+
     server->allocator = wlr_allocator_autocreate(server->backend, server->renderer);
     if (!server->allocator) {
         wlr_log(WLR_ERROR, "Unable to create allocator");

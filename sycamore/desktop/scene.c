@@ -18,13 +18,13 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
         return NULL;
     }
 
+    scene->server = server;
     scene->trees.shell_background = wlr_scene_tree_create(&scene->wlr_scene->node);
     scene->trees.shell_button = wlr_scene_tree_create(&scene->wlr_scene->node);
     scene->trees.shell_view = wlr_scene_tree_create(&scene->wlr_scene->node);
     scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->node);
     scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->node);
 
-    scene->server = server;
     wlr_scene_attach_output_layout(scene->wlr_scene, output_layout);
     wlr_scene_set_presentation(scene->wlr_scene, presentation);
 
