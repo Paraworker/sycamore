@@ -29,6 +29,18 @@ void view_unmap(struct sycamore_view *view) {
     update_pointer_focus(cursor, surface, sx, sy);
 }
 
+struct sycamore_output *view_get_main_output(struct sycamore_view *view) {
+    struct wlr_surface *surface = view->interface->get_wlr_surface(view);
+
+    struct wl_list *surface_outputs = &surface->current_outputs;
+    if (wl_list_empty(surface_outputs)) {
+        return NULL;
+    }
+
+    struct wlr_surface_output *surface_output = wl_container_of(surface->current_outputs.prev, surface_output, link);
+    return surface_output->output->data;
+}
+
 void focus_view(struct sycamore_view *view) {
     /* Note: this function only deals with keyboard focus. */
     if (view == NULL || view->view_type == VIEW_TYPE_UNKNOWN) {
@@ -73,7 +85,7 @@ void focus_view(struct sycamore_view *view) {
     server->desktop_focused_view = view;
 }
 
-void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *output, bool fullscreen) {
+void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool fullscreen) {
     if (fullscreen == view->is_fullscreen) {
         return;
     }
@@ -89,6 +101,16 @@ void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *output, 
         view->interface->get_geometry(view, &window_box);
         view->fullscreen_restore.width = window_box.width;
         view->fullscreen_restore.height = window_box.height;
+
+        struct wlr_output *output = NULL;
+        if (!fullscreen_output) {
+            struct sycamore_output *sycamore_output = view_get_main_output(view);
+            if (sycamore_output) {
+                output = sycamore_output->wlr_output;
+            }
+        } else {
+            output = fullscreen_output;
+        }
 
         struct wlr_box fullscreen_box;
         wlr_output_layout_get_box(view->server->output_layout,
@@ -129,7 +151,7 @@ void view_set_maximized(struct sycamore_view *view, bool maximized) {
         view->maximize_restore.width = window_box.width;
         view->maximize_restore.height = window_box.height;
 
-        struct sycamore_output *output = wl_container_of(view->server->all_outputs.prev, output, link);
+        struct sycamore_output *output = view_get_main_output(view);
         struct wlr_box max_box = output->usable_area;
         view->x = max_box.x;
         view->y = max_box.y;

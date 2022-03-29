@@ -57,7 +57,9 @@ void view_map(struct sycamore_view *view, struct wlr_output *output, bool maximi
 
 void view_unmap(struct sycamore_view *view);
 
-void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *output, bool fullscreen);
+struct sycamore_output *view_get_main_output(struct sycamore_view *view);
+
+void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool fullscreen);
 
 void view_set_maximized(struct sycamore_view *view, bool maximized);
 
