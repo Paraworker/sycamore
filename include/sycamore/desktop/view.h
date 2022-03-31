@@ -53,7 +53,7 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_maximize;
 };
 
-void view_map(struct sycamore_view *view, struct wlr_output *output, bool maximized, bool fullscreen);
+void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);
 
 void view_unmap(struct sycamore_view *view);
 

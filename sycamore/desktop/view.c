@@ -6,9 +6,9 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/scene.h"
 
-void view_map(struct sycamore_view *view, struct wlr_output *output, bool maximized, bool fullscreen) {
+void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen) {
     view_set_maximized(view, maximized);
-    view_set_fullscreen(view, output, fullscreen);
+    view_set_fullscreen(view, fullscreen_output, fullscreen);
     wl_list_insert(&view->server->mapped_views, &view->link);
     focus_view(view);
 }
@@ -105,9 +105,10 @@ void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *fullscre
         struct wlr_output *output = NULL;
         if (!fullscreen_output) {
             struct sycamore_output *sycamore_output = view_get_main_output(view);
-            if (sycamore_output) {
-                output = sycamore_output->wlr_output;
+            if (!sycamore_output) {
+                sycamore_output = wl_container_of(view->server->all_outputs.prev, sycamore_output, link);
             }
+            output = sycamore_output->wlr_output;
         } else {
             output = fullscreen_output;
         }
@@ -151,8 +152,13 @@ void view_set_maximized(struct sycamore_view *view, bool maximized) {
         view->maximize_restore.width = window_box.width;
         view->maximize_restore.height = window_box.height;
 
-        struct sycamore_output *output = view_get_main_output(view);
-        struct wlr_box max_box = output->usable_area;
+        struct sycamore_output *sycamore_output = view_get_main_output(view);
+        if (!sycamore_output) {
+            sycamore_output = wl_container_of(view->server->all_outputs.prev, sycamore_output, link);
+        }
+
+        struct wlr_box max_box;
+        max_box = sycamore_output->usable_area;
         view->x = max_box.x;
         view->y = max_box.y;
 
