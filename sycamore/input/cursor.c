@@ -30,12 +30,6 @@ void update_pointer_focus(struct sycamore_cursor *cursor, struct wlr_surface *su
 static void process_cursor_move(struct sycamore_cursor *cursor, uint32_t time) {
     /* Move the grabbed view to the new position. */
     struct sycamore_view *view = cursor->grabbed_view;
-    if (!view) {
-        /* prevent the grabbed view from being unmapped */
-        cursor->mode = CURSOR_MODE_PASSTHROUGH;
-        return;
-    }
-
     view->x = cursor->wlr_cursor->x - cursor->grab_x;
     view->y = cursor->wlr_cursor->y - cursor->grab_y;
 
@@ -54,11 +48,6 @@ static void process_cursor_resize(struct sycamore_cursor *cursor, uint32_t time)
      * commit any movement that was prepared.
      */
     struct sycamore_view *view = cursor->grabbed_view;
-    if (!view) {
-        cursor->mode = CURSOR_MODE_PASSTHROUGH;
-        return;
-    }
-
     double border_x = cursor->wlr_cursor->x - cursor->grab_x;
     double border_y = cursor->wlr_cursor->y - cursor->grab_y;
     int new_left = cursor->grab_geobox.x;

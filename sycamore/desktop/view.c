@@ -15,9 +15,14 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
 
 void view_unmap(struct sycamore_view *view) {
     wl_list_remove(&view->link);
+
     if (view->server->seat->cursor->grabbed_view == view) {
         view->server->seat->cursor->grabbed_view = NULL;
+        if (view->server->seat->cursor->mode != CURSOR_MODE_PASSTHROUGH) {
+            view->server->seat->cursor->mode = CURSOR_MODE_PASSTHROUGH;
+        }
     }
+
     if (view->server->desktop_focused_view == view) {
         view->server->desktop_focused_view = NULL;
     }
