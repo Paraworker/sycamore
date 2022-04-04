@@ -5,6 +5,7 @@
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/render/allocator.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
@@ -96,11 +97,12 @@ static bool server_init(struct sycamore_server *server) {
     wl_list_init(&server->mapped_views);
     server->desktop_focused_view = NULL;
 
-    wlr_subcompositor_create(server->wl_display);
+    wlr_data_control_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
-    wlr_xdg_output_manager_v1_create(server->wl_display, server->output_layout);
-    wlr_viewporter_create(server->wl_display);
     wlr_screencopy_manager_v1_create(server->wl_display);
+    wlr_subcompositor_create(server->wl_display);
+    wlr_viewporter_create(server->wl_display);
+    wlr_xdg_output_manager_v1_create(server->wl_display, server->output_layout);
 
     server->socket = wl_display_add_socket_auto(server->wl_display);
     if (!server->socket) {
