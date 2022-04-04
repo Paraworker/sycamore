@@ -110,7 +110,7 @@ static void process_cursor_motion(struct sycamore_cursor *cursor, uint32_t time)
     }
 }
 
-static void cursor_motion(struct wl_listener *listener, void *data) {
+static void handle_cursor_motion(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
     struct sycamore_cursor *cursor =
@@ -124,7 +124,7 @@ static void cursor_motion(struct wl_listener *listener, void *data) {
     process_cursor_motion(cursor, event->time_msec);
 }
 
-static void cursor_motion_absolute(struct wl_listener *listener, void *data) {
+static void handle_cursor_motion_absolute(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits an _absolute_
      * motion event, from 0..1 on each axis. This happens, for example, when
      * wlroots is running under a Wayland window rather than KMS+DRM, and you
@@ -138,9 +138,8 @@ static void cursor_motion_absolute(struct wl_listener *listener, void *data) {
     process_cursor_motion(cursor, event->time_msec);
 }
 
-static void cursor_button(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits a button
-     * event. */
+static void handle_cursor_button(struct wl_listener *listener, void *data) {
+    /* This event is forwarded by the cursor when a pointer emits a button event. */
     struct sycamore_cursor *cursor =
             wl_container_of(listener, cursor, cursor_button);
     struct wlr_pointer_button_event *event = data;
@@ -166,7 +165,7 @@ static void cursor_button(struct wl_listener *listener, void *data) {
     }
 }
 
-static void cursor_axis(struct wl_listener *listener, void *data) {
+static void handle_cursor_axis(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits an axis event,
      * for example when you move the scroll wheel. */
     struct sycamore_cursor *cursor =
@@ -178,7 +177,7 @@ static void cursor_axis(struct wl_listener *listener, void *data) {
                                  event->delta_discrete, event->source);
 }
 
-static void cursor_frame(struct wl_listener *listener, void *data) {
+static void handle_cursor_frame(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits an frame
      * event. Frame events are sent after regular pointer events to group
      * multiple events together. For instance, two axis events may happen at the
@@ -362,15 +361,15 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     wlr_xcursor_manager_load(cursor->xcursor_manager, 1);
 
-    cursor->cursor_motion.notify = cursor_motion;
+    cursor->cursor_motion.notify = handle_cursor_motion;
     wl_signal_add(&cursor->wlr_cursor->events.motion, &cursor->cursor_motion);
-    cursor->cursor_motion_absolute.notify = cursor_motion_absolute;
+    cursor->cursor_motion_absolute.notify = handle_cursor_motion_absolute;
     wl_signal_add(&cursor->wlr_cursor->events.motion_absolute, &cursor->cursor_motion_absolute);
-    cursor->cursor_button.notify = cursor_button;
+    cursor->cursor_button.notify = handle_cursor_button;
     wl_signal_add(&cursor->wlr_cursor->events.button, &cursor->cursor_button);
-    cursor->cursor_axis.notify = cursor_axis;
+    cursor->cursor_axis.notify = handle_cursor_axis;
     wl_signal_add(&cursor->wlr_cursor->events.axis, &cursor->cursor_axis);
-    cursor->cursor_frame.notify = cursor_frame;
+    cursor->cursor_frame.notify = handle_cursor_frame;
     wl_signal_add(&cursor->wlr_cursor->events.frame, &cursor->cursor_frame);
 
     cursor->swipe_begin.notify = handle_swipe_begin;

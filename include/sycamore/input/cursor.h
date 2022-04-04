@@ -35,7 +35,6 @@ struct sycamore_cursor {
     struct wl_listener hold_begin;
     struct wl_listener hold_end;
 
-
     /* for cursor move and resize view */
     struct sycamore_view *grabbed_view;
     double grab_x, grab_y;
