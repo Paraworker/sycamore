@@ -4,6 +4,7 @@
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_pointer.h>
+#include <wlr/types/wlr_pointer_gestures_v1.h>
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 
@@ -16,6 +17,7 @@ enum cursor_mode {
 struct sycamore_cursor {
     struct wlr_cursor *wlr_cursor;
     struct wlr_xcursor_manager *xcursor_manager;
+    struct wlr_pointer_gestures_v1 *gestures;
     enum cursor_mode mode;
 
     struct wl_listener cursor_motion;
@@ -24,7 +26,17 @@ struct sycamore_cursor {
     struct wl_listener cursor_axis;
     struct wl_listener cursor_frame;
 
-    /*for cursor move and resize window*/
+    struct wl_listener swipe_begin;
+    struct wl_listener swipe_update;
+    struct wl_listener swipe_end;
+    struct wl_listener pinch_begin;
+    struct wl_listener pinch_update;
+    struct wl_listener pinch_end;
+    struct wl_listener hold_begin;
+    struct wl_listener hold_end;
+
+
+    /* for cursor move and resize view */
     struct sycamore_view *grabbed_view;
     double grab_x, grab_y;
     struct wlr_box grab_geobox;
