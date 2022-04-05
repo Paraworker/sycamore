@@ -203,11 +203,13 @@ void set_interactive(struct sycamore_view *view,
         return;
     }
 
-    /* Deny move/resize requests from unfocused clients or there is no focused clients. */
-    if (!focused_surface) {
+    /* Deny move/resize requests from maximized/fullscreen clients. */
+    if (view->is_maximized || view->is_fullscreen) {
         return;
     }
-    if (view->interface->get_wlr_surface(view) !=
+
+    /* Deny move/resize requests from unfocused clients or there is no focused clients. */
+    if (focused_surface == NULL || view->interface->get_wlr_surface(view) !=
         wlr_surface_get_root_surface(focused_surface)) {
         return;
     }
