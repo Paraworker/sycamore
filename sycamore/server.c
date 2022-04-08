@@ -1,17 +1,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <wlr/backend.h>
-#include <wlr/util/log.h>
-#include <wlr/render/wlr_renderer.h>
 #include <wlr/render/allocator.h>
+#include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_control_v1.h>
-#include <wlr/types/wlr_primary_selection_v1.h>
-#include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
-#include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/types/wlr_export_dmabuf_v1.h>
+#include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_viewporter.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/util/log.h>
 #include "sycamore/server.h"
 #include "sycamore/output/output.h"
 
@@ -100,6 +101,7 @@ static bool server_init(struct sycamore_server *server) {
     wl_list_init(&server->mapped_views);
     server->desktop_focused_view = NULL;
 
+    wlr_export_dmabuf_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
     wlr_data_control_manager_v1_create(server->wl_display);
     wlr_primary_selection_v1_device_manager_create(server->wl_display);
