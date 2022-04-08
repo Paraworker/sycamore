@@ -67,9 +67,6 @@ struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, str
     sycamore_layer->destroy.notify = handle_sycamore_layer_destroy;
     wl_signal_add(&layer_surface->events.destroy, &sycamore_layer->destroy);
 
-    wl_list_insert(&output->layers[sycamore_layer->layer_type],
-                   &sycamore_layer->link);
-
     struct wlr_box full_area;
     wlr_output_layout_get_box(server->output_layout, output->wlr_output, &full_area);
     wlr_scene_layer_surface_v1_configure(sycamore_layer->scene_layer_surface,
@@ -86,7 +83,6 @@ void sycamore_layer_destroy(struct sycamore_layer *layer) {
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
-    wl_list_remove(&layer->link);
 
     if (layer->wlr_layer_surface) {
         wlr_layer_surface_v1_destroy(layer->wlr_layer_surface);

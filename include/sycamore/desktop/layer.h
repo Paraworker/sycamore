@@ -7,7 +7,6 @@
 
 struct sycamore_layer {
     enum scene_descriptor_type scene_descriptor;
-    struct wl_list link;
     struct wlr_layer_surface_v1 *wlr_layer_surface;
     struct wlr_scene_layer_surface_v1 *scene_layer_surface;
     enum zwlr_layer_shell_v1_layer layer_type;

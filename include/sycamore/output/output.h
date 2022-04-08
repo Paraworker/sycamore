@@ -7,11 +7,12 @@
 struct sycamore_output {
     struct wl_list link;
     struct wlr_output *wlr_output;
-    struct wl_listener frame;
-    struct wl_listener destroy;
+    struct wlr_scene_output *scene_output;
 
-    struct wl_list layers[4]; // sycamore_layer::link
     struct wlr_box usable_area;
+
+    struct wl_listener destroy;
+    struct wl_listener frame;
 
     struct sycamore_server *server;
 };

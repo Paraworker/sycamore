@@ -7,17 +7,13 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
      * generally at the output's refresh rate (e.g. 60Hz). */
     struct sycamore_output *output = wl_container_of(listener, output, frame);
-    struct sycamore_scene *scene = output->server->scene;
-
-    struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(
-            scene->wlr_scene, output->wlr_output);
 
     /* Render the scene if needed and commit the output */
-    wlr_scene_output_commit(scene_output);
+    wlr_scene_output_commit(output->scene_output);
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
-    wlr_scene_output_send_frame_done(scene_output, &now);
+    wlr_scene_output_send_frame_done(output->scene_output, &now);
 }
 
 static void handle_output_destroy(struct wl_listener *listener, void *data) {
@@ -34,15 +30,17 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
         return NULL;
     }
 
-    for (int i = 0; i < 4; ++i) {
-        wl_list_init(&output->layers[i]);
+    output->scene_output = wlr_scene_output_create(server->scene->wlr_scene, wlr_output);
+    if (!output->scene_output) {
+        wlr_log(WLR_ERROR, "Unable to create scene_output");
+        free(output);
+        return NULL;
     }
 
     wlr_output->data = output;
     output->wlr_output = wlr_output;
     output->server = server;
 
-    /* Sets up a listener for the frame notify event. */
     output->frame.notify = handle_output_frame;
     wl_signal_add(&wlr_output->events.frame, &output->frame);
     output->destroy.notify = handle_output_destroy;
@@ -69,18 +67,7 @@ void sycamore_output_disable(struct sycamore_output *output) {
     if (!output) {
         return;
     }
-
-    /* Destroy all layers */
-    for (int i = 0; i < 4; ++i) {
-        struct sycamore_layer *layer, *next;
-        wl_list_for_each_safe(layer, next, &output->layers[i], link) {
-            if (layer->mapped) {
-                sycamore_layer_unmap(layer);
-            }
-            sycamore_layer_destroy(layer);
-        }
-    }
-
+    /* TODO */
 }
 
 void sycamore_output_destroy(struct sycamore_output *output) {
@@ -90,9 +77,13 @@ void sycamore_output_destroy(struct sycamore_output *output) {
 
     sycamore_output_disable(output);
 
-    wl_list_remove(&output->frame.link);
     wl_list_remove(&output->destroy.link);
+    wl_list_remove(&output->frame.link);
     wl_list_remove(&output->link);
+
+    if (output->scene_output) {
+        wlr_scene_output_destroy(output->scene_output);
+    }
 
     if (output->wlr_output) {
         wlr_output_destroy(output->wlr_output);
@@ -128,9 +119,7 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         }
     }
 
-    /* Allocates and configures our state for this output */
-    struct sycamore_output *output = sycamore_output_create(server, wlr_output);
-    if (!output) {
+    if (!sycamore_output_create(server, wlr_output)) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_output");
         return;
     }
