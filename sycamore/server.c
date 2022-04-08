@@ -52,6 +52,8 @@ static bool server_init(struct sycamore_server *server) {
         return false;
     }
 
+    wlr_subcompositor_create(server->wl_display);
+
     server->output_layout = wlr_output_layout_create();
     if (!server->output_layout) {
         wlr_log(WLR_ERROR, "Unable to create output_layout");
@@ -98,11 +100,10 @@ static bool server_init(struct sycamore_server *server) {
     wl_list_init(&server->mapped_views);
     server->desktop_focused_view = NULL;
 
-    wlr_data_control_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
+    wlr_data_control_manager_v1_create(server->wl_display);
     wlr_primary_selection_v1_device_manager_create(server->wl_display);
     wlr_screencopy_manager_v1_create(server->wl_display);
-    wlr_subcompositor_create(server->wl_display);
     wlr_viewporter_create(server->wl_display);
     wlr_xdg_output_manager_v1_create(server->wl_display, server->output_layout);
 
