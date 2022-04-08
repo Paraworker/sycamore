@@ -115,6 +115,7 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         wlr_output_set_mode(wlr_output, mode);
         wlr_output_enable(wlr_output, true);
         if (!wlr_output_commit(wlr_output)) {
+            wlr_output_destroy(wlr_output);
             return;
         }
     }
