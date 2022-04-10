@@ -2,9 +2,10 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/log.h>
-#include "sycamore/input/cursor.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/desktop/scene.h"
+#include "sycamore/input/cursor.h"
+#include "sycamore/output/output.h"
 
 void update_pointer_focus(struct sycamore_cursor *cursor, struct wlr_surface *surface, double sx, double sy) {
     if (!surface && cursor->default_setted == false) {
@@ -25,6 +26,18 @@ void update_pointer_focus(struct sycamore_cursor *cursor, struct wlr_surface *su
     } else if (!surface && seat->pointer_state.focused_surface) {
         wlr_seat_pointer_clear_focus(seat);
     }
+}
+
+void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {
+    struct wlr_box box;
+    wlr_output_layout_get_box(cursor->seat->server->output_layout,
+                              output->wlr_output, &box);
+
+    cursor->wlr_cursor->x = box.width/2 + box.x;
+    cursor->wlr_cursor->y = box.height/2 + box.y;
+
+    wlr_cursor_warp(cursor->wlr_cursor, NULL,
+                    cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 }
 
 static void process_cursor_move(struct sycamore_cursor *cursor, uint32_t time) {

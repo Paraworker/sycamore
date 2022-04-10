@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_pointer_gestures_v1.h>
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/output/output.h"
 
 enum cursor_mode {
     CURSOR_MODE_PASSTHROUGH,
@@ -45,14 +46,16 @@ struct sycamore_cursor {
     struct sycamore_seat *seat;
 };
 
-void sycamore_cursor_destroy(struct sycamore_cursor *cursor);
-
 void update_pointer_focus(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy);
+
+void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
 void set_interactive(struct sycamore_view *view, enum cursor_mode mode, uint32_t edges);
 
 struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         struct wlr_output_layout *output_layout);
+
+void sycamore_cursor_destroy(struct sycamore_cursor *cursor);
 
 #endif //SYCAMORE_CURSOR_H
