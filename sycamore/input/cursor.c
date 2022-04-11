@@ -52,8 +52,8 @@ void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_outpu
     wlr_output_layout_get_box(cursor->seat->server->output_layout,
                               output->wlr_output, &box);
 
-    cursor->wlr_cursor->x = box.width/2 + box.x;
-    cursor->wlr_cursor->y = box.height/2 + box.y;
+    cursor->wlr_cursor->x = box.x + box.width / 2.0;
+    cursor->wlr_cursor->y = box.y + box.height / 2.0;
 
     wlr_cursor_warp(cursor->wlr_cursor, NULL,
                     cursor->wlr_cursor->x, cursor->wlr_cursor->y);
