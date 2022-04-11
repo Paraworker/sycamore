@@ -1,6 +1,7 @@
 #ifndef SYCAMORE_LAYER_H
 #define SYCAMORE_LAYER_H
 
+#include <stdbool.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include "sycamore/server.h"
 #include "sycamore/desktop/scene.h"

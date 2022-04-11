@@ -1,6 +1,9 @@
 #ifndef SYCAMORE_SCENE_H
 #define SYCAMORE_SCENE_H
 
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
 #include "sycamore/server.h"
 

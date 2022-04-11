@@ -1,8 +1,7 @@
 #include <stdlib.h>
-#include <wayland-util.h>
-#include <wlr/backend/libinput.h>
-#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_input_device.h>
+#include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"

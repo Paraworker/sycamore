@@ -1,6 +1,12 @@
+#include <stdbool.h>
 #include <stdlib.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
+#include "sycamore/desktop/scene.h"
+#include "sycamore/server.h"
 #include "sycamore/output/output.h"
 
 void sycamore_layer_map(struct sycamore_layer *layer) {

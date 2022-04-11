@@ -1,11 +1,16 @@
+#include <stdbool.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/desktop/scene.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen) {
     view_set_maximized(view, maximized);

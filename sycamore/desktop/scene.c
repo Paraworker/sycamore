@@ -1,5 +1,10 @@
 #include <stdlib.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_presentation_time.h>
+#include <wlr/types/wlr_scene.h>
 #include <wlr/util/log.h>
+#include "sycamore/server.h"
 #include "sycamore/desktop/scene.h"
 #include "sycamore/desktop/view.h"
 

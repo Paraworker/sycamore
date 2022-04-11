@@ -1,9 +1,11 @@
 #ifndef SYCAMORE_SEAT_H
 #define SYCAMORE_SEAT_H
 
-#include "sycamore/server.h"
+#include <wlr/types/wlr_input_device.h>
+#include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_seat.h>
 #include "sycamore/input/cursor.h"
-#include "sycamore/input/keyboard.h"
+#include "sycamore/server.h"
 
 struct sycamore_seat {
     struct wlr_seat *wlr_seat;

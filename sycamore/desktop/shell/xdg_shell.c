@@ -1,4 +1,8 @@
 #include <stdlib.h>
+#include <stdbool.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"

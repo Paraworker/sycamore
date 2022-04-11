@@ -1,7 +1,15 @@
 #ifndef SYCAMORE_VIEW_H
 #define SYCAMORE_VIEW_H
 
+#include <stdbool.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/util/box.h>
 #include "sycamore/desktop/scene.h"
+#include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,

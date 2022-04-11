@@ -1,7 +1,13 @@
+#include <stdbool.h>
 #include <stdlib.h>
+#include <time.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/log.h>
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,

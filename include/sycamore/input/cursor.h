@@ -1,10 +1,14 @@
 #ifndef SYCAMORE_CURSOR_H
 #define SYCAMORE_CURSOR_H
 
+#include <stdbool.h>
+#include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
-#include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_pointer_gestures_v1.h>
+#include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/util/box.h>
 #include "sycamore/desktop/scene.h"
 #include "sycamore/server.h"
 #include "sycamore/input/seat.h"

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
 #include "sycamore/desktop/shell/layer_shell.h"
