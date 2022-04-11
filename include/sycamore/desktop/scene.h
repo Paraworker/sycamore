@@ -29,9 +29,9 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
 
 void sycamore_scene_destroy(struct sycamore_scene* scene);
 
-struct wlr_surface* desktop_surface_at(struct sycamore_scene *scene,
-                                       double lx, double ly, double *sx, double *sy);
+struct wlr_surface *surface_under(struct sycamore_scene *scene,
+        double lx, double ly, double *sx, double *sy);
 
-struct sycamore_view* desktop_view_at(struct sycamore_scene *scene, double lx, double ly);
+struct sycamore_view* view_under(struct sycamore_scene *scene, double lx, double ly);
 
 #endif //SYCAMORE_SCENE_H

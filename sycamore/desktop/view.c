@@ -12,12 +12,7 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
     view_set_fullscreen(view, fullscreen_output, fullscreen);
     wl_list_insert(&view->server->mapped_views, &view->link);
     focus_view(view);
-
-    double sx, sy;
-    struct sycamore_cursor *cursor = view->server->seat->cursor;
-    struct wlr_surface *surface = desktop_surface_at(view->server->scene,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    update_pointer_focus(cursor, surface, sx, sy);
+    cursor_rebase(view->server->seat->cursor);
 }
 
 void view_unmap(struct sycamore_view *view) {
@@ -34,11 +29,7 @@ void view_unmap(struct sycamore_view *view) {
         view->server->desktop_focused_view = NULL;
     }
 
-    double sx, sy;
-    struct sycamore_cursor *cursor = view->server->seat->cursor;
-    struct wlr_surface *surface = desktop_surface_at(view->server->scene,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    update_pointer_focus(cursor, surface, sx, sy);
+    cursor_rebase(view->server->seat->cursor);
 }
 
 struct sycamore_output *view_get_main_output(struct sycamore_view *view) {

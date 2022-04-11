@@ -39,16 +39,17 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
     free(scene);
 }
 
-struct wlr_surface* desktop_surface_at(struct sycamore_scene *scene,
+struct wlr_surface *surface_under(struct sycamore_scene *scene,
         double lx, double ly, double *sx, double *sy) {
     struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, sx, sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {
         return NULL;
     }
+
     return wlr_scene_surface_from_node(node)->surface;
 }
 
-struct sycamore_view* desktop_view_at(struct sycamore_scene *scene, double lx, double ly) {
+struct sycamore_view *view_under(struct sycamore_scene *scene, double lx, double ly) {
     double sx, sy;
     struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, &sx, &sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {

@@ -7,25 +7,35 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 
-void update_pointer_focus(struct sycamore_cursor *cursor, struct wlr_surface *surface, double sx, double sy) {
-    if (!surface && cursor->default_setted == false) {
-        /* If there's no surface under the cursor, set the cursor image to a default
-         * default_setted makes sure to set only once. */
-        wlr_xcursor_manager_set_cursor_image(
-                cursor->xcursor_manager, "left_ptr", cursor->wlr_cursor);
-        cursor->default_setted = true;
-    } else if (surface && cursor->default_setted == true){
-        cursor->default_setted = false;
-    }
+static uint32_t get_current_time_msec() {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return now.tv_sec * 1000 + now.tv_nsec / 1000000;
+}
 
+void cursor_image_update(struct sycamore_cursor *cursor, struct wlr_surface *surface) {
+    if (!surface && cursor->set_image_default == false) {
+        /* If there's no surface under the cursor, set the cursor image to a default */
+        cursor_set_image(cursor, "left_ptr");
+        cursor->set_image_default = true;
+    } else if (surface && cursor->set_image_default == true){
+        cursor->set_image_default = false;
+    }
+}
+
+void pointer_focus_update(struct sycamore_cursor *cursor, struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
     struct wlr_seat* seat = cursor->seat->wlr_seat;
-    if (surface && seat->pointer_state.focused_surface != surface) {
-        /* The enter event gives the surface "pointer focus".
-         * wlroots will avoid sending duplicate enter events. */
+    if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
-    } else if (!surface && seat->pointer_state.focused_surface) {
+        wlr_seat_pointer_notify_motion(cursor->seat->wlr_seat, time_msec, sx, sy);
+    } else if (seat->pointer_state.focused_surface) {
         wlr_seat_pointer_clear_focus(seat);
     }
+}
+
+void cursor_set_image(struct sycamore_cursor *cursor, const char *name) {
+    wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
+                                         name, cursor->wlr_cursor);
 }
 
 void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {
@@ -40,7 +50,35 @@ void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_outpu
                     cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 }
 
-static void process_cursor_move(struct sycamore_cursor *cursor, uint32_t time) {
+void cursor_enable(struct sycamore_cursor *cursor, bool enabled) {
+    if (cursor->enabled == enabled) {
+        return;
+    }
+
+    cursor->enabled = enabled;
+    if (enabled) {
+        cursor_rebase(cursor);
+    } else {
+        wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
+        wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
+    }
+}
+
+void cursor_rebase(struct sycamore_cursor *cursor) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    double sx, sy;
+    struct wlr_surface *surface = surface_under(cursor->seat->server->scene,
+            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
+
+    pointer_focus_update(cursor, surface, sx, sy,
+                         get_current_time_msec());
+    cursor_image_update(cursor, surface);
+}
+
+static void process_pointer_move(struct sycamore_cursor *cursor, uint32_t time) {
     /* Move the grabbed view to the new position. */
     struct sycamore_view *view = cursor->grabbed_view;
     view->x = cursor->wlr_cursor->x - cursor->grab_x;
@@ -49,7 +87,7 @@ static void process_cursor_move(struct sycamore_cursor *cursor, uint32_t time) {
     wlr_scene_node_set_position(view->scene_node, view->x, view->y);
 }
 
-static void process_cursor_resize(struct sycamore_cursor *cursor, uint32_t time) {
+static void process_pointer_resize(struct sycamore_cursor *cursor, uint32_t time) {
     /*
      * Resizing the grabbed view can be a little bit complicated, because we
      * could be resizing from any corner or edge. This not only resizes the view
@@ -104,37 +142,33 @@ static void process_cursor_resize(struct sycamore_cursor *cursor, uint32_t time)
     view->interface->set_size(view, new_width, new_height);
 }
 
-static void process_cursor_motion(struct sycamore_cursor *cursor, uint32_t time) {
+static void process_pointer_motion(struct sycamore_cursor *cursor, uint32_t time) {
     if (cursor->mode == CURSOR_MODE_MOVE) {
-        process_cursor_move(cursor, time);
+        process_pointer_move(cursor, time);
         return;
     } else if (cursor->mode == CURSOR_MODE_RESIZE) {
-        process_cursor_resize(cursor, time);
+        process_pointer_resize(cursor, time);
         return;
     }
 
-    /* mode is passthrough, update the pointer focus and send the motion event. */
+    /* mode is passthrough */
     double sx, sy;
-    struct wlr_surface *surface = desktop_surface_at(cursor->seat->server->scene,
+    struct wlr_surface *surface = surface_under(cursor->seat->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    update_pointer_focus(cursor, surface, sx, sy);
-    if (surface) {
-        wlr_seat_pointer_notify_motion(cursor->seat->wlr_seat, time, sx, sy);
-    }
+
+    pointer_focus_update(cursor, surface, sx, sy, time);
+    cursor_image_update(cursor, surface);
 }
 
-static void handle_cursor_motion(struct wl_listener *listener, void *data) {
+static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
-    struct sycamore_cursor *cursor =
-            wl_container_of(listener, cursor, cursor_motion);
+    struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion);
     struct wlr_pointer_motion_event *event = data;
-
-    /* move the cursor */
+    cursor_enable(cursor, true);
     wlr_cursor_move(cursor->wlr_cursor, &event->pointer->base,
                     event->delta_x, event->delta_y);
-
-    process_cursor_motion(cursor, event->time_msec);
+    process_pointer_motion(cursor, event->time_msec);
 }
 
 static void handle_cursor_motion_absolute(struct wl_listener *listener, void *data) {
@@ -144,18 +178,18 @@ static void handle_cursor_motion_absolute(struct wl_listener *listener, void *da
      * move the mouse over the window. You could enter the window from any edge,
      * so we have to warp the mouse there. There is also some hardware which
      * emits these events. */
-    struct sycamore_cursor *cursor =
-            wl_container_of(listener, cursor, cursor_motion_absolute);
+    struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion_absolute);
     struct wlr_pointer_motion_absolute_event *event = data;
+    cursor_enable(cursor, true);
     wlr_cursor_warp_absolute(cursor->wlr_cursor, &event->pointer->base, event->x, event->y);
-    process_cursor_motion(cursor, event->time_msec);
+    process_pointer_motion(cursor, event->time_msec);
 }
 
 static void handle_cursor_button(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a button event. */
-    struct sycamore_cursor *cursor =
-            wl_container_of(listener, cursor, cursor_button);
+    struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_button);
     struct wlr_pointer_button_event *event = data;
+    cursor_enable(cursor, true);
 
     /* Notify the client with pointer focus that a button press has occurred */
     wlr_seat_pointer_notify_button(cursor->seat->wlr_seat,
@@ -163,27 +197,24 @@ static void handle_cursor_button(struct wl_listener *listener, void *data) {
 
     if (event->state == WLR_BUTTON_PRESSED) {
         /* Focus the view if the button was pressed */
-        struct sycamore_view *view = desktop_view_at(cursor->seat->server->scene,
-                cursor->wlr_cursor->x, cursor->wlr_cursor->y);
+        struct sycamore_view *view = view_under(cursor->seat->server->scene,
+                                                cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 
         focus_view(view);
     } else if (cursor->mode != CURSOR_MODE_PASSTHROUGH) {
         /* If you released any buttons and the cursor mode is not passthrough
-         * we exit interactive move/resize mode. */
+         * exit interactive move/resize mode. */
         cursor->mode = CURSOR_MODE_PASSTHROUGH;
-        double sx, sy;
-        struct wlr_surface *surface = desktop_surface_at(cursor->seat->server->scene,
-                cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-        update_pointer_focus(cursor, surface, sx, sy);
+        cursor_rebase(cursor);
     }
 }
 
 static void handle_cursor_axis(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits an axis event,
      * for example when you move the scroll wheel. */
-    struct sycamore_cursor *cursor =
-            wl_container_of(listener, cursor, cursor_axis);
+    struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_axis);
     struct wlr_pointer_axis_event *event = data;
+    cursor_enable(cursor, true);
     /* Notify the client with pointer focus of the axis event. */
     wlr_seat_pointer_notify_axis(cursor->seat->wlr_seat,
                                  event->time_msec, event->orientation, event->delta,
@@ -195,8 +226,7 @@ static void handle_cursor_frame(struct wl_listener *listener, void *data) {
      * event. Frame events are sent after regular pointer events to group
      * multiple events together. For instance, two axis events may happen at the
      * same time, in which case a frame event won't be sent in between. */
-    struct sycamore_cursor *cursor =
-            wl_container_of(listener, cursor, cursor_frame);
+    struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_frame);
     /* Notify the client with pointer focus of the frame event. */
     wlr_seat_pointer_notify_frame(cursor->seat->wlr_seat);
 }
@@ -262,7 +292,7 @@ void set_interactive(struct sycamore_view *view,
 static void handle_swipe_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, swipe_begin);
     struct wlr_pointer_swipe_begin_event *event = data;
-
+    cursor_enable(cursor, true);
     wlr_pointer_gestures_v1_send_swipe_begin(cursor->gestures, cursor->seat->wlr_seat,
                                              event->time_msec, event->fingers);
 }
@@ -286,7 +316,7 @@ static void handle_swipe_end(struct wl_listener *listener, void *data) {
 static void handle_pinch_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, pinch_begin);
     struct wlr_pointer_pinch_begin_event *event = data;
-
+    cursor_enable(cursor, true);
     wlr_pointer_gestures_v1_send_pinch_begin(cursor->gestures, cursor->seat->wlr_seat,
                                              event->time_msec, event->fingers);
 }
@@ -311,7 +341,7 @@ static void handle_pinch_end(struct wl_listener *listener, void *data) {
 static void handle_hold_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, hold_begin);
     struct wlr_pointer_hold_begin_event *event = data;
-
+    cursor_enable(cursor, true);
     wlr_pointer_gestures_v1_send_hold_begin(cursor->gestures, cursor->seat->wlr_seat,
                                             event->time_msec, event->fingers);
 }
@@ -342,6 +372,14 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
     wl_list_remove(&cursor->cursor_motion_absolute.link);
     wl_list_remove(&cursor->cursor_frame.link);
 
+    wl_list_remove(&cursor->swipe_begin.link);
+    wl_list_remove(&cursor->swipe_update.link);
+    wl_list_remove(&cursor->swipe_end.link);
+    wl_list_remove(&cursor->pinch_begin.link);
+    wl_list_remove(&cursor->pinch_update.link);
+    wl_list_remove(&cursor->hold_begin.link);
+    wl_list_remove(&cursor->hold_end.link);
+
     free(cursor);
 }
 
@@ -359,8 +397,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    wlr_cursor_attach_output_layout(
-            cursor->wlr_cursor, output_layout);
+    wlr_cursor_attach_output_layout(cursor->wlr_cursor, output_layout);
 
     cursor->gestures = wlr_pointer_gestures_v1_create(seat->server->wl_display);
     if (!cursor->gestures) {
@@ -376,7 +413,13 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     wlr_xcursor_manager_load(cursor->xcursor_manager, 1);
 
-    cursor->cursor_motion.notify = handle_cursor_motion;
+    cursor->mode = CURSOR_MODE_PASSTHROUGH;
+    cursor->enabled = false;
+    cursor->set_image_default = false;
+    cursor->grabbed_view = NULL;
+    cursor->seat = seat;
+
+    cursor->cursor_motion.notify = handle_cursor_motion_relative;
     wl_signal_add(&cursor->wlr_cursor->events.motion, &cursor->cursor_motion);
     cursor->cursor_motion_absolute.notify = handle_cursor_motion_absolute;
     wl_signal_add(&cursor->wlr_cursor->events.motion_absolute, &cursor->cursor_motion_absolute);
@@ -403,11 +446,6 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
     wl_signal_add(&cursor->wlr_cursor->events.hold_begin, &cursor->hold_begin);
     cursor->hold_end.notify = handle_hold_end;
     wl_signal_add(&cursor->wlr_cursor->events.hold_end, &cursor->hold_end);
-
-    cursor->seat = seat;
-    cursor->mode = CURSOR_MODE_PASSTHROUGH;
-    cursor->grabbed_view = NULL;
-    cursor->default_setted = false;
 
     return cursor;
 }
