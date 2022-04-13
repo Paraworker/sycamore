@@ -7,18 +7,15 @@
 #include "sycamore/input/seat.h"
 
 struct sycamore_keyboard {
-    struct wl_list link;
+    struct sycamore_seat_device *base;
     struct wlr_keyboard *wlr_keyboard;
 
     struct wl_listener modifiers;
     struct wl_listener key;
-    struct wl_listener destroy;
-
-    struct sycamore_seat *seat;
 };
 
 struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
-        struct wlr_input_device *device);
+        struct wlr_input_device *wlr_device);
 
 void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard);
 

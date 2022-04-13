@@ -8,9 +8,85 @@
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/libinput.h"
 
-static void new_pointer(struct sycamore_seat *seat,
-        struct wlr_input_device *device) {
+struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
+        void *type, void(*handle_destroy)(struct wl_listener *listener, void *data)) {
+    struct sycamore_seat_device *seat_device =
+            calloc(1, sizeof(struct sycamore_seat_device));
+    if (!seat_device) {
+        return NULL;
+    }
+
+    seat_device->wlr_device = wlr_device;
+    seat_device->type = type;
+    seat_device->seat = seat;
+
+    seat_device->destroy.notify = handle_destroy;
+    wl_signal_add(&wlr_device->events.destroy, &seat_device->destroy);
+
+    return seat_device;
+}
+
+void seat_device_destroy(struct sycamore_seat_device *seat_device) {
+    if (!seat_device) {
+        return;
+    }
+
+    wl_list_remove(&seat_device->destroy.link);
+    wl_list_remove(&seat_device->link);
+
+    free(seat_device);
+}
+
+void handle_seat_device_destroy(struct wl_listener *listener, void *data) {
+    struct sycamore_seat_device *seat_device = wl_container_of(listener, seat_device, destroy);
+    struct sycamore_seat *seat = seat_device->seat;
+    seat_device_destroy(seat_device);
+    seat_update_capabilities(seat);
+}
+
+void seat_update_capabilities(struct sycamore_seat *seat) {
+    uint32_t caps = 0;
+    struct sycamore_seat_device *seat_device;
+    wl_list_for_each(seat_device, &seat->devices, link) {
+        switch (seat_device->wlr_device->type) {
+            case WLR_INPUT_DEVICE_KEYBOARD:
+                caps |= WL_SEAT_CAPABILITY_KEYBOARD;
+                break;
+            case WLR_INPUT_DEVICE_POINTER:
+                caps |= WL_SEAT_CAPABILITY_POINTER;
+                break;
+            case WLR_INPUT_DEVICE_TOUCH:
+                caps |= WL_SEAT_CAPABILITY_TOUCH;
+                break;
+            case WLR_INPUT_DEVICE_TABLET_TOOL:
+                caps |= WL_SEAT_CAPABILITY_POINTER;
+                break;
+            case WLR_INPUT_DEVICE_SWITCH:
+            case WLR_INPUT_DEVICE_TABLET_PAD:
+                break;
+        }
+    }
+
+    wlr_seat_set_capabilities(seat->wlr_seat, caps);
+
+    // Disable cursor if seat doesn't have pointer capability.
+    if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0) {
+        cursor_enable(seat->cursor, false);
+    }
+}
+
+static void seat_configure_pointer(struct sycamore_seat *seat,
+                                   struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
+
+    struct sycamore_seat_device* seat_device =
+            seat_device_create(seat, device, NULL, handle_seat_device_destroy);
+    if (!seat_device) {
+        wlr_log(WLR_ERROR, "Unable to create seat_device");
+        return;
+    }
+
+    wl_list_insert(&seat->devices, &seat_device->link);
     wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
 
     touchpad_set_tap_to_click(device);
@@ -18,39 +94,39 @@ static void new_pointer(struct sycamore_seat *seat,
     touchpad_set_accel_speed(device, 0.3);
 }
 
-static void new_keyboard(struct sycamore_seat *seat,
-                                struct wlr_input_device *device) {
-
+static void seat_configure_keyboard(struct sycamore_seat *seat,
+                                    struct wlr_input_device *device) {
     struct sycamore_keyboard *keyboard = sycamore_keyboard_create(seat, device);
     if (!keyboard) {
         wlr_log(WLR_ERROR, "Unable to create keyboard");
         return;
     }
 
-    wl_list_insert(&seat->keyboards, &keyboard->link);
+    wl_list_insert(&seat->devices, &keyboard->base->link);
+    wlr_seat_set_keyboard(seat->wlr_seat, keyboard->wlr_keyboard);
 }
 
-static void new_touch(struct sycamore_seat *seat,
-                             struct wlr_input_device *device) {
+static void seat_configure_touch(struct sycamore_seat *seat,
+                                 struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new touch device: %s", device->name);
     /* TODO */
 }
 
-static void new_tablet_tool(struct sycamore_seat *seat,
-                                   struct wlr_input_device *device) {
+static void seat_configure_tablet_tool(struct sycamore_seat *seat,
+                                       struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new tablet tool device: %s", device->name);
     wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
     /* TODO */
 }
 
-static void new_tablet_pad(struct sycamore_seat *seat,
-                                  struct wlr_input_device *device) {
+static void seat_configure_tablet_pad(struct sycamore_seat *seat,
+                                      struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new tablet pad device: %s", device->name);
     /* TODO */
 }
 
-static void new_switch(struct sycamore_seat *seat,
-                              struct wlr_input_device *device) {
+static void seat_configure_switch(struct sycamore_seat *seat,
+                                  struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new switch device: %s", device->name);
     /* TODO */
 }
@@ -60,39 +136,33 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
      * available. */
     struct sycamore_server *server =
             wl_container_of(listener, server, backend_new_input);
-    struct sycamore_seat *seat = server->seat;
     struct wlr_input_device *device = data;
+    struct sycamore_seat *seat = server->seat;
     switch (device->type) {
         case WLR_INPUT_DEVICE_KEYBOARD:
-            new_keyboard(seat, device);
+            seat_configure_keyboard(seat, device);
             break;
         case WLR_INPUT_DEVICE_POINTER:
-            new_pointer(seat, device);
+            seat_configure_pointer(seat, device);
             break;
         case WLR_INPUT_DEVICE_TOUCH:
-            new_touch(seat, device);
+            seat_configure_touch(seat, device);
             break;
         case WLR_INPUT_DEVICE_TABLET_TOOL:
-            new_tablet_tool(seat, device);
+            seat_configure_tablet_tool(seat, device);
             break;
         case WLR_INPUT_DEVICE_TABLET_PAD:
-            new_tablet_pad(seat, device);
+            seat_configure_tablet_pad(seat, device);
             break;
         case WLR_INPUT_DEVICE_SWITCH:
-            new_switch(seat, device);
+            seat_configure_switch(seat, device);
             break;
 
         default:
             break;
     }
-    /* We need to let the wlr_seat know what our capabilities are, which is
-     * communiciated to the client. In Sycamore we always have a cursor, even if
-     * there are no pointer devices, so we always include that capability. */
-    uint32_t caps = WL_SEAT_CAPABILITY_POINTER;
-    if (!wl_list_empty(&seat->keyboards)) {
-        caps |= WL_SEAT_CAPABILITY_KEYBOARD;
-    }
-    wlr_seat_set_capabilities(seat->wlr_seat, caps);
+
+    seat_update_capabilities(seat);
 }
 
 static void handle_seat_request_cursor(struct wl_listener *listener, void *data) {
@@ -161,7 +231,7 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     }
 
     seat->server = server;
-    wl_list_init(&seat->keyboards);
+    wl_list_init(&seat->devices);
 
     seat->wlr_seat = wlr_seat_create(display, "seat0");
     if (!seat->wlr_seat) {

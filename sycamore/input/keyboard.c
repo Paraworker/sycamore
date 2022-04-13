@@ -9,9 +9,9 @@ static void handle_keyboard_modifiers(struct wl_listener *listener, void *data) 
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, modifiers);
 
-    wlr_seat_set_keyboard(keyboard->seat->wlr_seat, keyboard->wlr_keyboard);
+    wlr_seat_set_keyboard(keyboard->base->seat->wlr_seat, keyboard->wlr_keyboard);
     /* Send modifiers to the client. */
-    wlr_seat_keyboard_notify_modifiers(keyboard->seat->wlr_seat,
+    wlr_seat_keyboard_notify_modifiers(keyboard->base->seat->wlr_seat,
                                        &keyboard->wlr_keyboard->modifiers);
 }
 
@@ -20,7 +20,7 @@ static void handle_keyboard_key(struct wl_listener *listener, void *data) {
     struct sycamore_keyboard *keyboard =
             wl_container_of(listener, keyboard, key);
     struct wlr_keyboard_key_event *event = data;
-    struct wlr_seat *seat = keyboard->seat->wlr_seat;
+    struct wlr_seat *seat = keyboard->base->seat->wlr_seat;
 
     /* Translate libinput keycode -> xkbcommon */
     uint32_t keycode = event->keycode + 8;
@@ -35,7 +35,7 @@ static void handle_keyboard_key(struct wl_listener *listener, void *data) {
          * process it as a compositor keybinding. */
         uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
         for (int i = 0; i < nsyms; ++i) {
-            handled = handle_keybinding(keyboard->seat->server->keybinding_manager,
+            handled = handle_keybinding(keyboard->base->seat->server->keybinding_manager,
                                         modifiers, syms[i]);
         }
     }
@@ -53,10 +53,10 @@ static void handle_keyboard_destroy(struct wl_listener *listener, void *data) {
      * the destruction of the wlr_keyboard. It will no longer receive events
      * and should be destroyed.
      */
-    struct sycamore_keyboard *keyboard =
-            wl_container_of(listener, keyboard, destroy);
-
-    sycamore_keyboard_destroy(keyboard);
+    struct sycamore_seat_device *device = wl_container_of(listener, device, destroy);
+    struct sycamore_seat *seat = device->seat;
+    sycamore_keyboard_destroy(device->keyboard);
+    seat_update_capabilities(seat);
 }
 
 void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard) {
@@ -66,22 +66,31 @@ void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard) {
 
     wl_list_remove(&keyboard->modifiers.link);
     wl_list_remove(&keyboard->key.link);
-    wl_list_remove(&keyboard->destroy.link);
-    wl_list_remove(&keyboard->link);
+
+    if (keyboard->base) {
+        seat_device_destroy(keyboard->base);
+    }
 
     free(keyboard);
 }
 
 struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
-        struct wlr_input_device *device) {
+        struct wlr_input_device *wlr_device) {
     struct sycamore_keyboard *keyboard = calloc(1, sizeof(struct sycamore_keyboard));
     if (!keyboard) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_keyboard");
         return NULL;
     }
 
-    keyboard->seat = seat;
-    keyboard->wlr_keyboard = device->keyboard;
+    keyboard->base = seat_device_create(seat, wlr_device, keyboard,
+                                        handle_keyboard_destroy);
+    if (!keyboard->base) {
+        wlr_log(WLR_ERROR, "Unable to create seat_device");
+        free(keyboard);
+        return NULL;
+    }
+
+    keyboard->wlr_keyboard = wlr_device->keyboard;
 
     /* Prepare an XKB keymap and assign it to the keyboard. This
      * assumes the defaults (e.g. layout = "us"). */
@@ -89,19 +98,14 @@ struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
     struct xkb_keymap *keymap = xkb_keymap_new_from_names(context, NULL,
                                                           XKB_KEYMAP_COMPILE_NO_FLAGS);
 
-    wlr_keyboard_set_keymap(device->keyboard, keymap);
+    wlr_keyboard_set_keymap(keyboard->wlr_keyboard, keymap);
     xkb_keymap_unref(keymap);
     xkb_context_unref(context);
 
-    /* Set up listeners for keyboard events. */
     keyboard->modifiers.notify = handle_keyboard_modifiers;
-    wl_signal_add(&device->keyboard->events.modifiers, &keyboard->modifiers);
+    wl_signal_add(&keyboard->wlr_keyboard->events.modifiers, &keyboard->modifiers);
     keyboard->key.notify = handle_keyboard_key;
-    wl_signal_add(&device->keyboard->events.key, &keyboard->key);
-    keyboard->destroy.notify = handle_keyboard_destroy;
-    wl_signal_add(&device->events.destroy, &keyboard->destroy);
-
-    wlr_seat_set_keyboard(seat->wlr_seat, keyboard->wlr_keyboard);
+    wl_signal_add(&keyboard->wlr_keyboard->events.key, &keyboard->key);
 
     return keyboard;
 }
