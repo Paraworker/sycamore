@@ -9,7 +9,7 @@
 #include "sycamore/input/libinput.h"
 
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *type, void(*handle_destroy)(struct wl_listener *listener, void *data)) {
+        void *derived_device, void(*handle_destroy)(struct wl_listener *listener, void *data)) {
     struct sycamore_seat_device *seat_device =
             calloc(1, sizeof(struct sycamore_seat_device));
     if (!seat_device) {
@@ -17,7 +17,7 @@ struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, stru
     }
 
     seat_device->wlr_device = wlr_device;
-    seat_device->type = type;
+    seat_device->derived_device = derived_device;
     seat_device->seat = seat;
 
     seat_device->destroy.notify = handle_destroy;
@@ -79,8 +79,8 @@ static void seat_configure_pointer(struct sycamore_seat *seat,
                                    struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
 
-    struct sycamore_seat_device* seat_device =
-            seat_device_create(seat, device, NULL, handle_seat_device_destroy);
+    struct sycamore_seat_device* seat_device = seat_device_create(seat, device,
+            NULL, handle_seat_device_destroy);
     if (!seat_device) {
         wlr_log(WLR_ERROR, "Unable to create seat_device");
         return;
