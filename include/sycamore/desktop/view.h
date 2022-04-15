@@ -73,4 +73,6 @@ void view_set_maximized(struct sycamore_view *view, bool maximized);
 
 void focus_view(struct sycamore_view *view);
 
+void view_set_interactive(struct sycamore_view *view, enum seatop_mode mode, uint32_t edges);
+
 #endif //SYCAMORE_VIEW_H

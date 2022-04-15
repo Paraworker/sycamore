@@ -166,8 +166,7 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
 }
 
 static void handle_seat_request_cursor(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(
-            listener, seat, request_cursor);
+    struct sycamore_seat *seat = wl_container_of(listener, seat, request_cursor);
     /* This event is raised by the seat when a client provides a cursor image */
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
     struct wlr_seat_client *focused_client =
@@ -230,9 +229,6 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
         return NULL;
     }
 
-    seat->server = server;
-    wl_list_init(&seat->devices);
-
     seat->wlr_seat = wlr_seat_create(display, "seat0");
     if (!seat->wlr_seat) {
         wlr_log(WLR_ERROR, "Unable to create wlr_seat");
@@ -240,22 +236,26 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
         return NULL;
     }
 
-    seat->cursor = sycamore_cursor_create(seat, output_layout);
+    seat->cursor = sycamore_cursor_create(seat, display, output_layout);
     if (!seat->cursor) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_cursor");
         sycamore_seat_destroy(seat);
         return NULL;
     }
 
+    wl_list_init(&seat->devices);
+    seat->server = server;
+
+    seat->grabbed_view = NULL;
+
     seat->request_cursor.notify = handle_seat_request_cursor;
-    wl_signal_add(&seat->wlr_seat->events.request_set_cursor,
-                  &seat->request_cursor);
+    wl_signal_add(&seat->wlr_seat->events.request_set_cursor, &seat->request_cursor);
     seat->request_set_selection.notify = handle_seat_request_set_selection;
-    wl_signal_add(&seat->wlr_seat->events.request_set_selection,
-                  &seat->request_set_selection);
+    wl_signal_add(&seat->wlr_seat->events.request_set_selection, &seat->request_set_selection);
     seat->destroy.notify = handle_seat_destroy;
-    wl_signal_add(&seat->wlr_seat->events.destroy,
-                  &seat->destroy);
+    wl_signal_add(&seat->wlr_seat->events.destroy, &seat->destroy);
+
+    seatop_begin_default(seat);
 
     return seat;
 }

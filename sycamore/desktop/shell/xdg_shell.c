@@ -6,7 +6,6 @@
 #include <wlr/util/log.h>
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
-#include "sycamore/input/cursor.h"
 
 void handle_xdg_shell_view_map(struct wl_listener *listener, void *data) {
     /* Called when the surface is mapped, or ready to display on-screen. */
@@ -28,7 +27,7 @@ void handle_xdg_shell_view_request_move(struct wl_listener *listener, void *data
      * provided serial against a list of button press serials sent to this
      * client, to prevent the client from requesting this whenever they want. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_move);
-    set_interactive(&view->base_view, CURSOR_MODE_MOVE, 0);
+    view_set_interactive(&view->base_view, SEATOP_POINTER_MOVE, 0);
 }
 
 void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *data) {
@@ -39,7 +38,7 @@ void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *da
      * client, to prevent the client from requesting this whenever they want. */
     struct wlr_xdg_toplevel_resize_event *event = data;
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_resize);
-    set_interactive(&view->base_view, CURSOR_MODE_RESIZE, event->edges);
+    view_set_interactive(&view->base_view, SEATOP_POINTER_RESIZE, event->edges);
 }
 
 void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {

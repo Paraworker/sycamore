@@ -23,18 +23,16 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
 void view_unmap(struct sycamore_view *view) {
     wl_list_remove(&view->link);
 
-    if (view->server->seat->cursor->grabbed_view == view) {
-        view->server->seat->cursor->grabbed_view = NULL;
-        if (view->server->seat->cursor->mode != CURSOR_MODE_PASSTHROUGH) {
-            view->server->seat->cursor->mode = CURSOR_MODE_PASSTHROUGH;
-        }
+    struct sycamore_seat *seat = view->server->seat;
+    if (seat->grabbed_view == view) {
+        seat->grabbed_view = NULL;
     }
 
     if (view->server->desktop_focused_view == view) {
         view->server->desktop_focused_view = NULL;
     }
 
-    cursor_rebase(view->server->seat->cursor);
+    cursor_rebase(seat->cursor);
 }
 
 struct sycamore_output *view_get_main_output(struct sycamore_view *view) {
@@ -179,6 +177,32 @@ void view_set_maximized(struct sycamore_view *view, bool maximized) {
 
         view->interface->set_size(view, view->maximize_restore.width, view->maximize_restore.height);
         wlr_scene_node_set_position(view->scene_node , view->maximize_restore.x, view->maximize_restore.y);
+    }
+}
+
+void view_set_interactive(struct sycamore_view *view, enum seatop_mode mode, uint32_t edges) {
+    struct sycamore_server *server = view->server;
+    struct sycamore_seat *seat = view->server->seat;
+
+    /* Deny move/resize requests if we are already in the move/resize mode. */
+    if (server->seat->seatop_impl->mode != SEATOP_DEFAULT) {
+        return;
+    }
+
+    /* Deny move/resize requests from maximized/fullscreen clients. */
+    if (view->is_maximized || view->is_fullscreen) {
+        return;
+    }
+
+    /* Deny move/resize requests from unfocused clients or there is no focused clients. */
+    if (view != server->desktop_focused_view) {
+        return;
+    }
+
+    if (mode == SEATOP_POINTER_MOVE) {
+        seatop_begin_pointer_move(seat, view);
+    } else if (mode == SEATOP_POINTER_RESIZE){
+        seatop_begin_pointer_resize(seat, view, edges);
     }
 }
 
