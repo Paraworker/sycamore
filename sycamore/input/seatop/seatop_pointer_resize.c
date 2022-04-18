@@ -8,6 +8,9 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
 
     /* If you released any buttons
      * switch to default mode. */
+    if (seat->grabbed_view) {
+        seat->grabbed_view->interface->set_resizing(seat->grabbed_view, false);
+    }
     seatop_begin_default(seat);
 }
 
@@ -108,6 +111,8 @@ void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_vie
 
     seat->resize_edges = edges;
     seat->grabbed_view = view;
+
+    view->interface->set_resizing(view, true);
 
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
 }

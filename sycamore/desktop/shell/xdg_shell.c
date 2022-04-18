@@ -110,6 +110,13 @@ void sycamore_xdg_shell_view_set_maximized(struct sycamore_view *view, bool maxi
 }
 
 /* sycamore_xdg_shell_view interface */
+void sycamore_xdg_shell_view_set_resizing(struct sycamore_view *view, bool resizing) {
+    struct sycamore_xdg_shell_view *xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
+    wlr_xdg_toplevel_set_resizing(xdg_shell_view->xdg_toplevel, resizing);
+}
+
+/* sycamore_xdg_shell_view interface */
 struct wlr_surface* sycamore_xdg_shell_view_get_wlr_surface(struct sycamore_view *view) {
     struct sycamore_xdg_shell_view *xdg_shell_view =
             wl_container_of(view, xdg_shell_view, base_view);
@@ -130,6 +137,7 @@ static const struct sycamore_view_interface xdg_shell_view_interface = {
     .set_size = sycamore_xdg_shell_view_set_size,
     .set_fullscreen = sycamore_xdg_shell_view_set_fullscreen,
     .set_maximized = sycamore_xdg_shell_view_set_maximized,
+    .set_resizing = sycamore_xdg_shell_view_set_resizing,
     .get_wlr_surface =  sycamore_xdg_shell_view_get_wlr_surface,
     .get_geometry = sycamore_xdg_shell_view_get_geometry,
 };

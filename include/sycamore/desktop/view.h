@@ -25,6 +25,7 @@ struct sycamore_view_interface{
     void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
     void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
     void (*set_maximized)(struct sycamore_view *view, bool maximized);
+    void (*set_resizing)(struct sycamore_view *view, bool resizing);
     struct wlr_surface *(*get_wlr_surface)(struct sycamore_view *view);
     void (*get_geometry)(struct sycamore_view *view, struct wlr_box *box);
 };
