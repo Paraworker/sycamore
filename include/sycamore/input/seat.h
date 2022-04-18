@@ -45,6 +45,7 @@ struct sycamore_seat_device {
 
     union {
         void *derived_device;
+        struct sycamore_pointer *pointer;
         struct sycamore_keyboard *keyboard;
     };
 

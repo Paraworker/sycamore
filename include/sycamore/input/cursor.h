@@ -9,10 +9,9 @@
 #include <wlr/types/wlr_pointer_gestures_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/util/box.h>
-#include "sycamore/desktop/scene.h"
-#include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 struct sycamore_cursor {
     struct wlr_cursor *wlr_cursor;

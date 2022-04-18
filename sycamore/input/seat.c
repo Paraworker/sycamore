@@ -4,9 +4,11 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
-#include "sycamore/input/seat.h"
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/libinput.h"
+#include "sycamore/input/pointer.h"
+#include "sycamore/input/seat.h"
 
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
         void *derived_device, void(*handle_destroy)(struct wl_listener *listener, void *data)) {
@@ -35,13 +37,6 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device) {
     wl_list_remove(&seat_device->link);
 
     free(seat_device);
-}
-
-void handle_seat_device_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_seat_device *seat_device = wl_container_of(listener, seat_device, destroy);
-    struct sycamore_seat *seat = seat_device->seat;
-    seat_device_destroy(seat_device);
-    seat_update_capabilities(seat);
 }
 
 void seat_update_capabilities(struct sycamore_seat *seat) {
@@ -79,15 +74,15 @@ static void seat_configure_pointer(struct sycamore_seat *seat,
                                    struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
 
-    struct sycamore_seat_device* seat_device = seat_device_create(seat, device,
-            NULL, handle_seat_device_destroy);
-    if (!seat_device) {
-        wlr_log(WLR_ERROR, "Unable to create seat_device");
+    struct sycamore_pointer *pointer =
+            sycamore_pointer_create(seat, seat->cursor, device);
+    if (!pointer) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_pointer");
         return;
     }
 
-    wl_list_insert(&seat->devices, &seat_device->link);
     wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
+    wl_list_insert(&seat->devices, &pointer->base->link);
 
     touchpad_set_tap_to_click(device);
     touchpad_set_natural_scroll(device);
@@ -96,14 +91,15 @@ static void seat_configure_pointer(struct sycamore_seat *seat,
 
 static void seat_configure_keyboard(struct sycamore_seat *seat,
                                     struct wlr_input_device *device) {
-    struct sycamore_keyboard *keyboard = sycamore_keyboard_create(seat, device);
+    struct sycamore_keyboard *keyboard =
+            sycamore_keyboard_create(seat, device);
     if (!keyboard) {
-        wlr_log(WLR_ERROR, "Unable to create keyboard");
+        wlr_log(WLR_ERROR, "Unable to create sycamore_keyboard");
         return;
     }
 
-    wl_list_insert(&seat->devices, &keyboard->base->link);
     wlr_seat_set_keyboard(seat->wlr_seat, keyboard->wlr_keyboard);
+    wl_list_insert(&seat->devices, &keyboard->base->link);
 }
 
 static void seat_configure_touch(struct sycamore_seat *seat,

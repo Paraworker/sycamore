@@ -15,7 +15,7 @@ add_executable(
         ${PROJECT_NAME}
         ${SOURCES_FILE}
         ${HEADERS_FILE}
-)
+        sycamore/input/pointer.c include/sycamore/input/pointer.h)
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(WLR REQUIRED wlroots)

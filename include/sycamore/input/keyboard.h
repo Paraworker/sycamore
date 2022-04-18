@@ -3,7 +3,6 @@
 
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_keyboard.h>
-#include "sycamore/server.h"
 #include "sycamore/input/seat.h"
 
 struct sycamore_keyboard {
