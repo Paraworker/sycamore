@@ -46,7 +46,9 @@ void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_outpu
 
 void cursor_image_update(struct sycamore_cursor *cursor, struct wlr_surface *surface);
 
-void cursor_enable(struct sycamore_cursor *cursor, bool enabled);
+void cursor_enable(struct sycamore_cursor *cursor);
+
+void cursor_disable(struct sycamore_cursor *cursor);
 
 void cursor_rebase(struct sycamore_cursor *cursor);
 

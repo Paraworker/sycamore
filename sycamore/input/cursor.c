@@ -58,18 +58,23 @@ void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_outpu
                     cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 }
 
-void cursor_enable(struct sycamore_cursor *cursor, bool enabled) {
-    if (cursor->enabled == enabled) {
+void cursor_enable(struct sycamore_cursor *cursor) {
+    if (cursor->enabled) {
         return;
     }
 
-    cursor->enabled = enabled;
-    if (enabled) {
-        cursor_rebase(cursor);
-    } else {
-        wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
-        wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
+    cursor->enabled = true;
+    cursor_rebase(cursor);
+}
+
+void cursor_disable(struct sycamore_cursor *cursor) {
+    if (!cursor->enabled) {
+        return;
     }
+
+    cursor->enabled = false;
+    wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
+    wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
 }
 
 void cursor_rebase(struct sycamore_cursor *cursor) {
@@ -95,7 +100,7 @@ static void handle_cursor_motion_relative(struct wl_listener *listener, void *da
      * pointer motion event (i.e. a delta) */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion);
     struct wlr_pointer_motion_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     wlr_cursor_move(cursor->wlr_cursor, &event->pointer->base,
                     event->delta_x, event->delta_y);
     cursor->seat->seatop_impl->pointer_motion(cursor->seat, event->time_msec);
@@ -110,7 +115,7 @@ static void handle_cursor_motion_absolute(struct wl_listener *listener, void *da
      * emits these events. */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion_absolute);
     struct wlr_pointer_motion_absolute_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     wlr_cursor_warp_absolute(cursor->wlr_cursor, &event->pointer->base, event->x, event->y);
     cursor->seat->seatop_impl->pointer_motion(cursor->seat, event->time_msec);
 }
@@ -119,7 +124,7 @@ static void handle_cursor_button(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a button event. */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_button);
     struct wlr_pointer_button_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     cursor->seat->seatop_impl->pointer_button(cursor->seat, event);
 }
 
@@ -128,7 +133,7 @@ static void handle_cursor_axis(struct wl_listener *listener, void *data) {
      * for example when you move the scroll wheel. */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_axis);
     struct wlr_pointer_axis_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     /* Notify the client with pointer focus of the axis event. */
     wlr_seat_pointer_notify_axis(cursor->seat->wlr_seat,
                                  event->time_msec, event->orientation, event->delta,
@@ -148,7 +153,7 @@ static void handle_cursor_frame(struct wl_listener *listener, void *data) {
 static void handle_swipe_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, swipe_begin);
     struct wlr_pointer_swipe_begin_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     wlr_pointer_gestures_v1_send_swipe_begin(cursor->gestures, cursor->seat->wlr_seat,
                                              event->time_msec, event->fingers);
 }
@@ -172,7 +177,7 @@ static void handle_swipe_end(struct wl_listener *listener, void *data) {
 static void handle_pinch_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, pinch_begin);
     struct wlr_pointer_pinch_begin_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     wlr_pointer_gestures_v1_send_pinch_begin(cursor->gestures, cursor->seat->wlr_seat,
                                              event->time_msec, event->fingers);
 }
@@ -197,7 +202,7 @@ static void handle_pinch_end(struct wl_listener *listener, void *data) {
 static void handle_hold_begin(struct wl_listener *listener, void *data) {
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, hold_begin);
     struct wlr_pointer_hold_begin_event *event = data;
-    cursor_enable(cursor, true);
+    cursor_enable(cursor);
     wlr_pointer_gestures_v1_send_hold_begin(cursor->gestures, cursor->seat->wlr_seat,
                                             event->time_msec, event->fingers);
 }

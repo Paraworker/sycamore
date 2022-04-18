@@ -71,7 +71,7 @@ void seat_update_capabilities(struct sycamore_seat *seat) {
 
     // Disable cursor if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0) {
-        cursor_enable(seat->cursor, false);
+        cursor_disable(seat->cursor);
     }
 }
 
