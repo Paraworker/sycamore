@@ -180,29 +180,3 @@ void view_set_maximized(struct sycamore_view *view, bool maximized) {
     }
 }
 
-void view_set_interactive(struct sycamore_view *view, enum seatop_mode mode, uint32_t edges) {
-    struct sycamore_server *server = view->server;
-    struct sycamore_seat *seat = view->server->seat;
-
-    /* Deny move/resize requests if we are already in the move/resize mode. */
-    if (server->seat->seatop_impl->mode != SEATOP_DEFAULT) {
-        return;
-    }
-
-    /* Deny move/resize requests from maximized/fullscreen clients. */
-    if (view->is_maximized || view->is_fullscreen) {
-        return;
-    }
-
-    /* Deny move/resize requests from unfocused clients or there is no focused clients. */
-    if (view != server->desktop_focused_view) {
-        return;
-    }
-
-    if (mode == SEATOP_POINTER_MOVE) {
-        seatop_begin_pointer_move(seat, view);
-    } else if (mode == SEATOP_POINTER_RESIZE){
-        seatop_begin_pointer_resize(seat, view, edges);
-    }
-}
-

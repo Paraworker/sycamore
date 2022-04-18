@@ -31,6 +31,21 @@ static const struct sycamore_seatop_impl seatop_impl = {
 };
 
 void seatop_begin_pointer_move(struct sycamore_seat* seat, struct sycamore_view *view) {
+    /* Deny move if we are already in the move mode. */
+    if (seat->seatop_impl->mode == SEATOP_POINTER_MOVE) {
+        return;
+    }
+
+    /* Deny move from maximized/fullscreen clients. */
+    if (view->is_maximized || view->is_fullscreen) {
+        return;
+    }
+
+    /* Deny move from unfocused clients or there is no focused clients. */
+    if (view != seat->server->desktop_focused_view) {
+        return;
+    }
+
     seat->seatop_impl = &seatop_impl;
 
     seat->grab_x = seat->cursor->wlr_cursor->x - view->x;

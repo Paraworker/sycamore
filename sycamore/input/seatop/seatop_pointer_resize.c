@@ -75,6 +75,21 @@ static const struct sycamore_seatop_impl seatop_impl = {
 };
 
 void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_view *view, uint32_t edges) {
+    /* Deny resize if we are already in the resize mode. */
+    if (seat->seatop_impl->mode == SEATOP_POINTER_RESIZE) {
+        return;
+    }
+
+    /* Deny resize from maximized/fullscreen clients. */
+    if (view->is_maximized || view->is_fullscreen) {
+        return;
+    }
+
+    /* Deny resize from unfocused clients or there is no focused clients. */
+    if (view != seat->server->desktop_focused_view) {
+        return;
+    }
+
     seat->seatop_impl = &seatop_impl;
 
     struct wlr_box geo_box;
