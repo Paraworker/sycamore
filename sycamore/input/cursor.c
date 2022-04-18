@@ -31,7 +31,8 @@ void cursor_image_update(struct sycamore_cursor *cursor, struct wlr_surface *sur
     }
 }
 
-void pointer_focus_update(struct sycamore_cursor *cursor, struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
+void pointer_focus_update(struct sycamore_cursor *cursor,
+        struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
     struct wlr_seat* seat = cursor->seat->wlr_seat;
     if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
@@ -87,10 +88,13 @@ void cursor_rebase(struct sycamore_cursor *cursor) {
         return;
     }
 
+    if (cursor->set_image_default) {
+        cursor->set_image_default = false;
+    }
+
     double sx, sy;
     struct wlr_surface *surface = surface_under(cursor->seat->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-
     pointer_focus_update(cursor, surface, sx, sy, get_current_time_msec());
     cursor_image_update(cursor, surface);
 }
