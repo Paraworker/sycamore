@@ -56,6 +56,12 @@ static void sycamore_keyboard_destroy(struct sycamore_seat_device *seat_device) 
     wl_list_remove(&seat_device->keyboard->modifiers.link);
     wl_list_remove(&seat_device->keyboard->key.link);
 
+    struct wlr_seat *wlr_seat = seat_device->seat->wlr_seat;
+    struct wlr_keyboard *wlr_keyboard = seat_device->keyboard->wlr_keyboard;
+    if (wlr_seat_get_keyboard(wlr_seat) == wlr_keyboard) {
+        wlr_seat_set_keyboard(wlr_seat, NULL);
+    }
+
     free(seat_device->keyboard);
 }
 
