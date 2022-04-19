@@ -48,30 +48,15 @@ static void handle_keyboard_key(struct wl_listener *listener, void *data) {
     }
 }
 
-static void handle_keyboard_destroy(struct wl_listener *listener, void *data) {
-    /* This event is raised by the keyboard base wlr_input_device to signal
-     * the destruction of the wlr_keyboard. It will no longer receive events
-     * and should be destroyed.
-     */
-    struct sycamore_seat_device *device = wl_container_of(listener, device, destroy);
-    struct sycamore_seat *seat = device->seat;
-    sycamore_keyboard_destroy(device->keyboard);
-    seat_update_capabilities(seat);
-}
-
-void sycamore_keyboard_destroy(struct sycamore_keyboard *keyboard) {
-    if (!keyboard) {
+static void sycamore_keyboard_destroy(struct sycamore_seat_device *seat_device) {
+    if (!seat_device) {
         return;
     }
 
-    wl_list_remove(&keyboard->modifiers.link);
-    wl_list_remove(&keyboard->key.link);
+    wl_list_remove(&seat_device->keyboard->modifiers.link);
+    wl_list_remove(&seat_device->keyboard->key.link);
 
-    if (keyboard->base) {
-        seat_device_destroy(keyboard->base);
-    }
-
-    free(keyboard);
+    free(seat_device->keyboard);
 }
 
 struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
@@ -83,7 +68,7 @@ struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
     }
 
     keyboard->base = seat_device_create(seat, wlr_device, keyboard,
-                                        handle_keyboard_destroy);
+                                        sycamore_keyboard_destroy);
     if (!keyboard->base) {
         wlr_log(WLR_ERROR, "Unable to create seat_device");
         free(keyboard);

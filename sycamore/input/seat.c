@@ -10,19 +10,26 @@
 #include "sycamore/input/pointer.h"
 #include "sycamore/input/seat.h"
 
+static void handle_seat_device_destroy(struct wl_listener *listener, void *data) {
+    struct sycamore_seat_device *seat_device = wl_container_of(listener, seat_device, destroy);
+    struct sycamore_seat *seat = seat_device->seat;
+    seat_device_destroy(seat_device);
+    seat_update_capabilities(seat);
+}
+
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *derived_device, void(*handle_destroy)(struct wl_listener *listener, void *data)) {
-    struct sycamore_seat_device *seat_device =
-            calloc(1, sizeof(struct sycamore_seat_device));
+        void *derived_device, void (*derived_destroy)(struct sycamore_seat_device *seat_device)) {
+    struct sycamore_seat_device *seat_device = calloc(1, sizeof(struct sycamore_seat_device));
     if (!seat_device) {
         return NULL;
     }
 
     seat_device->wlr_device = wlr_device;
     seat_device->derived_device = derived_device;
+    seat_device->derived_destroy = derived_destroy;
     seat_device->seat = seat;
 
-    seat_device->destroy.notify = handle_destroy;
+    seat_device->destroy.notify = handle_seat_device_destroy;
     wl_signal_add(&wlr_device->events.destroy, &seat_device->destroy);
 
     return seat_device;
@@ -31,6 +38,10 @@ struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, stru
 void seat_device_destroy(struct sycamore_seat_device *seat_device) {
     if (!seat_device) {
         return;
+    }
+
+    if (seat_device->derived_destroy) {
+        seat_device->derived_destroy(seat_device);
     }
 
     wl_list_remove(&seat_device->destroy.link);
@@ -75,7 +86,7 @@ static void seat_configure_pointer(struct sycamore_seat *seat,
     wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
 
     struct sycamore_pointer *pointer =
-            sycamore_pointer_create(seat, seat->cursor, device);
+            sycamore_pointer_create(seat, device);
     if (!pointer) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_pointer");
         return;

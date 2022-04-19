@@ -49,6 +49,8 @@ struct sycamore_seat_device {
         struct sycamore_keyboard *keyboard;
     };
 
+    void (*derived_destroy)(struct sycamore_seat_device *seat_device);
+
     struct wl_listener destroy;
 
     struct sycamore_seat *seat;
@@ -62,7 +64,7 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
 void sycamore_seat_destroy(struct sycamore_seat *seat);
 
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *derived_device, void(*handle_destroy)(struct wl_listener *listener, void *data));
+        void *derived_device, void (*derived_destroy)(struct sycamore_seat_device *seat_device));
 
 void seat_device_destroy(struct sycamore_seat_device *seat_device);
 
