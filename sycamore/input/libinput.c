@@ -44,47 +44,43 @@ static bool set_natural_scroll(struct libinput_device *device, bool n) {
     return true;
 }
 
-bool scroll_methods_is_touchpad(struct libinput_device* device) {
-    enum libinput_config_scroll_method method =
-            libinput_device_config_scroll_get_methods(device);
-    if (method & LIBINPUT_CONFIG_SCROLL_2FG & LIBINPUT_CONFIG_SCROLL_EDGE != 0) {
-        return true;
+static bool device_is_touchpad(struct wlr_input_device *device) {
+    if (device->type != WLR_INPUT_DEVICE_POINTER ||
+        !wlr_input_device_is_libinput(device)) {
+        return false;
     }
-    return false;
+
+    struct libinput_device *libinput_device =
+            wlr_libinput_get_device_handle(device);
+
+    return libinput_device_config_tap_get_finger_count(libinput_device) > 0;
 }
 
 void touchpad_set_natural_scroll(struct wlr_input_device *device) {
-    if (!wlr_input_device_is_libinput(device)) {
-        /* We can only do this on libinput devices */
-        wlr_log(WLR_DEBUG, "%s is not a libinput_device", device->name);
+    if (!device_is_touchpad(device)) {
         return;
     }
+
     struct libinput_device *libinput_device = wlr_libinput_get_device_handle(device);
-    if (scroll_methods_is_touchpad(libinput_device)) {
-        set_natural_scroll(libinput_device, true);
-    }
+    set_natural_scroll(libinput_device, true);
 }
 
 void touchpad_set_tap_to_click(struct wlr_input_device *device) {
-    if (!wlr_input_device_is_libinput(device)) {
-        /* We can only do this on libinput devices */
-        wlr_log(WLR_DEBUG, "%s is not a libinput_device", device->name);
+    if (!device_is_touchpad(device)) {
         return;
     }
+
     struct libinput_device *libinput_device = wlr_libinput_get_device_handle(device);
     set_tap(libinput_device, LIBINPUT_CONFIG_TAP_ENABLED);
 }
 
 void touchpad_set_accel_speed(struct wlr_input_device* device, double speed) {
-    if (!wlr_input_device_is_libinput(device)) {
-        /* We can only do this on libinput devices */
-        wlr_log(WLR_DEBUG, "%s is not a libinput_device", device->name);
+    if (!device_is_touchpad(device)) {
         return;
     }
+
     struct libinput_device *libinput_device = wlr_libinput_get_device_handle(device);
-    if (scroll_methods_is_touchpad(libinput_device)) {
-        set_accel_speed(libinput_device, speed);
-    }
+    set_accel_speed(libinput_device, speed);
 }
 
 
