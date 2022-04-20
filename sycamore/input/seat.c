@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_input_device.h>
+#include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
@@ -201,6 +202,13 @@ static void handle_seat_request_set_selection(struct wl_listener *listener, void
     wlr_seat_set_selection(seat->wlr_seat, event->source, event->serial);
 }
 
+static void handle_seat_request_set_primary_selection(struct wl_listener *listener, void *data) {
+    struct sycamore_seat *seat = wl_container_of(
+            listener, seat, request_set_primary_selection);
+    struct wlr_seat_request_set_primary_selection_event *event = data;
+    wlr_seat_set_primary_selection(seat->wlr_seat, event->source, event->serial);
+}
+
 static void handle_seat_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, destroy);
 
@@ -216,6 +224,7 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
 
     wl_list_remove(&seat->request_cursor.link);
     wl_list_remove(&seat->request_set_selection.link);
+    wl_list_remove(&seat->request_set_primary_selection.link);
     wl_list_remove(&seat->destroy.link);
 
     if (seat->wlr_seat) {
@@ -259,6 +268,8 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     wl_signal_add(&seat->wlr_seat->events.request_set_cursor, &seat->request_cursor);
     seat->request_set_selection.notify = handle_seat_request_set_selection;
     wl_signal_add(&seat->wlr_seat->events.request_set_selection, &seat->request_set_selection);
+    seat->request_set_primary_selection.notify = handle_seat_request_set_primary_selection;
+    wl_signal_add(&seat->wlr_seat->events.request_set_primary_selection, &seat->request_set_primary_selection);
     seat->destroy.notify = handle_seat_destroy;
     wl_signal_add(&seat->wlr_seat->events.destroy, &seat->destroy);
 

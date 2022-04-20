@@ -34,6 +34,7 @@ struct sycamore_seat {
 
     struct wl_listener request_cursor;
     struct wl_listener request_set_selection;
+    struct wl_listener request_set_primary_selection;
     struct wl_listener destroy;
 
     struct sycamore_server *server;
