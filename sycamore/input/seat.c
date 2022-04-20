@@ -139,6 +139,15 @@ static void seat_configure_switch(struct sycamore_seat *seat,
     /* TODO */
 }
 
+static void (*seat_configure_device[])(struct sycamore_seat *seat, struct wlr_input_device *device) = {
+        seat_configure_keyboard,
+        seat_configure_pointer,
+        seat_configure_touch,
+        seat_configure_tablet_tool,
+        seat_configure_tablet_pad,
+        seat_configure_switch,
+};
+
 void handle_backend_new_input(struct wl_listener *listener, void *data) {
     /* This event is raised by the backend when a new input device becomes
      * available. */
@@ -146,29 +155,8 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
             wl_container_of(listener, server, backend_new_input);
     struct wlr_input_device *device = data;
     struct sycamore_seat *seat = server->seat;
-    switch (device->type) {
-        case WLR_INPUT_DEVICE_KEYBOARD:
-            seat_configure_keyboard(seat, device);
-            break;
-        case WLR_INPUT_DEVICE_POINTER:
-            seat_configure_pointer(seat, device);
-            break;
-        case WLR_INPUT_DEVICE_TOUCH:
-            seat_configure_touch(seat, device);
-            break;
-        case WLR_INPUT_DEVICE_TABLET_TOOL:
-            seat_configure_tablet_tool(seat, device);
-            break;
-        case WLR_INPUT_DEVICE_TABLET_PAD:
-            seat_configure_tablet_pad(seat, device);
-            break;
-        case WLR_INPUT_DEVICE_SWITCH:
-            seat_configure_switch(seat, device);
-            break;
 
-        default:
-            break;
-    }
+    seat_configure_device[device->type](seat, device);
 
     seat_update_capabilities(seat);
 }
