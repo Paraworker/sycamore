@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 #include <getopt.h>
 #include <unistd.h>
 #include <wlr/util/log.h>
@@ -32,15 +31,15 @@ int main(int argc, char **argv) {
 
     setenv("WAYLAND_DISPLAY", server->socket, true);
 
+    if (!server_start(server)) {
+        server_destroy(server);
+        exit(EXIT_FAILURE);
+    }
+
     if (startup_cmd) {
         if (fork() == 0) {
             execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void *)NULL);
         }
-    }
-
-    if (!server_start(server)) {
-        server_destroy(server);
-        exit(EXIT_FAILURE);
     }
 
     server_run(server);
