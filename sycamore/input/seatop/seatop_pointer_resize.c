@@ -114,5 +114,7 @@ void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_vie
 
     view->interface->set_resizing(view, true);
 
+    const char *image = wlr_xcursor_get_resize_name(edges);
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
+    cursor_set_image(seat->cursor, image);
 }
