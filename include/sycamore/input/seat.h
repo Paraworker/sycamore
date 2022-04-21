@@ -67,7 +67,7 @@ struct sycamore_seat {
     struct wlr_box grab_geobox;
     uint32_t resize_edges;
 
-    struct wl_listener request_cursor;
+    struct wl_listener request_set_cursor;
     struct wl_listener request_set_selection;
     struct wl_listener request_set_primary_selection;
     struct wl_listener request_start_drag;

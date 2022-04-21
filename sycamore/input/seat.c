@@ -215,22 +215,24 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
     seat_update_capabilities(seat);
 }
 
-static void handle_seat_request_cursor(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(listener, seat, request_cursor);
-    /* This event is raised by the seat when a client provides a cursor image */
-    struct wlr_seat_pointer_request_set_cursor_event *event = data;
-    struct wlr_seat_client *focused_client =
-            seat->wlr_seat->pointer_state.focused_client;
-    /* This can be sent by any client, so we check to make sure this one is
-     * actually has pointer focus first. */
-    if (focused_client == event->seat_client) {
-        /* Once we've vetted the client, we can tell the cursor to use the
-         * provided surface as the cursor image. It will set the hardware cursor
-         * on the output that it's currently on and continue to do so as the
-         * cursor moves between outputs. */
-        wlr_cursor_set_surface(seat->cursor->wlr_cursor, event->surface,
-                               event->hotspot_x, event->hotspot_y);
+static void handle_seat_request_set_cursor(struct wl_listener *listener, void *data) {
+    struct sycamore_seat *seat = wl_container_of(listener, seat, request_set_cursor);
+    if (!seat->cursor->enabled) {
+        return;
     }
+    struct wlr_seat_pointer_request_set_cursor_event *event = data;
+    struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
+    if (focused_client != event->seat_client) {
+        return;
+    }
+
+    /* Once we've vetted the client, we can tell the cursor to use the
+     * provided surface as the cursor image. It will set the hardware cursor
+     * on the output that it's currently on and continue to do so as the
+     * cursor moves between outputs. */
+    seat->cursor->image = NULL;
+    wlr_cursor_set_surface(seat->cursor->wlr_cursor, event->surface,
+                           event->hotspot_x, event->hotspot_y);
 }
 
 static void handle_seat_request_set_selection(struct wl_listener *listener, void *data) {
@@ -264,7 +266,7 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
         return;
     }
 
-    wl_list_remove(&seat->request_cursor.link);
+    wl_list_remove(&seat->request_set_cursor.link);
     wl_list_remove(&seat->request_set_selection.link);
     wl_list_remove(&seat->request_set_primary_selection.link);
     wl_list_remove(&seat->request_start_drag.link);
@@ -308,9 +310,9 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
 
     seat->grabbed_view = NULL;
 
-    seat->request_cursor.notify = handle_seat_request_cursor;
+    seat->request_set_cursor.notify = handle_seat_request_set_cursor;
     wl_signal_add(&seat->wlr_seat->events.request_set_cursor,
-                  &seat->request_cursor);
+                  &seat->request_set_cursor);
     seat->request_set_selection.notify = handle_seat_request_set_selection;
     wl_signal_add(&seat->wlr_seat->events.request_set_selection,
                   &seat->request_set_selection);

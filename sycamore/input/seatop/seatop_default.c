@@ -19,9 +19,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     double sx, sy;
     struct wlr_surface *surface = surface_under(seat->server->scene,
             seat->cursor->wlr_cursor->x, seat->cursor->wlr_cursor->y, &sx, &sy);
-
-    pointer_focus_update(seat->cursor, surface, sx, sy, time_msec);
-    cursor_image_update(seat->cursor, surface);
+    pointer_update(seat->cursor, surface, sx, sy, time_msec);
 }
 
 static const struct sycamore_seatop_impl seatop_impl = {

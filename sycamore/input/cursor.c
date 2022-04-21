@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
@@ -21,42 +22,29 @@ static uint32_t get_current_time_msec() {
     return now.tv_sec * 1000 + now.tv_nsec / 1000000;
 }
 
-void cursor_image_update(struct sycamore_cursor *cursor, struct wlr_surface *surface) {
-    if (!surface && cursor->set_image_default == false) {
-        /* If there's no surface under the cursor, set the cursor image to a default */
-        cursor_set_image(cursor, "left_ptr");
-        cursor->set_image_default = true;
-    } else if (surface && cursor->set_image_default == true){
-        cursor->set_image_default = false;
+void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
+    const char *current_image = cursor->image;
+
+    if (!image) {
+        cursor->image = NULL;
+        wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
+    } else if (!current_image || strcmp(current_image, image) != 0) {
+        cursor->image = image;
+        wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
+                                             image, cursor->wlr_cursor);
     }
 }
 
-void pointer_focus_update(struct sycamore_cursor *cursor,
+void pointer_update(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
     struct wlr_seat* seat = cursor->seat->wlr_seat;
     if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
         wlr_seat_pointer_notify_motion(cursor->seat->wlr_seat, time_msec, sx, sy);
-    } else if (seat->pointer_state.focused_surface) {
+    } else {
         wlr_seat_pointer_clear_focus(seat);
+        cursor_set_image(cursor, "left_ptr");
     }
-}
-
-void cursor_set_image(struct sycamore_cursor *cursor, const char *name) {
-    wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
-                                         name, cursor->wlr_cursor);
-}
-
-void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {
-    struct wlr_box box;
-    wlr_output_layout_get_box(cursor->seat->server->output_layout,
-                              output->wlr_output, &box);
-
-    cursor->wlr_cursor->x = box.x + box.width / 2.0;
-    cursor->wlr_cursor->y = box.y + box.height / 2.0;
-
-    wlr_cursor_warp(cursor->wlr_cursor, NULL,
-                    cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 }
 
 void cursor_enable(struct sycamore_cursor *cursor) {
@@ -74,8 +62,8 @@ void cursor_disable(struct sycamore_cursor *cursor) {
     }
 
     cursor->enabled = false;
+    cursor_set_image(cursor, NULL);
     wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
-    wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
 }
 
 void cursor_rebase(struct sycamore_cursor *cursor) {
@@ -88,15 +76,22 @@ void cursor_rebase(struct sycamore_cursor *cursor) {
         return;
     }
 
-    if (cursor->set_image_default) {
-        cursor->set_image_default = false;
-    }
-
     double sx, sy;
     struct wlr_surface *surface = surface_under(cursor->seat->server->scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    pointer_focus_update(cursor, surface, sx, sy, get_current_time_msec());
-    cursor_image_update(cursor, surface);
+    pointer_update(cursor, surface, sx, sy, get_current_time_msec());
+}
+
+void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {
+    struct wlr_box box;
+    wlr_output_layout_get_box(cursor->seat->server->output_layout,
+                              output->wlr_output, &box);
+
+    cursor->wlr_cursor->x = box.x + box.width / 2.0;
+    cursor->wlr_cursor->y = box.y + box.height / 2.0;
+
+    wlr_cursor_warp(cursor->wlr_cursor, NULL,
+                    cursor->wlr_cursor->x, cursor->wlr_cursor->y);
 }
 
 static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
@@ -279,7 +274,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
     wlr_xcursor_manager_load(cursor->xcursor_manager, 1);
 
     cursor->enabled = false;
-    cursor->set_image_default = false;
+    cursor->image = NULL;
     cursor->seat = seat;
 
     cursor->cursor_motion.notify = handle_cursor_motion_relative;
