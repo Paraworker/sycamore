@@ -83,22 +83,38 @@ struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
 
     keyboard->wlr_keyboard = wlr_device->keyboard;
 
-    /* Prepare an XKB keymap and assign it to the keyboard. This
-     * assumes the defaults (e.g. layout = "us"). */
-    struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    struct xkb_keymap *keymap = xkb_keymap_new_from_names(context, NULL,
-                                                          XKB_KEYMAP_COMPILE_NO_FLAGS);
-
-    wlr_keyboard_set_keymap(keyboard->wlr_keyboard, keymap);
-    xkb_keymap_unref(keymap);
-    xkb_context_unref(context);
-
     keyboard->modifiers.notify = handle_keyboard_modifiers;
     wl_signal_add(&keyboard->wlr_keyboard->events.modifiers, &keyboard->modifiers);
     keyboard->key.notify = handle_keyboard_key;
     wl_signal_add(&keyboard->wlr_keyboard->events.key, &keyboard->key);
 
     return keyboard;
+}
+
+struct xkb_keymap *sycamore_keyboard_compile_keymap() {
+    /* Compile an XKB keymap
+     * We assumes the defaults right now (e.g. layout = "us"). */
+    struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    if (!context) {
+        wlr_log(WLR_ERROR, "Unable to create xkb_context");
+        return NULL;
+    }
+
+    struct xkb_keymap *keymap = xkb_keymap_new_from_names(context, NULL,
+                                                          XKB_KEYMAP_COMPILE_NO_FLAGS);
+    xkb_context_unref(context);
+    return keymap;
+}
+
+void sycamore_keyboard_configure(struct sycamore_keyboard *keyboard) {
+    struct xkb_keymap *keymap = sycamore_keyboard_compile_keymap();
+    if (!keymap) {
+        wlr_log(WLR_ERROR, "Unable to compile xkb_keymap");
+        return;
+    }
+
+    wlr_keyboard_set_keymap(keyboard->wlr_keyboard, keymap);
+    xkb_keymap_unref(keymap);
 }
 
 

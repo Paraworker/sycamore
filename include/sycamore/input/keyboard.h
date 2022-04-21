@@ -16,4 +16,6 @@ struct sycamore_keyboard {
 struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
         struct wlr_input_device *wlr_device);
 
+void sycamore_keyboard_configure(struct sycamore_keyboard *keyboard);
+
 #endif //SYCAMORE_KEYBOARD_H
