@@ -7,37 +7,18 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/server.h"
 
+struct sycamore_seat;
+
 enum seatop_mode {
     SEATOP_DEFAULT,
     SEATOP_POINTER_MOVE,
     SEATOP_POINTER_RESIZE,
 };
 
-struct sycamore_seat;
-
 struct sycamore_seatop_impl {
     void (*pointer_button)(struct sycamore_seat *seat, struct wlr_pointer_button_event *event);
     void (*pointer_motion)(struct sycamore_seat *seat, uint32_t time_msec);
     enum seatop_mode mode;
-};
-
-struct sycamore_seat {
-    struct wlr_seat *wlr_seat;
-    const struct sycamore_seatop_impl *seatop_impl;
-    struct sycamore_cursor *cursor;
-    struct wl_list devices;
-
-    struct sycamore_view *grabbed_view;
-    double grab_x, grab_y;
-    struct wlr_box grab_geobox;
-    uint32_t resize_edges;
-
-    struct wl_listener request_cursor;
-    struct wl_listener request_set_selection;
-    struct wl_listener request_set_primary_selection;
-    struct wl_listener destroy;
-
-    struct sycamore_server *server;
 };
 
 struct sycamore_seat_device {
@@ -55,6 +36,45 @@ struct sycamore_seat_device {
     struct wl_listener destroy;
 
     struct sycamore_seat *seat;
+};
+
+struct sycamore_drag_icon {
+    struct sycamore_seat *seat;
+    struct wlr_drag_icon *wlr_drag_icon;
+
+    double x, y; // in layout-local coordinates
+
+    struct wl_listener surface_commit;
+    struct wl_listener map;
+    struct wl_listener unmap;
+    struct wl_listener destroy;
+};
+
+struct sycamore_drag {
+    struct sycamore_seat *seat;
+    struct wlr_drag *wlr_drag;
+    struct wl_listener destroy;
+};
+
+struct sycamore_seat {
+    struct wlr_seat *wlr_seat;
+    const struct sycamore_seatop_impl *seatop_impl;
+    struct sycamore_cursor *cursor;
+    struct wl_list devices;
+
+    struct sycamore_view *grabbed_view;
+    double grab_x, grab_y;
+    struct wlr_box grab_geobox;
+    uint32_t resize_edges;
+
+    struct wl_listener request_cursor;
+    struct wl_listener request_set_selection;
+    struct wl_listener request_set_primary_selection;
+    struct wl_listener request_start_drag;
+    struct wl_listener start_drag;
+    struct wl_listener destroy;
+
+    struct sycamore_server *server;
 };
 
 void handle_backend_new_input(struct wl_listener *listener, void *data);
