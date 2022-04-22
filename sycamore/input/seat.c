@@ -220,6 +220,7 @@ static void handle_seat_request_set_cursor(struct wl_listener *listener, void *d
     if (!seat->cursor->enabled) {
         return;
     }
+
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
     struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
     if (focused_client != event->seat_client) {
@@ -230,9 +231,7 @@ static void handle_seat_request_set_cursor(struct wl_listener *listener, void *d
      * provided surface as the cursor image. It will set the hardware cursor
      * on the output that it's currently on and continue to do so as the
      * cursor moves between outputs. */
-    seat->cursor->image = NULL;
-    wlr_cursor_set_surface(seat->cursor->wlr_cursor, event->surface,
-                           event->hotspot_x, event->hotspot_y);
+    cursor_set_image_surface(seat->cursor, event);
 }
 
 static void handle_seat_request_set_selection(struct wl_listener *listener, void *data) {

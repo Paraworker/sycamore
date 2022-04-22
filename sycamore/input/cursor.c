@@ -35,6 +35,13 @@ void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
     }
 }
 
+void cursor_set_image_surface(struct sycamore_cursor *cursor,
+        struct wlr_seat_pointer_request_set_cursor_event *event) {
+    cursor->image = NULL;
+    wlr_cursor_set_surface(cursor->wlr_cursor, event->surface,
+                           event->hotspot_x, event->hotspot_y);
+}
+
 void pointer_update(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
     struct wlr_seat* seat = cursor->seat->wlr_seat;
