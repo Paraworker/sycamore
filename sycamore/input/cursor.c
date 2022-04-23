@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_output_layout.h>
@@ -12,15 +11,8 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/desktop/scene.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
-
-static uint32_t get_current_time_msec() {
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    return now.tv_sec * 1000 + now.tv_nsec / 1000000;
-}
 
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
     const char *current_image = cursor->image;
@@ -60,7 +52,7 @@ void cursor_enable(struct sycamore_cursor *cursor) {
     }
 
     cursor->enabled = true;
-    cursor_rebase(cursor);
+    cursor->seat->seatop_impl->cursor_rebase(cursor->seat);
 }
 
 void cursor_disable(struct sycamore_cursor *cursor) {
@@ -71,22 +63,6 @@ void cursor_disable(struct sycamore_cursor *cursor) {
     cursor->enabled = false;
     cursor_set_image(cursor, NULL);
     wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
-}
-
-void cursor_rebase(struct sycamore_cursor *cursor) {
-    if (!cursor || !cursor->enabled) {
-        return;
-    }
-
-    enum seatop_mode mode = cursor->seat->seatop_impl->mode;
-    if (mode == SEATOP_POINTER_MOVE || mode == SEATOP_POINTER_RESIZE) {
-        return;
-    }
-
-    double sx, sy;
-    struct wlr_surface *surface = surface_under(cursor->seat->server->scene,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    pointer_update(cursor, surface, sx, sy, get_current_time_msec());
 }
 
 void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {

@@ -18,6 +18,7 @@ enum seatop_mode {
 struct sycamore_seatop_impl {
     void (*pointer_button)(struct sycamore_seat *seat, struct wlr_pointer_button_event *event);
     void (*pointer_motion)(struct sycamore_seat *seat, uint32_t time_msec);
+    void (*cursor_rebase)(struct sycamore_seat *seat);
     enum seatop_mode mode;
 };
 

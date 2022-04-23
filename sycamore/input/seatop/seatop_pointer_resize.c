@@ -1,3 +1,4 @@
+#include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
 
@@ -71,9 +72,20 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     view->interface->set_size(view, new_width, new_height);
 }
 
+static void process_cursor_rebase(struct sycamore_seat *seat) {
+    if (!seat->cursor->enabled) {
+        return;
+    }
+
+    const char *image = wlr_xcursor_get_resize_name(seat->resize_edges);
+    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
+    cursor_set_image(seat->cursor, image);
+}
+
 static const struct sycamore_seatop_impl seatop_impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
+        .cursor_rebase = process_cursor_rebase,
         .mode = SEATOP_POINTER_RESIZE,
 };
 
@@ -114,7 +126,5 @@ void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_vie
 
     view->interface->set_resizing(view, true);
 
-    const char *image = wlr_xcursor_get_resize_name(edges);
-    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
-    cursor_set_image(seat->cursor, image);
+    process_cursor_rebase(seat);
 }
