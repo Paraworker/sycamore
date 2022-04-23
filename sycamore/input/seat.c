@@ -137,6 +137,8 @@ void seat_update_capabilities(struct sycamore_seat *seat) {
 
 static void seat_configure_keyboard(struct sycamore_seat *seat,
                                     struct wlr_input_device *device) {
+    wlr_log(WLR_DEBUG, "new keyboard: %s", device->name);
+
     struct sycamore_keyboard *keyboard =
             sycamore_keyboard_create(seat, device);
     if (!keyboard) {
@@ -151,7 +153,7 @@ static void seat_configure_keyboard(struct sycamore_seat *seat,
 
 static void seat_configure_pointer(struct sycamore_seat *seat,
                                    struct wlr_input_device *device) {
-    wlr_log(WLR_DEBUG, "new pointer device: %s", device->name);
+    wlr_log(WLR_DEBUG, "new pointer: %s", device->name);
 
     struct sycamore_pointer *pointer =
             sycamore_pointer_create(seat, device);
@@ -170,26 +172,30 @@ static void seat_configure_pointer(struct sycamore_seat *seat,
 
 static void seat_configure_touch(struct sycamore_seat *seat,
                                  struct wlr_input_device *device) {
-    wlr_log(WLR_DEBUG, "new touch device: %s", device->name);
+    wlr_log(WLR_DEBUG, "new touch: %s", device->name);
+    
     /* TODO */
 }
 
 static void seat_configure_tablet_tool(struct sycamore_seat *seat,
                                        struct wlr_input_device *device) {
-    wlr_log(WLR_DEBUG, "new tablet tool device: %s", device->name);
+    wlr_log(WLR_DEBUG, "new tablet tool: %s", device->name);
+
     wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
     /* TODO */
 }
 
 static void seat_configure_tablet_pad(struct sycamore_seat *seat,
                                       struct wlr_input_device *device) {
-    wlr_log(WLR_DEBUG, "new tablet pad device: %s", device->name);
+    wlr_log(WLR_DEBUG, "new tablet pad: %s", device->name);
+
     /* TODO */
 }
 
 static void seat_configure_switch(struct sycamore_seat *seat,
                                   struct wlr_input_device *device) {
-    wlr_log(WLR_DEBUG, "new switch device: %s", device->name);
+    wlr_log(WLR_DEBUG, "new switch: %s", device->name);
+
     /* TODO */
 }
 
