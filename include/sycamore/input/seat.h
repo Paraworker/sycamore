@@ -98,4 +98,6 @@ void seatop_begin_pointer_move(struct sycamore_seat* seat, struct sycamore_view 
 
 void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_view *view, uint32_t edges);
 
+bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view);
+
 #endif //SYCAMORE_SEAT_H

@@ -4,6 +4,7 @@
 #include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
+#include "sycamore/desktop/view.h"
 #include "sycamore/server.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/keyboard.h"
@@ -337,5 +338,24 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     seatop_begin_default(seat);
 
     return seat;
+}
+
+bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view) {
+    /* Deny move/resize if we are already in the move/resize mode. */
+    if (seat->seatop_impl->mode != SEATOP_DEFAULT) {
+        return false;
+    }
+
+    /* Deny move/resize from maximized/fullscreen clients. */
+    if (view->is_maximized || view->is_fullscreen) {
+        return false;
+    }
+
+    /* Deny move from unfocused clients or there is no focused clients. */
+    if (view != seat->server->desktop_focused_view) {
+        return false;
+    }
+
+    return true;
 }
 
