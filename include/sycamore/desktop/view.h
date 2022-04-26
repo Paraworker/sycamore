@@ -8,8 +8,10 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include "sycamore/desktop/scene.h"
-#include "sycamore/output/output.h"
-#include "sycamore/server.h"
+
+struct sycamore_view;
+struct sycamore_output;
+struct sycamore_server;
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,
@@ -17,7 +19,10 @@ enum sycamore_view_type {
     VIEW_TYPE_XWAYLAND,
 };
 
-struct sycamore_view;
+struct view_ptr {
+    struct sycamore_view *view;
+    struct wl_list link;    //view::ptrs
+};
 
 struct sycamore_view_interface{
     void (*destroy)(struct sycamore_view *view);
@@ -33,10 +38,11 @@ struct sycamore_view_interface{
 /* the base view */
 struct sycamore_view {
     enum scene_descriptor_type scene_descriptor;
-    struct wl_list link;
     const struct sycamore_view_interface* interface;
-    struct wlr_scene_node *scene_node;
     enum sycamore_view_type view_type;
+    struct wlr_scene_node *scene_node;
+    struct wl_list link;
+    struct wl_list ptrs;
     int x, y;
 
     bool is_maximized;
@@ -73,5 +79,9 @@ void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *fullscre
 void view_set_maximized(struct sycamore_view *view, bool maximized);
 
 void focus_view(struct sycamore_view *view);
+
+void view_ptr_connect(struct view_ptr *ptr, struct sycamore_view *view);
+
+void view_ptr_disconnect(struct view_ptr *ptr);
 
 #endif //SYCAMORE_VIEW_H

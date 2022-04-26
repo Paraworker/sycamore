@@ -157,6 +157,7 @@ struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(struct sycamore_s
     view->base_view.interface = &xdg_shell_view_interface;
     view->base_view.is_fullscreen = false;
     view->base_view.is_maximized = false;
+    wl_list_init(&view->base_view.ptrs);
     view->base_view.server = server;
 
     view->base_view.scene_node = wlr_scene_xdg_surface_create(

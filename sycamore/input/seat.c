@@ -352,7 +352,7 @@ bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view 
     }
 
     /* Deny move from unfocused clients or there is no focused clients. */
-    if (view != seat->server->desktop_focused_view) {
+    if (view != seat->server->desktop_focused_view.view) {
         return false;
     }
 

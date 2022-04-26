@@ -5,9 +5,10 @@
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_seat.h>
 #include "sycamore/input/cursor.h"
-#include "sycamore/server.h"
 
 struct sycamore_seat;
+struct sycamore_server;
+struct sycamore_view;
 
 enum seatop_mode {
     SEATOP_DEFAULT,
@@ -59,7 +60,6 @@ struct sycamore_drag {
 
 struct sycamore_seat {
     struct wlr_seat *wlr_seat;
-    const struct sycamore_seatop_impl *seatop_impl;
     struct sycamore_cursor *cursor;
     struct wl_list devices;
 

@@ -5,7 +5,8 @@
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
-#include "sycamore/server.h"
+
+struct sycamore_server;
 
 enum scene_descriptor_type {
     SCENE_DESC_VIEW,

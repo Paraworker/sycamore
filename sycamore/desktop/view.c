@@ -8,7 +8,6 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
@@ -24,15 +23,12 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
 void view_unmap(struct sycamore_view *view) {
     wl_list_remove(&view->link);
 
+    struct view_ptr *ptr, *next_ptr;
+    wl_list_for_each_safe(ptr, next_ptr, &view->ptrs, link) {
+        view_ptr_disconnect(ptr);
+    }
+
     struct sycamore_seat *seat = view->server->seat;
-    if (seat->grabbed_view == view) {
-        seat->grabbed_view = NULL;
-    }
-
-    if (view->server->desktop_focused_view == view) {
-        view->server->desktop_focused_view = NULL;
-    }
-
     seat->seatop_impl->cursor_rebase(seat);
 }
 
@@ -54,7 +50,7 @@ void focus_view(struct sycamore_view *view) {
         return;
     }
     struct sycamore_server *server = view->server;
-    struct sycamore_view *prev_view = server->desktop_focused_view;
+    struct sycamore_view *prev_view = server->desktop_focused_view.view;
     if (prev_view == view) {
         /* Don't re-focus an already focused view. */
         return;
@@ -67,6 +63,7 @@ void focus_view(struct sycamore_view *view) {
          * stop displaying a caret.
          */
         prev_view->interface->set_activated(prev_view, false);
+        view_ptr_disconnect(&server->desktop_focused_view);
     }
 
     /* Move the view to the front */
@@ -89,7 +86,7 @@ void focus_view(struct sycamore_view *view) {
                                        NULL, 0, NULL);
     }
 
-    server->desktop_focused_view = view;
+    view_ptr_connect(&server->desktop_focused_view, view);
 }
 
 void view_set_fullscreen(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool fullscreen) {
@@ -179,5 +176,15 @@ void view_set_maximized(struct sycamore_view *view, bool maximized) {
         view->interface->set_size(view, view->maximize_restore.width, view->maximize_restore.height);
         wlr_scene_node_set_position(view->scene_node , view->maximize_restore.x, view->maximize_restore.y);
     }
+}
+
+void view_ptr_connect(struct view_ptr *ptr, struct sycamore_view *view) {
+    ptr->view = view;
+    wl_list_insert(&view->ptrs, &ptr->link);
+}
+
+void view_ptr_disconnect(struct view_ptr *ptr) {
+    ptr->view = NULL;
+    wl_list_remove(&ptr->link);
 }
 

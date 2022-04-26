@@ -106,7 +106,7 @@ static bool server_init(struct sycamore_server *server) {
     }
 
     wl_list_init(&server->mapped_views);
-    server->desktop_focused_view = NULL;
+    server->desktop_focused_view.view = NULL;
 
     wlr_export_dmabuf_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
