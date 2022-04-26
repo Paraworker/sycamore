@@ -272,6 +272,8 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
         return;
     }
 
+    seatop_end(seat);
+
     wl_list_remove(&seat->request_set_cursor.link);
     wl_list_remove(&seat->request_set_selection.link);
     wl_list_remove(&seat->request_set_primary_selection.link);
@@ -307,14 +309,15 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     seat->cursor = sycamore_cursor_create(seat, display, output_layout);
     if (!seat->cursor) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_cursor");
-        sycamore_seat_destroy(seat);
+        wlr_seat_destroy(seat->wlr_seat);
+        free(seat);
         return NULL;
     }
 
-    wl_list_init(&seat->devices);
+    seat->seatop_impl = NULL;
+    seat->seatop_data = NULL;
     seat->server = server;
-
-    seat->grabbed_view = NULL;
+    wl_list_init(&seat->devices);
 
     seat->request_set_cursor.notify = handle_seat_request_set_cursor;
     wl_signal_add(&seat->wlr_seat->events.request_set_cursor,
@@ -338,6 +341,18 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     seatop_begin_default(seat);
 
     return seat;
+}
+
+void seatop_end(struct sycamore_seat *seat) {
+    if (seat->seatop_impl) {
+        seat->seatop_impl->end(seat);
+        seat->seatop_impl = NULL;
+    }
+
+    if (seat->seatop_data) {
+        free(seat->seatop_data);
+        seat->seatop_data = NULL;
+    }
 }
 
 bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view) {

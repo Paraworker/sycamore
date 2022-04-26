@@ -20,6 +20,7 @@ struct sycamore_seatop_impl {
     void (*pointer_button)(struct sycamore_seat *seat, struct wlr_pointer_button_event *event);
     void (*pointer_motion)(struct sycamore_seat *seat, uint32_t time_msec);
     void (*cursor_rebase)(struct sycamore_seat *seat);
+    void (*end)(struct sycamore_seat *seat);
     enum seatop_mode mode;
 };
 
@@ -63,10 +64,8 @@ struct sycamore_seat {
     struct sycamore_cursor *cursor;
     struct wl_list devices;
 
-    struct sycamore_view *grabbed_view;
-    double grab_x, grab_y;
-    struct wlr_box grab_geobox;
-    uint32_t resize_edges;
+    const struct sycamore_seatop_impl *seatop_impl;
+    void *seatop_data;
 
     struct wl_listener request_set_cursor;
     struct wl_listener request_set_selection;
@@ -97,6 +96,8 @@ void seatop_begin_default(struct sycamore_seat* seat);
 void seatop_begin_pointer_move(struct sycamore_seat* seat, struct sycamore_view *view);
 
 void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_view *view, uint32_t edges);
+
+void seatop_end(struct sycamore_seat *seat);
 
 bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view);
 

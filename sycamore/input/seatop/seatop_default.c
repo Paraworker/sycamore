@@ -38,14 +38,19 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
     pointer_update(cursor, surface, sx, sy, get_current_time_msec());
 }
 
+static void process_end(struct sycamore_seat *seat) {}
+
 static const struct sycamore_seatop_impl seatop_impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
         .cursor_rebase = process_cursor_rebase,
+        .end = process_end,
         .mode = SEATOP_DEFAULT,
 };
 
 void seatop_begin_default(struct sycamore_seat* seat) {
+    seatop_end(seat);
+
     seat->seatop_impl = &seatop_impl;
     process_cursor_rebase(seat);
 }
