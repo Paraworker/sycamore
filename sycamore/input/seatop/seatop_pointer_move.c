@@ -21,13 +21,14 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     /* Move the grabbed view to the new position. */
     struct pointer_move_data *data = seat->seatop_data;
+    struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
         return;
     }
 
-    view->x = seat->cursor->wlr_cursor->x - data->grab_x;
-    view->y = seat->cursor->wlr_cursor->y - data->grab_y;
+    view->x = cursor->x - data->grab_x;
+    view->y = cursor->y - data->grab_y;
 
     wlr_scene_node_set_position(view->scene_node, view->x, view->y);
 }

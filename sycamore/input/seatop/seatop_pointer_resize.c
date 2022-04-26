@@ -30,13 +30,14 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
      * you'd wait for the client to prepare a buffer at the new size, then
      * commit any movement that was prepared. */
     struct pointer_resize_data *data = seat->seatop_data;
+    struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
         return;
     }
 
-    double border_x = seat->cursor->wlr_cursor->x - data->grab_x;
-    double border_y = seat->cursor->wlr_cursor->y - data->grab_y;
+    double border_x = cursor->x - data->grab_x;
+    double border_y = cursor->y - data->grab_y;
     int new_left = data->grab_geobox.x;
     int new_right = data->grab_geobox.x + data->grab_geobox.width;
     int new_top = data->grab_geobox.y;
