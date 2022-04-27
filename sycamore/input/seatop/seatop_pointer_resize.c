@@ -107,7 +107,7 @@ static const struct sycamore_seatop_impl seatop_impl = {
         .mode = SEATOP_POINTER_RESIZE,
 };
 
-void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_view *view, uint32_t edges) {
+void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges) {
     if (!seatop_interactive_assert(seat, view)) {
         return;
     }

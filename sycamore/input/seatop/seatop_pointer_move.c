@@ -57,7 +57,7 @@ static const struct sycamore_seatop_impl seatop_impl = {
         .mode = SEATOP_POINTER_MOVE,
 };
 
-void seatop_begin_pointer_move(struct sycamore_seat* seat, struct sycamore_view *view) {
+void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view) {
     if (!seatop_interactive_assert(seat, view)) {
         return;
     }

@@ -91,11 +91,11 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device);
 
 void seat_update_capabilities(struct sycamore_seat *seat);
 
-void seatop_begin_default(struct sycamore_seat* seat);
+void seatop_begin_default(struct sycamore_seat *seat);
 
-void seatop_begin_pointer_move(struct sycamore_seat* seat, struct sycamore_view *view);
+void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view);
 
-void seatop_begin_pointer_resize(struct sycamore_seat* seat, struct sycamore_view *view, uint32_t edges);
+void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges);
 
 void seatop_end(struct sycamore_seat *seat);
 

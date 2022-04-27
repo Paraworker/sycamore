@@ -10,7 +10,6 @@
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
-#include "sycamore/desktop/view.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 

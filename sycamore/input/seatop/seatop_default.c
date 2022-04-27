@@ -48,7 +48,7 @@ static const struct sycamore_seatop_impl seatop_impl = {
         .mode = SEATOP_DEFAULT,
 };
 
-void seatop_begin_default(struct sycamore_seat* seat) {
+void seatop_begin_default(struct sycamore_seat *seat) {
     seatop_end(seat);
 
     seat->seatop_impl = &seatop_impl;
