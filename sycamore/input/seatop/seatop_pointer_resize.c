@@ -3,14 +3,15 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
 
-struct pointer_resize_data {
+struct seatop_pointer_resize_data {
     struct view_ptr view_ptr;
-    double grab_x, grab_y;
+    double dx, dy;
     struct wlr_box grab_geobox;
     uint32_t edges;
 };
 
-static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
+static void process_pointer_button(struct sycamore_seat *seat,
+        struct wlr_pointer_button_event *event) {
     if (event->state == WLR_BUTTON_PRESSED) {
         return;
     }
@@ -29,15 +30,15 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
      * Note that I took some shortcuts here. In a more fleshed-out compositor,
      * you'd wait for the client to prepare a buffer at the new size, then
      * commit any movement that was prepared. */
-    struct pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = seat->seatop_data;
     struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
         return;
     }
 
-    double border_x = cursor->x - data->grab_x;
-    double border_y = cursor->y - data->grab_y;
+    double border_x = cursor->x - data->dx;
+    double border_y = cursor->y - data->dy;
     int new_left = data->grab_geobox.x;
     int new_right = data->grab_geobox.x + data->grab_geobox.width;
     int new_top = data->grab_geobox.y;
@@ -84,7 +85,7 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
         return;
     }
 
-    struct pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = seat->seatop_data;
     const char *image = wlr_xcursor_get_resize_name(data->edges);
 
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
@@ -92,7 +93,7 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
 }
 
 static void process_end(struct sycamore_seat *seat) {
-    struct pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = seat->seatop_data;
     if (data->view_ptr.view) {
         data->view_ptr.view->interface->set_resizing(data->view_ptr.view, false);
         view_ptr_disconnect(&data->view_ptr);
@@ -107,16 +108,18 @@ static const struct sycamore_seatop_impl seatop_impl = {
         .mode = SEATOP_POINTER_RESIZE,
 };
 
-void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges) {
+void seatop_begin_pointer_resize(struct sycamore_seat *seat,
+        struct sycamore_view *view, uint32_t edges) {
     if (!seatop_interactive_assert(seat, view)) {
         return;
     }
 
     seatop_end(seat);
 
-    struct pointer_resize_data *data = calloc(1, sizeof(struct pointer_resize_data));
+    struct seatop_pointer_resize_data *data =
+            calloc(1, sizeof(struct seatop_pointer_resize_data));
     if (!data) {
-        wlr_log(WLR_ERROR, "Unable to allocate pointer_resize_data");
+        wlr_log(WLR_ERROR, "Unable to allocate seatop_pointer_resize_data");
         return;
     }
 
@@ -129,8 +132,8 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_vie
                       ((edges & WLR_EDGE_RIGHT) ? geo_box.width : 0);
     double border_y = (view->y + geo_box.y) +
                       ((edges & WLR_EDGE_BOTTOM) ? geo_box.height : 0);
-    data->grab_x = seat->cursor->wlr_cursor->x - border_x;
-    data->grab_y = seat->cursor->wlr_cursor->y - border_y;
+    data->dx = seat->cursor->wlr_cursor->x - border_x;
+    data->dy = seat->cursor->wlr_cursor->y - border_y;
 
     data->grab_geobox = geo_box;
     data->grab_geobox.x += view->x;
