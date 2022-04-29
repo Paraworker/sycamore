@@ -1,14 +1,5 @@
-#include <stdlib.h>
-#include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
-
-struct seatop_pointer_resize_data {
-    struct view_ptr view_ptr;
-    double dx, dy;
-    struct wlr_box grab_geobox;
-    uint32_t edges;
-};
 
 static void process_pointer_button(struct sycamore_seat *seat,
         struct wlr_pointer_button_event *event) {
@@ -30,7 +21,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
      * Note that I took some shortcuts here. In a more fleshed-out compositor,
      * you'd wait for the client to prepare a buffer at the new size, then
      * commit any movement that was prepared. */
-    struct seatop_pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
     struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
@@ -85,7 +76,7 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
         return;
     }
 
-    struct seatop_pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
     const char *image = wlr_xcursor_get_resize_name(data->edges);
 
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
@@ -93,7 +84,7 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
 }
 
 static void process_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_resize_data *data = seat->seatop_data;
+    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
     if (data->view_ptr.view) {
         data->view_ptr.view->interface->set_resizing(data->view_ptr.view, false);
         view_ptr_disconnect(&data->view_ptr);
@@ -116,12 +107,7 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat,
 
     seatop_end(seat);
 
-    struct seatop_pointer_resize_data *data =
-            calloc(1, sizeof(struct seatop_pointer_resize_data));
-    if (!data) {
-        wlr_log(WLR_ERROR, "Unable to allocate seatop_pointer_resize_data");
-        return;
-    }
+    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
 
     view_ptr_connect(&data->view_ptr, view);
 
@@ -142,7 +128,6 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat,
     data->edges = edges;
 
     seat->seatop_impl = &seatop_impl;
-    seat->seatop_data = data;
 
     view->interface->set_resizing(view, true);
     process_cursor_rebase(seat);

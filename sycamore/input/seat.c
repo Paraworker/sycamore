@@ -315,7 +315,6 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     }
 
     seat->seatop_impl = NULL;
-    seat->seatop_data = NULL;
     seat->server = server;
     wl_list_init(&seat->devices);
 
@@ -347,11 +346,6 @@ void seatop_end(struct sycamore_seat *seat) {
     if (seat->seatop_impl) {
         seat->seatop_impl->end(seat);
         seat->seatop_impl = NULL;
-    }
-
-    if (seat->seatop_data) {
-        free(seat->seatop_data);
-        seat->seatop_data = NULL;
     }
 }
 

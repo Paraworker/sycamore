@@ -4,11 +4,11 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_seat.h>
+#include "sycamore/desktop/view.h"
 #include "sycamore/input/cursor.h"
 
 struct sycamore_seat;
 struct sycamore_server;
-struct sycamore_view;
 
 enum seatop_mode {
     SEATOP_DEFAULT,
@@ -59,13 +59,29 @@ struct sycamore_drag {
     struct wl_listener destroy;
 };
 
+struct seatop_pointer_move_data {
+    struct view_ptr view_ptr;
+    double dx, dy;
+};
+
+struct seatop_pointer_resize_data {
+    struct view_ptr view_ptr;
+    double dx, dy;
+    struct wlr_box grab_geobox;
+    uint32_t edges;
+};
+
 struct sycamore_seat {
     struct wlr_seat *wlr_seat;
     struct sycamore_cursor *cursor;
     struct wl_list devices;
 
     const struct sycamore_seatop_impl *seatop_impl;
-    void *seatop_data;
+
+    union {
+        struct seatop_pointer_move_data pointer_move_data;
+        struct seatop_pointer_resize_data pointer_resize_data;
+    };
 
     struct wl_listener request_set_cursor;
     struct wl_listener request_set_selection;
