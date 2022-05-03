@@ -32,7 +32,7 @@ static void cycle_view(struct sycamore_server *server, struct sycamore_keybindin
 
     struct sycamore_view *next_view = wl_container_of(
             server->mapped_views.prev, next_view, link);
-    focus_view(next_view);
+    view_set_focus(next_view);
     struct sycamore_seat *seat = server->seat;
     seat->seatop_impl->cursor_rebase(seat);
 }

@@ -38,7 +38,7 @@ struct wlr_scene_layer_surface_v1 *sycamore_layer_add_to_scene(struct sycamore_s
     struct wlr_scene_layer_surface_v1 *scene_layer_surface = wlr_scene_layer_surface_v1_create(
             parent, layer->wlr_layer_surface);
     scene_layer_surface->node->data = layer;
-    layer->wlr_layer_surface->surface->data = scene_layer_surface->node;
+    layer->wlr_layer_surface->data = scene_layer_surface->node;
 
     return scene_layer_surface;
 }
@@ -64,7 +64,8 @@ struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, str
     sycamore_layer->server = server;
     sycamore_layer->mapped = false;
 
-    sycamore_layer->scene_layer_surface = sycamore_layer_add_to_scene(server->scene, sycamore_layer);
+    sycamore_layer->scene_layer_surface =
+            sycamore_layer_add_to_scene(server->scene, sycamore_layer);
 
     sycamore_layer->map.notify = handle_sycamore_layer_map;
     wl_signal_add(&layer_surface->events.map, &sycamore_layer->map);

@@ -163,7 +163,7 @@ struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(struct sycamore_s
     view->base_view.scene_node = wlr_scene_xdg_surface_create(
             &server->scene->trees.shell_view->node, toplevel->base);
     view->base_view.scene_node->data = &view->base_view;
-    view->xdg_toplevel->base->surface->data = view->base_view.scene_node;
+    view->xdg_toplevel->base->data = view->base_view.scene_node;
 
     /* Listen to the various events it can emit */
     view->map.notify = handle_xdg_shell_view_map;
@@ -199,9 +199,22 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
 
     if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
         struct wlr_surface *parent_surface = xdg_surface->popup->parent;
-        struct wlr_scene_node *parent_node = parent_surface->data;
-        xdg_surface->surface->data = wlr_scene_xdg_surface_create(
-                parent_node, xdg_surface);
+
+        struct wlr_scene_node *parent_node = NULL;
+        if (wlr_surface_is_xdg_surface(parent_surface)) {
+            struct wlr_xdg_surface *parent =
+                    wlr_xdg_surface_from_wlr_surface(parent_surface);
+            parent_node = parent->data;
+        } else if (wlr_surface_is_layer_surface(parent_surface)) {
+            struct wlr_layer_surface_v1 *parent =
+                    wlr_layer_surface_v1_from_wlr_surface(parent_surface);
+            parent_node = parent->data;
+        } else {
+            wlr_log(WLR_ERROR, "unknown parent surface type");
+            return;
+        }
+
+        xdg_surface->data = wlr_scene_xdg_surface_create(parent_node, xdg_surface);
         return;
     }
 
