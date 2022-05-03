@@ -60,7 +60,7 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
     wl_signal_add(&wlr_drag->events.destroy, &drag->destroy);
 
     struct wlr_drag_icon *wlr_drag_icon = wlr_drag->icon;
-    if (wlr_drag_icon != NULL) {
+    if (wlr_drag_icon) {
         /* TODO: drag icon */
     }
 }
@@ -265,6 +265,17 @@ static void handle_seat_destroy(struct wl_listener *listener, void *data) {
     seat->wlr_seat = NULL;
     seat->server->seat = NULL;
     sycamore_seat_destroy(seat);
+}
+
+void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface) {
+    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat->wlr_seat);
+    if (!keyboard) {
+        wlr_seat_keyboard_notify_enter(seat->wlr_seat, surface, NULL, 0, NULL);
+        return;
+    }
+
+    wlr_seat_keyboard_notify_enter(seat->wlr_seat, surface,
+                                   keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
 void sycamore_seat_destroy(struct sycamore_seat *seat) {

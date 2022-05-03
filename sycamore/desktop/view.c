@@ -57,11 +57,9 @@ void view_set_focus(struct sycamore_view *view) {
     }
 
     if (prev_view) {
-        /*
-         * Deactivate the previously focused view. This lets the client know
+        /* Deactivate the previously focused view. This lets the client know
          * it no longer has focus and the client will repaint accordingly, e.g.
-         * stop displaying a caret.
-         */
+         * stop displaying a caret. */
         prev_view->interface->set_activated(prev_view, false);
         view_ptr_disconnect(&server->desktop_focused_view);
     }
@@ -74,17 +72,7 @@ void view_set_focus(struct sycamore_view *view) {
     /* Activate the new view */
     view->interface->set_activated(view, true);
 
-    /* Tell the seat to have the keyboard enter this surface. wlroots will keep
-     * track of this and automatically send key events to the appropriate
-     * clients without additional work on your part. */
-    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat->wlr_seat);
-    if (keyboard) {
-        wlr_seat_keyboard_notify_enter(server->seat->wlr_seat, view->interface->get_wlr_surface(view),
-                                       keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
-    } else {
-        wlr_seat_keyboard_notify_enter(server->seat->wlr_seat, view->interface->get_wlr_surface(view),
-                                       NULL, 0, NULL);
-    }
+    seat_set_keyboard_focus(server->seat, view->interface->get_wlr_surface(view));
 
     view_ptr_connect(&server->desktop_focused_view, view);
 }
