@@ -15,11 +15,11 @@
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/util/log.h>
-#include "sycamore/desktop/scene.h"
 #include "sycamore/desktop/shell/layer_shell.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/input/keybinding.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 #include "sycamore/output/output.h"
 

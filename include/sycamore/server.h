@@ -5,17 +5,17 @@
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/backend.h>
-#include <wlr/render/wlr_renderer.h>
 #include <wlr/render/allocator.h>
+#include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
-#include "sycamore/input/seat.h"
-#include "sycamore/input/keybinding.h"
-#include "sycamore/desktop/scene.h"
-#include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/shell/layer_shell.h"
+#include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
+#include "sycamore/input/keybinding.h"
+#include "sycamore/input/seat.h"
+#include "sycamore/output/scene.h"
 
 struct sycamore_server {
     struct wl_display *wl_display;

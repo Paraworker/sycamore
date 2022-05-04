@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
+#include "sycamore/output/scene.h"
 #include "sycamore/server.h"
-#include "sycamore/desktop/scene.h"
 
 struct sycamore_layer {
     enum scene_descriptor_type scene_descriptor;

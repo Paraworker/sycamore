@@ -1,6 +1,6 @@
-#include "sycamore/desktop/scene.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 #include "sycamore/util.h"
 

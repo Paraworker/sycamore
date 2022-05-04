@@ -7,7 +7,7 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
-#include "sycamore/desktop/scene.h"
+#include "sycamore/output/scene.h"
 
 struct sycamore_view;
 struct sycamore_output;

@@ -5,9 +5,9 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
-#include "sycamore/desktop/scene.h"
-#include "sycamore/server.h"
 #include "sycamore/output/output.h"
+#include "sycamore/output/scene.h"
+#include "sycamore/server.h"
 
 void sycamore_layer_map(struct sycamore_layer *layer) {
     layer->mapped = true;

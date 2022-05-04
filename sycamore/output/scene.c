@@ -4,9 +4,9 @@
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/log.h>
-#include "sycamore/server.h"
-#include "sycamore/desktop/scene.h"
 #include "sycamore/desktop/view.h"
+#include "sycamore/output/scene.h"
+#include "sycamore/server.h"
 
 struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
         struct wlr_output_layout *output_layout, struct wlr_presentation *presentation) {
