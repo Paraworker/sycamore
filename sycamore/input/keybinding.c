@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <wlr/util/log.h>
 #include "sycamore/input/keybinding.h"
 #include "sycamore/desktop/view.h"
@@ -40,6 +41,20 @@ static void cycle_view(struct sycamore_server *server, struct sycamore_keybindin
 /* action */
 static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     wl_display_terminate(server->wl_display);
+}
+
+/* action */
+static void open_terminal(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    if (fork() == 0) {
+        execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", (void *)NULL);
+    }
+}
+
+/* action */
+static void open_browser(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    if (fork() == 0) {
+        execl("/bin/sh", "/bin/sh", "-c", "chromium", (void *)NULL);
+    }
 }
 
 /* action */
@@ -120,17 +135,27 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
     /* alt */
     struct sycamore_modifiers_node *alt = sycamore_modifiers_node_create(manager, WLR_MODIFIER_ALT);
     if (!alt) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node");
+        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node: alt");
         sycamore_keybinding_manager_destroy(manager);
         return NULL;
     }
     sycamore_keybinding_create(alt, alt->modifiers, XKB_KEY_Tab, cycle_view);
 
+    /* logo */
+    struct sycamore_modifiers_node *logo = sycamore_modifiers_node_create(manager, WLR_MODIFIER_LOGO);
+    if (!logo) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node: logo");
+        sycamore_keybinding_manager_destroy(manager);
+        return NULL;
+    }
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_t, open_terminal);
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
+
     /* ctrl+alt */
     struct sycamore_modifiers_node *ctrl_alt =
             sycamore_modifiers_node_create(manager, WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT);
     if (!ctrl_alt) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node");
+        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node: ctrl_alt");
         sycamore_keybinding_manager_destroy(manager);
         return NULL;
     }
