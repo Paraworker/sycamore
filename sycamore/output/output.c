@@ -55,6 +55,28 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
     return output;
 }
 
+struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
+    if (!output || wl_list_empty(&output->modes)) {
+        return NULL;
+    }
+
+    int32_t max_refresh = 0, max_resolution = 0;
+    struct wlr_output_mode *mode, *max_mode;
+    wl_list_for_each(mode, &output->modes, link) {
+        int32_t resolution = mode->width * mode->height;
+        if (resolution > max_resolution) {
+            max_resolution = resolution;
+            max_refresh = mode->refresh;
+            max_mode = mode;
+        } else if (resolution == max_resolution && mode->refresh > max_refresh) {
+            max_refresh = mode->refresh;
+            max_mode = mode;
+        }
+    }
+
+    return max_mode;
+}
+
 void sycamore_output_disable(struct sycamore_output *output) {
     if (!output) {
         return;
@@ -103,7 +125,7 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
      * just pick the monitor's preferred mode, a more sophisticated compositor
      * would let the user configure it. */
     if (!wl_list_empty(&wlr_output->modes)) {
-        struct wlr_output_mode *mode = wlr_output_preferred_mode(wlr_output);
+        struct wlr_output_mode *mode = output_max_mode(wlr_output);
         wlr_output_set_mode(wlr_output, mode);
         wlr_output_enable(wlr_output, true);
         if (!wlr_output_commit(wlr_output)) {
