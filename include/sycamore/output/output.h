@@ -19,6 +19,8 @@ struct sycamore_output {
 
 void handle_backend_new_output(struct wl_listener *listener, void *data);
 
+void output_get_center_coords(struct sycamore_output *output, struct wlr_fbox *box);
+
 void sycamore_output_destroy(struct sycamore_output *output);
 
 struct sycamore_output *sycamore_output_create(struct sycamore_server *server,

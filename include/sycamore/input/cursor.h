@@ -42,16 +42,19 @@ struct sycamore_cursor {
 void pointer_update(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy, uint32_t time_msec);
 
-void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output);
+void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
 void cursor_enable(struct sycamore_cursor *cursor);
 
 void cursor_disable(struct sycamore_cursor *cursor);
 
+/* This will avoid setting image duplicately. Pass NULL to hide cursor */
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
 
 void cursor_set_image_surface(struct sycamore_cursor *cursor,
         struct wlr_seat_pointer_request_set_cursor_event *event);
+
+void xcursor_configure(struct sycamore_cursor *cursor);
 
 struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         struct wl_display *display, struct wlr_output_layout *output_layout);

@@ -64,16 +64,46 @@ void cursor_disable(struct sycamore_cursor *cursor) {
     wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
 }
 
-void cursor_warp_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output) {
-    struct wlr_box box;
-    wlr_output_layout_get_box(cursor->seat->server->output_layout,
-                              output->wlr_output, &box);
+void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamore_output *output) {
+    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
+    struct wlr_fbox box;
+    output_get_center_coords(output, &box);
+    wlr_cursor_warp(wlr_cursor, NULL, box.x, box.y);
+}
 
-    cursor->wlr_cursor->x = box.x + box.width / 2.0;
-    cursor->wlr_cursor->y = box.y + box.height / 2.0;
+void xcursor_configure(struct sycamore_cursor *cursor) {
+    if (!cursor->xcursor_manager) {
+        unsigned cursor_size = 24;
+        const char *cursor_theme = NULL;
+        cursor->xcursor_manager = wlr_xcursor_manager_create(cursor_theme, cursor_size);
+        if (!cursor->xcursor_manager) {
+            wlr_log(WLR_ERROR, "Unable to create xcursor manager for theme '%s'", cursor_theme);
+            return;
+        }
+    }
 
-    wlr_cursor_warp(cursor->wlr_cursor, NULL,
-                    cursor->wlr_cursor->x, cursor->wlr_cursor->y);
+    struct sycamore_output *output;
+    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
+        struct wlr_output *wlr_output = output->wlr_output;
+        bool result = wlr_xcursor_manager_load(cursor->xcursor_manager, wlr_output->scale);
+        if (!result) {
+            wlr_log(WLR_ERROR, "Unable to load xcursor theme for output '%s' with scale %f",
+                    wlr_output->name, wlr_output->scale);
+        }
+    }
+
+    if (cursor->enabled) {
+        /* Refresh cursor image */
+        if (cursor->image) {
+            wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
+                                                 cursor->image, cursor->wlr_cursor);
+        } else {
+            cursor_set_image(cursor, "left_ptr");
+        }
+    }
+
+    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
+    wlr_cursor_warp(wlr_cursor, NULL, wlr_cursor->x, wlr_cursor->y);
 }
 
 static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
@@ -247,16 +277,9 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    cursor->xcursor_manager = wlr_xcursor_manager_create(NULL, 24);
-    if (!cursor->xcursor_manager) {
-        sycamore_cursor_destroy(cursor);
-        return NULL;
-    }
-
-    wlr_xcursor_manager_load(cursor->xcursor_manager, 1);
-
-    cursor->enabled = false;
+    cursor->xcursor_manager = NULL;
     cursor->image = NULL;
+    cursor->enabled = false;
     cursor->seat = seat;
 
     cursor->cursor_motion.notify = handle_cursor_motion_relative;

@@ -55,6 +55,15 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
     return output;
 }
 
+void output_get_center_coords(struct sycamore_output *output, struct wlr_fbox *box) {
+    struct wlr_box output_box;
+    wlr_output_layout_get_box(output->server->output_layout,
+                              output->wlr_output, &output_box);
+
+    box->x = output_box.x + output_box.width / 2.0;
+    box->y = output_box.y + output_box.height / 2.0;
+}
+
 struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
     if (!output || wl_list_empty(&output->modes)) {
         return NULL;
@@ -142,9 +151,16 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
 
     wlr_output_layout_add_auto(server->output_layout, wlr_output);
     wlr_output_layout_get_box(server->output_layout, wlr_output, &output->usable_area);
-
     wl_list_insert(&server->all_outputs, &output->link);
+
+    struct sycamore_cursor *cursor = server->seat->cursor;
     if (wl_list_length(&server->all_outputs) == 1) {
-        cursor_warp_to_output(server->seat->cursor, output);
+        /* If this is the first output, cursor should be in the center of it*/
+        struct wlr_fbox box;
+        output_get_center_coords(output, &box);
+        cursor->wlr_cursor->x = box.x;
+        cursor->wlr_cursor->y = box.y;
     }
+
+    xcursor_configure(cursor);
 }
