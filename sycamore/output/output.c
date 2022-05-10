@@ -119,6 +119,7 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
     struct sycamore_server *server =
             wl_container_of(listener, server, backend_new_output);
     struct wlr_output *wlr_output = data;
+    wlr_log(WLR_DEBUG, "new output: %s", wlr_output->name);
 
     /* Configures the output created by the backend to use our allocator
      * and our renderer. Must be done once, before commiting the output */
