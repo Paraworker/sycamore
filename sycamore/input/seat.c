@@ -283,6 +283,11 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
         return;
     }
 
+    struct sycamore_seat_device *seat_device, *next;
+    wl_list_for_each_safe(seat_device, next, &seat->devices, link) {
+        seat_device_destroy(seat_device);
+    }
+
     seatop_end(seat);
 
     wl_list_remove(&seat->request_set_cursor.link);
