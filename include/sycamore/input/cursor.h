@@ -48,7 +48,7 @@ void cursor_enable(struct sycamore_cursor *cursor);
 
 void cursor_disable(struct sycamore_cursor *cursor);
 
-/* This will avoid setting image duplicately. Pass NULL to hide cursor */
+/* This will avoid setting duplicate image. Pass NULL to clear cursor image. */
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
 
 void cursor_set_image_surface(struct sycamore_cursor *cursor,

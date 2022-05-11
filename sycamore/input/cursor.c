@@ -14,12 +14,14 @@
 #include "sycamore/output/output.h"
 
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
-    const char *current_image = cursor->image;
+    if (!cursor->enabled) {
+        return;
+    }
 
     if (!image) {
         cursor->image = NULL;
         wlr_cursor_set_image(cursor->wlr_cursor, NULL, 0, 0, 0, 0, 0, 0);
-    } else if (!current_image || strcmp(current_image, image) != 0) {
+    } else if (!cursor->image || strcmp(cursor->image, image) != 0) {
         cursor->image = image;
         wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
                                              image, cursor->wlr_cursor);
@@ -28,6 +30,10 @@ void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
 
 void cursor_set_image_surface(struct sycamore_cursor *cursor,
         struct wlr_seat_pointer_request_set_cursor_event *event) {
+    if (!cursor->enabled) {
+        return;
+    }
+
     cursor->image = NULL;
     wlr_cursor_set_surface(cursor->wlr_cursor, event->surface,
                            event->hotspot_x, event->hotspot_y);
@@ -59,9 +65,9 @@ void cursor_disable(struct sycamore_cursor *cursor) {
         return;
     }
 
-    cursor->enabled = false;
     cursor_set_image(cursor, NULL);
     wlr_seat_pointer_notify_clear_focus(cursor->seat->wlr_seat);
+    cursor->enabled = false;
 }
 
 void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamore_output *output) {
@@ -92,14 +98,13 @@ void xcursor_configure(struct sycamore_cursor *cursor) {
         }
     }
 
-    if (cursor->enabled) {
-        /* Refresh cursor image */
-        if (cursor->image) {
-            wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
-                                                 cursor->image, cursor->wlr_cursor);
-        } else {
-            cursor_set_image(cursor, "left_ptr");
-        }
+    /* Refresh cursor image. */
+    const char *current_image = cursor->image;
+    cursor_set_image(cursor, NULL);
+    if (current_image) {
+        cursor_set_image(cursor, current_image);
+    } else {
+        cursor_set_image(cursor, "left_ptr");
     }
 
     struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;

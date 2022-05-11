@@ -224,10 +224,6 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
 
 static void handle_seat_request_set_cursor(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, request_set_cursor);
-    if (!seat->cursor->enabled) {
-        return;
-    }
-
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
     struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
     if (focused_client != event->seat_client) {
