@@ -77,15 +77,34 @@ void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamor
     wlr_cursor_warp(wlr_cursor, NULL, box.x, box.y);
 }
 
-void xcursor_configure(struct sycamore_cursor *cursor) {
+bool xcursor_init(struct sycamore_cursor *cursor) {
+    if (cursor->xcursor_manager) {
+        return true;
+    }
+
+    unsigned size = 24;
+    const char *theme = NULL;
+
+    char size_fmt[16];
+    snprintf(size_fmt, sizeof(size_fmt), "%u", size);
+    setenv("XCURSOR_SIZE", size_fmt, 1);
+
+    if (theme) {
+        setenv("XCURSOR_THEME", theme, 1);
+    }
+
+    cursor->xcursor_manager = wlr_xcursor_manager_create(theme, size);
     if (!cursor->xcursor_manager) {
-        unsigned cursor_size = 24;
-        const char *cursor_theme = NULL;
-        cursor->xcursor_manager = wlr_xcursor_manager_create(cursor_theme, cursor_size);
-        if (!cursor->xcursor_manager) {
-            wlr_log(WLR_ERROR, "Unable to create xcursor manager for theme '%s'", cursor_theme);
-            return;
-        }
+        wlr_log(WLR_ERROR, "Unable to create xcursor manager for theme '%s'", theme);
+        return false;
+    }
+
+    return true;
+}
+
+void xcursor_configure(struct sycamore_cursor *cursor) {
+    if (!xcursor_init(cursor)) {
+        return;
     }
 
     struct sycamore_output *output;
@@ -276,9 +295,16 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     wlr_cursor_attach_output_layout(cursor->wlr_cursor, output_layout);
 
+    if (!xcursor_init(cursor)) {
+        wlr_cursor_destroy(cursor->wlr_cursor);
+        free(cursor);
+        return NULL;
+    }
+
     cursor->gestures = wlr_pointer_gestures_v1_create(display);
     if (!cursor->gestures) {
-        sycamore_cursor_destroy(cursor);
+        wlr_cursor_destroy(cursor->wlr_cursor);
+        free(cursor);
         return NULL;
     }
 
