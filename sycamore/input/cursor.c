@@ -78,6 +78,8 @@ void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamor
 }
 
 bool xcursor_init(struct sycamore_cursor *cursor) {
+    /* TODO: Get cursor theme/size from config file
+     * recreate xcursor manager if theme/size changed. */
     if (cursor->xcursor_manager) {
         return true;
     }
@@ -99,22 +101,24 @@ bool xcursor_init(struct sycamore_cursor *cursor) {
         return false;
     }
 
+    struct sycamore_output *output;
+    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
+        wlr_xcursor_manager_load(cursor->xcursor_manager,
+                                 output->wlr_output->scale);
+    }
+
     return true;
 }
 
-void xcursor_configure(struct sycamore_cursor *cursor) {
-    if (!xcursor_init(cursor)) {
-        return;
-    }
+void output_setup_cursor(struct sycamore_cursor *cursor, struct sycamore_output *output) {
+    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
 
-    struct sycamore_output *output;
-    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
-        struct wlr_output *wlr_output = output->wlr_output;
-        bool result = wlr_xcursor_manager_load(cursor->xcursor_manager, wlr_output->scale);
-        if (!result) {
-            wlr_log(WLR_ERROR, "Unable to load xcursor theme for output '%s' with scale %f",
-                    wlr_output->name, wlr_output->scale);
-        }
+    /* If this is the first output, cursor should be in the center of it*/
+    if (wl_list_length(&output->server->all_outputs) == 1) {
+        struct wlr_fbox box;
+        output_get_center_coords(output, &box);
+        cursor->wlr_cursor->x = box.x;
+        cursor->wlr_cursor->y = box.y;
     }
 
     /* Refresh cursor image. */
@@ -287,6 +291,11 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         return NULL;
     }
 
+    cursor->image = NULL;
+    cursor->xcursor_manager = NULL;
+    cursor->enabled = false;
+    cursor->seat = seat;
+
     cursor->wlr_cursor = wlr_cursor_create();
     if (!cursor->wlr_cursor) {
         free(cursor);
@@ -307,11 +316,6 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         free(cursor);
         return NULL;
     }
-
-    cursor->xcursor_manager = NULL;
-    cursor->image = NULL;
-    cursor->enabled = false;
-    cursor->seat = seat;
 
     cursor->cursor_motion.notify = handle_cursor_motion_relative;
     wl_signal_add(&cursor->wlr_cursor->events.motion, &cursor->cursor_motion);

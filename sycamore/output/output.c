@@ -154,14 +154,5 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
     wlr_output_layout_get_box(server->output_layout, wlr_output, &output->usable_area);
     wl_list_insert(&server->all_outputs, &output->link);
 
-    struct sycamore_cursor *cursor = server->seat->cursor;
-    if (wl_list_length(&server->all_outputs) == 1) {
-        /* If this is the first output, cursor should be in the center of it*/
-        struct wlr_fbox box;
-        output_get_center_coords(output, &box);
-        cursor->wlr_cursor->x = box.x;
-        cursor->wlr_cursor->y = box.y;
-    }
-
-    xcursor_configure(cursor);
+    output_setup_cursor(server->seat->cursor, output);
 }
