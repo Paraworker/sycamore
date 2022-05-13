@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_keyboard.h>
-#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
@@ -12,10 +10,20 @@
 #include "sycamore/server.h"
 
 void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen) {
+    wl_list_insert(&view->server->mapped_views, &view->link);
+
+    struct sycamore_server *server = view->server;
+    struct wlr_box box;
+    cursor_at_output_box(server->seat->cursor, server->output_layout, &box);
+    view->x = box.x;
+    view->y = box.y;
+    wlr_scene_node_set_position(view->scene_node, view->x, view->y);
+
     view_set_maximized(view, maximized);
     view_set_fullscreen(view, fullscreen_output, fullscreen);
-    wl_list_insert(&view->server->mapped_views, &view->link);
+
     view_set_focus(view);
+
     struct sycamore_seat *seat = view->server->seat;
     seat->seatop_impl->cursor_rebase(seat);
 }

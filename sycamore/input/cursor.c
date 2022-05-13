@@ -147,6 +147,14 @@ void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output
     xcursor_reset(cursor);
 }
 
+void cursor_at_output_box(struct sycamore_cursor *cursor,
+        struct wlr_output_layout *layout, struct wlr_box *box) {
+    struct wlr_output *output = wlr_output_layout_output_at(layout,
+            cursor->wlr_cursor->x, cursor->wlr_cursor->y);
+
+    wlr_output_layout_get_box(layout, output, box);
+}
+
 static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
