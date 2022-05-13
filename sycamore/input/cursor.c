@@ -101,26 +101,11 @@ bool xcursor_init(struct sycamore_cursor *cursor) {
         return false;
     }
 
-    struct sycamore_output *output;
-    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
-        wlr_xcursor_manager_load(cursor->xcursor_manager,
-                                 output->wlr_output->scale);
-    }
-
     return true;
 }
 
-void output_setup_cursor(struct sycamore_cursor *cursor, struct sycamore_output *output) {
-    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
-
-    /* If this is the first output, cursor should be in the center of it*/
-    if (wl_list_length(&output->server->all_outputs) == 1) {
-        struct wlr_fbox box;
-        output_get_center_coords(output, &box);
-        cursor->wlr_cursor->x = box.x;
-        cursor->wlr_cursor->y = box.y;
-    }
-
+/* Refresh cursor image and warp it. */
+void xcursor_reset(struct sycamore_cursor *cursor) {
     /* Refresh cursor image. */
     const char *current_image = cursor->image;
     cursor_set_image(cursor, NULL);
@@ -132,6 +117,34 @@ void output_setup_cursor(struct sycamore_cursor *cursor, struct sycamore_output 
 
     struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
     wlr_cursor_warp(wlr_cursor, NULL, wlr_cursor->x, wlr_cursor->y);
+}
+
+void xcursor_reload(struct sycamore_cursor *cursor) {
+    if (!xcursor_init(cursor)) {
+        return;
+    }
+
+    struct sycamore_output *output;
+    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
+        wlr_xcursor_manager_load(cursor->xcursor_manager,
+                                 output->wlr_output->scale);
+    }
+
+    xcursor_reset(cursor);
+}
+
+void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output) {
+    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
+
+    /* If this is the first output, cursor should be in the center of it*/
+    if (wl_list_length(&output->server->all_outputs) == 1) {
+        struct wlr_fbox box;
+        output_get_center_coords(output, &box);
+        cursor->wlr_cursor->x = box.x;
+        cursor->wlr_cursor->y = box.y;
+    }
+
+    xcursor_reset(cursor);
 }
 
 static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
