@@ -147,12 +147,13 @@ void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output
     xcursor_reset(cursor);
 }
 
-void cursor_at_output_box(struct sycamore_cursor *cursor,
-        struct wlr_output_layout *layout, struct wlr_box *box) {
+struct wlr_output *cursor_at_output(struct sycamore_cursor *cursor,
+        struct wlr_output_layout *layout) {
+    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
     struct wlr_output *output = wlr_output_layout_output_at(layout,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y);
+            wlr_cursor->x, wlr_cursor->y);
 
-    wlr_output_layout_get_box(layout, output, box);
+    return output;
 }
 
 static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {

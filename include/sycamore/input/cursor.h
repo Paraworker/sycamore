@@ -56,8 +56,8 @@ void cursor_set_image_surface(struct sycamore_cursor *cursor,
 
 void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
-void cursor_at_output_box(struct sycamore_cursor *cursor,
-        struct wlr_output_layout *layout, struct wlr_box *box);
+struct wlr_output *cursor_at_output(struct sycamore_cursor *cursor,
+        struct wlr_output_layout *layout);
 
 struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         struct wl_display *display, struct wlr_output_layout *output_layout);

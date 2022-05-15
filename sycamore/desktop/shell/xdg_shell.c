@@ -6,6 +6,7 @@
 #include <wlr/util/log.h>
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
+#include "sycamore/output/output.h"
 
 void handle_xdg_shell_view_map(struct wl_listener *listener, void *data) {
     /* Called when the surface is mapped, or ready to display on-screen. */
@@ -43,13 +44,44 @@ void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *da
 
 void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_fullscreen);
-    view_set_fullscreen(&view->base_view, view->xdg_toplevel->requested.fullscreen_output,
-                        view->xdg_toplevel->requested.fullscreen);
+    struct sycamore_view *base = &view->base_view;
+    bool fullscreen = view->xdg_toplevel->requested.fullscreen;
+    if (fullscreen) {
+        /* If there is a fullscreen_output, satisfy it first */
+        struct wlr_output *output = view->xdg_toplevel->requested.fullscreen_output;
+        if (!output) {
+            struct sycamore_output *sycamore_output = view_get_main_output(base);
+            if (sycamore_output) {
+                output = sycamore_output->wlr_output;
+            }
+        }
+
+        /* output may still be NULL, but we apply it anyway */
+        struct wlr_box box;
+        wlr_output_layout_get_box(base->server->output_layout, output, &box);
+
+        view_set_fullscreen(base, &box, fullscreen);
+    } else {
+        view_set_fullscreen(base, NULL, fullscreen);
+    }
 }
 
 void handle_xdg_shell_view_request_maximize(struct wl_listener *listener, void *data) {
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_maximize);
-    view_set_maximized(&view->base_view, view->xdg_toplevel->requested.maximized);
+    struct sycamore_view *base = &view->base_view;
+    bool maximized = view->xdg_toplevel->requested.maximized;
+    if (maximized) {
+        struct sycamore_output *output = view_get_main_output(base);
+        if (output) {
+            view_set_maximized(base, &output->usable_area, maximized);
+        } else {
+            struct wlr_box box;
+            wlr_output_layout_get_box(base->server->output_layout, NULL, &box);
+            view_set_maximized(base, &box, maximized);
+        }
+    } else {
+        view_set_maximized(base, NULL, maximized);
+    }
 }
 
 void handle_xdg_shell_view_destroy(struct wl_listener *listener, void *data) {
