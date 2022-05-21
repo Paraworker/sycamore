@@ -132,15 +132,6 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
     wl_list_init(&manager->modifiers_nodes);
     manager->server = server;
 
-    /* alt */
-    struct sycamore_modifiers_node *alt = sycamore_modifiers_node_create(manager, WLR_MODIFIER_ALT);
-    if (!alt) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_modifiers_node: alt");
-        sycamore_keybinding_manager_destroy(manager);
-        return NULL;
-    }
-    sycamore_keybinding_create(alt, alt->modifiers, XKB_KEY_Tab, cycle_view);
-
     /* logo */
     struct sycamore_modifiers_node *logo = sycamore_modifiers_node_create(manager, WLR_MODIFIER_LOGO);
     if (!logo) {
@@ -148,6 +139,7 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
         sycamore_keybinding_manager_destroy(manager);
         return NULL;
     }
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_t, open_terminal);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
 
