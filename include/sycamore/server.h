@@ -40,7 +40,7 @@ struct sycamore_server {
     struct sycamore_keybinding_manager *keybinding_manager;
 
     struct wl_list mapped_views;
-    struct view_ptr desktop_focused_view;
+    struct view_ptr focused_view;
 
     const char *socket;
 };

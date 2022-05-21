@@ -312,6 +312,7 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
     }
 
     seat->seatop_impl = NULL;
+    seat->focused_layer = NULL;
     seat->server = server;
     wl_list_init(&seat->devices);
 
@@ -373,7 +374,7 @@ bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view 
     }
 
     /* Deny move from unfocused clients or there is no focused clients. */
-    if (view != seat->server->desktop_focused_view.view) {
+    if (view != seat->server->focused_view.view) {
         return false;
     }
 

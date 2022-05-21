@@ -12,6 +12,7 @@
 #include <wlr/util/log.h>
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
     if (!cursor->enabled) {

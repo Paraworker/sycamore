@@ -7,6 +7,7 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/cursor.h"
 
+struct sycamore_layer;
 struct sycamore_seat;
 struct sycamore_server;
 
@@ -82,6 +83,8 @@ struct sycamore_seat {
         struct seatop_pointer_move_data pointer_move_data;
         struct seatop_pointer_resize_data pointer_resize_data;
     };
+
+    struct sycamore_layer *focused_layer;
 
     struct wl_listener request_set_cursor;
     struct wl_listener request_set_selection;

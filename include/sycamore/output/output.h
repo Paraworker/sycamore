@@ -2,13 +2,16 @@
 #define SYCAMORE_OUTPUT_H
 
 #include <wlr/types/wlr_output.h>
-#include "sycamore/server.h"
+#include "sycamore/desktop/layer.h"
+
+struct sycamore_server;
 
 struct sycamore_output {
     struct wl_list link;
     struct wlr_output *wlr_output;
     struct wlr_scene_output *scene_output;
 
+    struct wl_list layers[LAYERS_ALL];   //sycamore_layer::link
     struct wlr_box usable_area;
 
     struct wl_listener destroy;

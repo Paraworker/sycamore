@@ -3,20 +3,21 @@
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
 #include "sycamore/desktop/shell/layer_shell.h"
+#include "sycamore/output/output.h"
 
 void handle_sycamore_layer_map(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, map);
-    sycamore_layer_map(layer);
+    layer_map(layer);
 }
 
 void handle_sycamore_layer_unmap(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, unmap);
-    sycamore_layer_unmap(layer);
+    layer_unmap(layer);
 }
 
 void handle_sycamore_layer_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, destroy);
-    layer->wlr_layer_surface = NULL;
+    layer->layer_surface = NULL;
     sycamore_layer_destroy(layer);
 }
 
@@ -24,11 +25,30 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
     struct sycamore_layer_shell *layer_shell =
             wl_container_of(listener, layer_shell, new_layer_shell_surface);
     struct wlr_layer_surface_v1 *layer_surface = data;
+    struct sycamore_server *server = layer_shell->server;
 
-    if (!sycamore_layer_create(layer_shell->server, layer_surface)) {
+    struct sycamore_layer *layer = sycamore_layer_create(server, layer_surface);
+    if (!layer) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_layer");
         return;
     }
+
+    struct wlr_scene_node *parent = layer_get_scene_node(server->scene, layer);
+
+    layer->scene = wlr_scene_layer_surface_v1_create(
+            parent, layer->layer_surface);
+    layer->scene->node->data = layer;
+    layer->layer_surface->data = layer->scene->node;
+
+    struct sycamore_output *output = layer->output;
+    wl_list_insert(&output->layers[layer->layer_type], &layer->link);
+
+    // Temporarily set the layer's current state to pending
+    // So that we can easily arrange it
+    struct wlr_layer_surface_v1_state old_state = layer_surface->current;
+    layer_surface->current = layer_surface->pending;
+    arrange_layers(output);
+    layer_surface->current = old_state;
 }
 
 struct sycamore_layer_shell *sycamore_layer_shell_create(

@@ -77,9 +77,10 @@ void view_set_focus(struct sycamore_view *view) {
         return;
     }
     struct sycamore_server *server = view->server;
-    struct sycamore_view *prev_view = server->desktop_focused_view.view;
+    struct sycamore_seat *seat = server->seat;
+    struct sycamore_view *prev_view = server->focused_view.view;
     if (prev_view == view) {
-        /* Don't re-focus an already focused view. */
+        /* Don't refocus */
         return;
     }
 
@@ -88,7 +89,7 @@ void view_set_focus(struct sycamore_view *view) {
          * it no longer has focus and the client will repaint accordingly, e.g.
          * stop displaying a caret. */
         prev_view->interface->set_activated(prev_view, false);
-        view_ptr_disconnect(&server->desktop_focused_view);
+        view_ptr_disconnect(&server->focused_view);
     }
 
     /* Move the view to the front */
@@ -99,9 +100,11 @@ void view_set_focus(struct sycamore_view *view) {
     /* Activate the new view */
     view->interface->set_activated(view, true);
 
-    seat_set_keyboard_focus(server->seat, view->interface->get_wlr_surface(view));
+    if (!seat->focused_layer) {
+        seat_set_keyboard_focus(seat, view->interface->get_wlr_surface(view));
+    }
 
-    view_ptr_connect(&server->desktop_focused_view, view);
+    view_ptr_connect(&server->focused_view, view);
 }
 
 void view_set_fullscreen(struct sycamore_view *view,
