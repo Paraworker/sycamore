@@ -17,6 +17,13 @@ void handle_sycamore_layer_unmap(struct wl_listener *listener, void *data) {
 
 void handle_sycamore_layer_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, destroy);
+
+    if (layer->linked) {
+        wl_list_remove(&layer->link);
+        layer->linked = false;
+        arrange_layers(layer->output);
+    }
+
     layer->layer_surface = NULL;
     sycamore_layer_destroy(layer);
 }
@@ -42,6 +49,7 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
 
     struct sycamore_output *output = layer->output;
     wl_list_insert(&output->layers[layer->layer_type], &layer->link);
+    layer->linked = true;
 
     // Temporarily set the layer's current state to pending
     // So that we can easily arrange it

@@ -22,7 +22,6 @@ void layer_map(struct sycamore_layer *layer) {
         arrange_layers(layer->output);
     }
 
-    layer->mapped = true;
     seat->seatop_impl->cursor_rebase(seat);
 }
 
@@ -37,7 +36,6 @@ void layer_unmap(struct sycamore_layer *layer) {
         }
     }
 
-    layer->mapped = false;
     seat->seatop_impl->cursor_rebase(seat);
 }
 
@@ -100,7 +98,7 @@ struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, str
     sycamore_layer->scene_descriptor = SCENE_DESC_LAYER;
     sycamore_layer->layer_type = layer_surface->pending.layer;
     sycamore_layer->layer_surface = layer_surface;
-    sycamore_layer->mapped = false;
+    sycamore_layer->linked = false;
     sycamore_layer->output = layer_surface->output->data;
     sycamore_layer->server = server;
 
@@ -122,13 +120,10 @@ void sycamore_layer_destroy(struct sycamore_layer *layer) {
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
-    wl_list_remove(&layer->link);
 
     if (layer->layer_surface) {
         wlr_layer_surface_v1_destroy(layer->layer_surface);
     }
-
-    arrange_layers(layer->output);
 
     free(layer);
 }

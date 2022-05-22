@@ -104,10 +104,8 @@ void sycamore_output_destroy(struct sycamore_output *output) {
     for (int i = 0; i < LAYERS_ALL; ++i) {
         struct sycamore_layer *layer, *next;
         wl_list_for_each_safe(layer, next, &output->layers[i], link) {
-            if (layer->mapped) {
-                layer_unmap(layer);
-            }
-            sycamore_layer_destroy(layer);
+            wl_list_remove(&layer->link);
+            layer->linked = false;
         }
     }
 
