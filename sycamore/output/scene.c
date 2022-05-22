@@ -9,7 +9,7 @@
 #include "sycamore/server.h"
 
 struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
-        struct wlr_output_layout *output_layout, struct wlr_presentation *presentation) {
+        struct wlr_output_layout *layout, struct wlr_presentation *presentation) {
     struct sycamore_scene *scene = calloc(1, sizeof(struct sycamore_scene));
     if (!scene) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_scene");
@@ -30,7 +30,7 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
     scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->node);
     scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->node);
 
-    wlr_scene_attach_output_layout(scene->wlr_scene, output_layout);
+    wlr_scene_attach_output_layout(scene->wlr_scene, layout);
     wlr_scene_set_presentation(scene->wlr_scene, presentation);
 
     return scene;
@@ -47,17 +47,23 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
 struct wlr_surface *surface_under(struct sycamore_scene *scene,
         double lx, double ly, double *sx, double *sy) {
     struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, sx, sy);
-    if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {
+    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
 
-    return wlr_scene_surface_from_node(node)->surface;
+    struct wlr_scene_surface *scene_surface =
+            wlr_scene_surface_from_buffer(wlr_scene_buffer_from_node(node));
+    if (!scene_surface) {
+        return NULL;
+    }
+
+    return scene_surface->surface;
 }
 
 struct sycamore_view *view_under(struct sycamore_scene *scene, double lx, double ly) {
     double sx, sy;
     struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, &sx, &sy);
-    if (node == NULL || node->type != WLR_SCENE_NODE_SURFACE) {
+    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
 
