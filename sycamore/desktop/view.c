@@ -60,7 +60,7 @@ void view_unmap(struct sycamore_view *view) {
 }
 
 struct sycamore_output *view_get_main_output(struct sycamore_view *view) {
-    struct wlr_surface *surface = view->interface->get_wlr_surface(view);
+    struct wlr_surface *surface = view->wlr_surface;
 
     struct wl_list *surface_outputs = &surface->current_outputs;
     if (wl_list_empty(surface_outputs)) {
@@ -101,7 +101,7 @@ void view_set_focus(struct sycamore_view *view) {
     view->interface->set_activated(view, true);
 
     if (!seat->focused_layer) {
-        seat_set_keyboard_focus(seat, view->interface->get_wlr_surface(view));
+        seat_set_keyboard_focus(seat, view->wlr_surface);
     }
 
     view_ptr_connect(&server->focused_view, view);

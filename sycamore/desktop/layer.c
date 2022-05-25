@@ -32,7 +32,7 @@ void layer_unmap(struct sycamore_layer *layer) {
         seat->focused_layer = NULL;
         struct sycamore_view *view = seat->server->focused_view.view;
         if (view) {
-            seat_set_keyboard_focus(seat, view->interface->get_wlr_surface(view));
+            seat_set_keyboard_focus(seat, view->wlr_surface);
         }
     }
 
