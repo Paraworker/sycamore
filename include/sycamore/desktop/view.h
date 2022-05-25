@@ -37,10 +37,10 @@ struct sycamore_view_interface {
 /* the base view */
 struct sycamore_view {
     enum scene_descriptor_type scene_descriptor;
-    const struct sycamore_view_interface* interface;
+    const struct sycamore_view_interface *interface;
     struct wlr_surface *wlr_surface;
-    enum sycamore_view_type view_type;
     struct wlr_scene_node *scene_node;
+    enum sycamore_view_type view_type;
     struct wl_list link;
     struct wl_list ptrs;
     int x, y;
