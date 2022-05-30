@@ -44,6 +44,13 @@ static void terminate_server(struct sycamore_server *server, struct sycamore_key
 }
 
 /* action */
+static void open_launcher(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    if (fork() == 0) {
+        execl("/bin/sh", "/bin/sh", "-c", "wofi --show run", (void *)NULL);
+    }
+}
+
+/* action */
 static void open_terminal(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", (void *)NULL);
@@ -140,6 +147,7 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
         return NULL;
     }
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_d, open_launcher);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_t, open_terminal);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
 
