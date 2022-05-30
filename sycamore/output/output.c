@@ -25,7 +25,9 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
 
 static void handle_output_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_output *output = wl_container_of(listener, output, destroy);
+
     output->wlr_output = NULL;
+
     sycamore_output_destroy(output);
 }
 

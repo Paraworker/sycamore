@@ -68,6 +68,7 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
 static void handle_seat_device_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_seat_device *seat_device = wl_container_of(listener, seat_device, destroy);
     struct sycamore_seat *seat = seat_device->seat;
+
     seat_device_destroy(seat_device);
     seat_update_capabilities(seat);
 }
@@ -260,6 +261,7 @@ static void handle_seat_destroy(struct wl_listener *listener, void *data) {
 
     seat->wlr_seat = NULL;
     seat->server->seat = NULL;
+
     sycamore_seat_destroy(seat);
 }
 
