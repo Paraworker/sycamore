@@ -24,8 +24,10 @@ struct view_ptr {
     struct wl_list link;    //view::ptrs
 };
 
-struct sycamore_view_interface {
+struct view_interface {
     void (*destroy)(struct sycamore_view *view);
+    void (*map)(struct sycamore_view *view);
+    void (*unmap)(struct sycamore_view *view);
     void (*set_activated)(struct sycamore_view *view, bool activated);
     void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
     void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
@@ -34,10 +36,10 @@ struct sycamore_view_interface {
     void (*get_geometry)(struct sycamore_view *view, struct wlr_box *box);
 };
 
-/* the base view */
+/* base view */
 struct sycamore_view {
     enum scene_descriptor_type scene_descriptor;
-    const struct sycamore_view_interface *interface;
+    const struct view_interface *interface;
     struct wlr_surface *wlr_surface;
     struct wlr_scene_node *scene_node;
     enum sycamore_view_type view_type;
@@ -45,6 +47,7 @@ struct sycamore_view {
     struct wl_list ptrs;
     int x, y;
 
+    bool mapped;
     bool is_maximized;
     bool is_fullscreen;
 
@@ -68,9 +71,15 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_maximize;
 };
 
-void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);
+void view_init(struct sycamore_view *view, struct wlr_surface *surface,
+        const struct view_interface *interface, struct sycamore_server *server);
+
+void view_map(struct sycamore_view *view,
+        struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);
 
 void view_unmap(struct sycamore_view *view);
+
+void view_destroy(struct sycamore_view *view);
 
 struct sycamore_output *view_get_main_output(struct sycamore_view *view);
 

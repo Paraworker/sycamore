@@ -9,7 +9,28 @@
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
-void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, bool maximized, bool fullscreen) {
+void view_init(struct sycamore_view *view, struct wlr_surface *surface,
+        const struct view_interface *interface, struct sycamore_server *server) {
+    view->scene_descriptor = SCENE_DESC_VIEW;
+    view->interface = interface;
+    view->wlr_surface = surface;
+    view->view_type = VIEW_TYPE_XDG_SHELL;
+
+    view->mapped = false;
+    view->is_fullscreen = false;
+    view->is_maximized = false;
+
+    wl_list_init(&view->ptrs);
+
+    view->server = server;
+}
+
+void view_map(struct sycamore_view *view,
+        struct wlr_output *fullscreen_output, bool maximized, bool fullscreen) {
+    if (view->mapped) {
+        return;
+    }
+
     wl_list_insert(&view->server->mapped_views, &view->link);
 
     struct sycamore_server *server = view->server;
@@ -41,6 +62,10 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
         }
     }
 
+    view->interface->map(view);
+
+    view->mapped = true;
+
     view_set_focus(view);
 
     struct sycamore_seat *seat = view->server->seat;
@@ -48,15 +73,31 @@ void view_map(struct sycamore_view *view, struct wlr_output *fullscreen_output, 
 }
 
 void view_unmap(struct sycamore_view *view) {
+    if (!view->mapped) {
+        return;
+    }
+
     wl_list_remove(&view->link);
 
-    struct view_ptr *ptr, *next_ptr;
-    wl_list_for_each_safe(ptr, next_ptr, &view->ptrs, link) {
+    struct view_ptr *ptr, *next;
+    wl_list_for_each_safe(ptr, next, &view->ptrs, link) {
         view_ptr_disconnect(ptr);
     }
 
+    view->interface->unmap(view);
+
+    view->mapped = false;
+
     struct sycamore_seat *seat = view->server->seat;
     seat->seatop_impl->cursor_rebase(seat);
+}
+
+void view_destroy(struct sycamore_view *view) {
+    if (!view || view->mapped) {
+        return;
+    }
+
+    view->interface->destroy(view);
 }
 
 struct sycamore_output *view_get_main_output(struct sycamore_view *view) {
