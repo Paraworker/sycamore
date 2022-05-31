@@ -40,12 +40,12 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
         return;
     }
 
-    struct wlr_scene_node *parent = layer_get_scene_node(server->scene, layer);
+    struct wlr_scene_tree *parent = layer_get_scene_tree(server->scene, layer);
 
     layer->scene = wlr_scene_layer_surface_v1_create(
             parent, layer->layer_surface);
-    layer->scene->node->data = layer;
-    layer->layer_surface->data = layer->scene->node;
+    layer->scene->tree->node.data = layer;
+    layer->layer_surface->data = layer->scene->tree;
 
     struct sycamore_output *output = layer->output;
     wl_list_insert(&output->layers[layer->layer_type], &layer->link);

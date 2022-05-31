@@ -39,17 +39,17 @@ void layer_unmap(struct sycamore_layer *layer) {
     seat->seatop_impl->cursor_rebase(seat);
 }
 
-struct wlr_scene_node *layer_get_scene_node(struct sycamore_scene *root,
+struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *root,
         struct sycamore_layer *layer) {
     switch (layer->layer_type) {
         case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
-            return &root->trees.shell_background->node;
+            return root->trees.shell_background;
         case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
-            return &root->trees.shell_button->node;
+            return root->trees.shell_button;
         case ZWLR_LAYER_SHELL_V1_LAYER_TOP:
-            return &root->trees.shell_top->node;
+            return root->trees.shell_top;
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
-            return &root->trees.shell_overlay->node;
+            return root->trees.shell_overlay;
         default:
             return NULL;
     }

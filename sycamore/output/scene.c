@@ -24,11 +24,11 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
     }
 
     scene->server = server;
-    scene->trees.shell_background = wlr_scene_tree_create(&scene->wlr_scene->node);
-    scene->trees.shell_button = wlr_scene_tree_create(&scene->wlr_scene->node);
-    scene->trees.shell_view = wlr_scene_tree_create(&scene->wlr_scene->node);
-    scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->node);
-    scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->node);
+    scene->trees.shell_background = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    scene->trees.shell_button = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    scene->trees.shell_view = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->tree);
 
     wlr_scene_attach_output_layout(scene->wlr_scene, layout);
     wlr_scene_set_presentation(scene->wlr_scene, presentation);
@@ -46,7 +46,7 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
 
 struct wlr_surface *surface_under(struct sycamore_scene *scene,
         double lx, double ly, double *sx, double *sy) {
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, sx, sy);
+    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->tree.node, lx, ly, sx, sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
@@ -62,19 +62,20 @@ struct wlr_surface *surface_under(struct sycamore_scene *scene,
 
 struct sycamore_view *view_under(struct sycamore_scene *scene, double lx, double ly) {
     double sx, sy;
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->node, lx, ly, &sx, &sy);
+    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->tree.node, lx, ly, &sx, &sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
 
-    while (node != NULL && node->data == NULL) {
-        node = node->parent;
+    struct wlr_scene_tree *tree = node->parent;
+    while (tree != NULL && tree->node.data == NULL) {
+        tree = tree->node.parent;
     }
 
-    enum scene_descriptor_type *descriptor_type = node->data;
+    enum scene_descriptor_type *descriptor_type = tree->node.data;
     if (*descriptor_type != SCENE_DESC_VIEW) {
         return NULL;
     }
-    return node->data;
+    return tree->node.data;
 }
 

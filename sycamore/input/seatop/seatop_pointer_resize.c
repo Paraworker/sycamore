@@ -67,7 +67,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     int new_width = new_right - new_left;
     int new_height = new_bottom - new_top;
 
-    wlr_scene_node_set_position(view->scene_node, view->x, view->y);
+    wlr_scene_node_set_position(&view->scene_tree->node, view->x, view->y);
     view->interface->set_size(view, new_width, new_height);
 }
 

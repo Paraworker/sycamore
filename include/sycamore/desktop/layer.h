@@ -36,7 +36,7 @@ struct sycamore_layer *sycamore_layer_create(struct sycamore_server *server,
 
 void sycamore_layer_destroy(struct sycamore_layer *layer);
 
-struct wlr_scene_node *layer_get_scene_node(struct sycamore_scene *root,
+struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *root,
         struct sycamore_layer *layer);
 
 #endif //SYCAMORE_LAYER_H

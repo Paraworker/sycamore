@@ -24,7 +24,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     view->x = cursor->x - data->dx;
     view->y = cursor->y - data->dy;
 
-    wlr_scene_node_set_position(view->scene_node, view->x, view->y);
+    wlr_scene_node_set_position(&view->scene_tree->node, view->x, view->y);
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {
