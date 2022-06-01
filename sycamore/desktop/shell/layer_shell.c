@@ -25,6 +25,7 @@ void handle_sycamore_layer_destroy(struct wl_listener *listener, void *data) {
     }
 
     layer->layer_surface = NULL;
+
     sycamore_layer_destroy(layer);
 }
 

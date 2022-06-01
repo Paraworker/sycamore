@@ -38,14 +38,16 @@ struct view_interface {
 
 /* base view */
 struct sycamore_view {
-    enum scene_descriptor_type scene_descriptor;
+    enum scene_descriptor_type scene_descriptor;    //must be first
     const struct view_interface *interface;
     struct wlr_surface *wlr_surface;
-    struct wlr_scene_tree *scene_tree;
     enum sycamore_view_type view_type;
+    int x, y;
+
+    struct wlr_scene_tree *scene_tree;
+
     struct wl_list link;
     struct wl_list ptrs;
-    int x, y;
 
     bool mapped;
     bool is_maximized;
