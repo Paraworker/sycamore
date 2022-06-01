@@ -61,14 +61,8 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     struct wlr_box geo_box;
     view->interface->get_geometry(view, &geo_box);
 
-    view->x = new_left - geo_box.x;
-    view->y = new_top - geo_box.y;
-
-    int new_width = new_right - new_left;
-    int new_height = new_bottom - new_top;
-
-    wlr_scene_node_set_position(&view->scene_tree->node, view->x, view->y);
-    view->interface->set_size(view, new_width, new_height);
+    view_move_to(view, new_left - geo_box.x, new_top - geo_box.y);
+    view->interface->set_size(view, new_right - new_left, new_bottom - new_top);
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {

@@ -83,6 +83,8 @@ void view_unmap(struct sycamore_view *view);
 
 void view_destroy(struct sycamore_view *view);
 
+void view_move_to(struct sycamore_view *view, int x, int y);
+
 struct sycamore_output *view_get_main_output(struct sycamore_view *view);
 
 void view_set_fullscreen(struct sycamore_view *view,
