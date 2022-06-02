@@ -42,7 +42,7 @@ void cursor_set_image_surface(struct sycamore_cursor *cursor,
 
 void pointer_update(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy, uint32_t time_msec) {
-    struct wlr_seat* seat = cursor->seat->wlr_seat;
+    struct wlr_seat *seat = cursor->seat->wlr_seat;
     if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
         wlr_seat_pointer_notify_motion(cursor->seat->wlr_seat, time_msec, sx, sy);

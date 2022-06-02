@@ -245,7 +245,7 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
                     wlr_layer_surface_v1_from_wlr_surface(parent_surface);
             parent_tree = parent->data;
         } else {
-            wlr_log(WLR_ERROR, "unknown parent surface type");
+            wlr_log(WLR_ERROR, "Unknown parent surface type");
             return;
         }
 
@@ -295,7 +295,7 @@ struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct sycamore_server *ser
 
     xdg_shell->wlr_xdg_shell = wlr_xdg_shell_create(display, 3);
     if (!xdg_shell->wlr_xdg_shell) {
-        wlr_log(WLR_ERROR, "Unable to create_wlr_xdg_shell");
+        wlr_log(WLR_ERROR, "Unable to create wlr_xdg_shell");
         free(xdg_shell);
         return NULL;
     }
