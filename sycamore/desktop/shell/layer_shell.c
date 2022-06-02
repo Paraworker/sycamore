@@ -7,22 +7,18 @@
 
 void handle_sycamore_layer_map(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, map);
+
     layer_map(layer);
 }
 
 void handle_sycamore_layer_unmap(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, unmap);
+
     layer_unmap(layer);
 }
 
 void handle_sycamore_layer_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, destroy);
-
-    if (layer->linked) {
-        wl_list_remove(&layer->link);
-        layer->linked = false;
-        arrange_layers(layer->output);
-    }
 
     layer->layer_surface = NULL;
 

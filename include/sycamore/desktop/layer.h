@@ -10,12 +10,14 @@ struct sycamore_output;
 struct sycamore_server;
 
 struct sycamore_layer {
-    enum scene_descriptor_type scene_descriptor;
-    struct wl_list link;
-    bool linked;
+    enum scene_descriptor_type scene_descriptor;    //must be first
     struct wlr_layer_surface_v1 *layer_surface;
-    struct wlr_scene_layer_surface_v1 *scene;
     enum zwlr_layer_shell_v1_layer layer_type;
+    bool mapped;
+    bool linked;
+    struct wl_list link;
+
+    struct wlr_scene_layer_surface_v1 *scene;
 
     struct wl_listener destroy;
     struct wl_listener map;

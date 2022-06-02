@@ -9,6 +9,10 @@
 #include "sycamore/server.h"
 
 void layer_map(struct sycamore_layer *layer) {
+    if (layer->mapped) {
+        return;
+    }
+
     struct wlr_layer_surface_v1 *layer_surface = layer->layer_surface;
     struct sycamore_seat *seat = layer->server->seat;
 
@@ -22,19 +26,28 @@ void layer_map(struct sycamore_layer *layer) {
         arrange_layers(layer->output);
     }
 
+    layer->mapped = true;
+
     seat->seatop_impl->cursor_rebase(seat);
 }
 
 void layer_unmap(struct sycamore_layer *layer) {
-    struct sycamore_seat *seat = layer->server->seat;
+    if (!layer->mapped) {
+        return;
+    }
+
+    struct sycamore_server *server = layer->server;
+    struct sycamore_seat *seat = server->seat;
 
     if (seat->focused_layer == layer) {
         seat->focused_layer = NULL;
-        struct sycamore_view *view = seat->server->focused_view.view;
+        struct sycamore_view *view = server->focused_view.view;
         if (view) {
             seat_set_keyboard_focus(seat, view->wlr_surface);
         }
     }
+
+    layer->mapped = false;
 
     seat->seatop_impl->cursor_rebase(seat);
 }
@@ -76,13 +89,14 @@ void arrange_layers(struct sycamore_output *output) {
     output->usable_area = usable_area;
 }
 
-struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, struct wlr_layer_surface_v1 *layer_surface) {
+struct sycamore_layer *sycamore_layer_create(struct sycamore_server *server, struct wlr_layer_surface_v1 *layer_surface) {
     struct sycamore_layer *sycamore_layer = calloc(1, sizeof(struct sycamore_layer));
     if (!sycamore_layer) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_layer");
         return NULL;
     }
 
+    /* Allocate an output for this layer. */
     if (!layer_surface->output) {
         struct wl_list *all_outputs = &server->all_outputs;
         if (wl_list_empty(all_outputs)) {
@@ -96,8 +110,9 @@ struct sycamore_layer* sycamore_layer_create(struct sycamore_server *server, str
     }
 
     sycamore_layer->scene_descriptor = SCENE_DESC_LAYER;
-    sycamore_layer->layer_type = layer_surface->pending.layer;
     sycamore_layer->layer_surface = layer_surface;
+    sycamore_layer->layer_type = layer_surface->pending.layer;
+    sycamore_layer->mapped = false;
     sycamore_layer->linked = false;
     sycamore_layer->output = layer_surface->output->data;
     sycamore_layer->server = server;
@@ -117,9 +132,19 @@ void sycamore_layer_destroy(struct sycamore_layer *layer) {
         return;
     }
 
+    if (layer->mapped) {
+        layer_unmap(layer);
+    }
+
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
+
+    if (layer->linked) {
+        wl_list_remove(&layer->link);
+        layer->linked = false;
+        arrange_layers(layer->output);
+    }
 
     if (layer->layer_surface) {
         wlr_layer_surface_v1_destroy(layer->layer_surface);
