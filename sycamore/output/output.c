@@ -15,12 +15,15 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
      * generally at the output's refresh rate (e.g. 60Hz). */
     struct sycamore_output *output = wl_container_of(listener, output, frame);
 
+    struct wlr_scene_output *scene_output =
+            wlr_scene_get_scene_output(output->scene, output->wlr_output);
+
     /* Render the scene if needed and commit the output */
-    wlr_scene_output_commit(output->scene_output);
+    wlr_scene_output_commit(scene_output);
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
-    wlr_scene_output_send_frame_done(output->scene_output, &now);
+    wlr_scene_output_send_frame_done(scene_output, &now);
 }
 
 static void handle_output_destroy(struct wl_listener *listener, void *data) {
@@ -33,23 +36,16 @@ static void handle_output_destroy(struct wl_listener *listener, void *data) {
 
 struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
         struct wlr_output *wlr_output) {
-    struct sycamore_output *output = calloc(1, sizeof(struct sycamore_output));
+    struct sycamore_output *output =
+            calloc(1, sizeof(struct sycamore_output));
     if (!output) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore output");
+        wlr_log(WLR_ERROR, "Unable to allocate sycamore_output");
         return NULL;
     }
 
     output->wlr_output = wlr_output;
+    output->scene = server->scene->wlr_scene;
     output->server = server;
-
-    output->scene_output = wlr_scene_output_create(server->scene->wlr_scene, wlr_output);
-    if (!output->scene_output) {
-        wlr_log(WLR_ERROR, "Unable to create scene_output");
-        free(output);
-        return NULL;
-    }
-
-    wlr_output->data = output;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
         wl_list_init(&output->layers[i]);
@@ -111,10 +107,6 @@ void sycamore_output_destroy(struct sycamore_output *output) {
         }
     }
 
-    if (output->scene_output) {
-        wlr_scene_output_destroy(output->scene_output);
-    }
-
     if (output->wlr_output) {
         wlr_output_destroy(output->wlr_output);
     }
@@ -146,7 +138,6 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         wlr_output_set_mode(wlr_output, mode);
         wlr_output_enable(wlr_output, true);
         if (!wlr_output_commit(wlr_output)) {
-            wlr_output_destroy(wlr_output);
             return;
         }
     }
@@ -156,6 +147,8 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_output");
         return;
     }
+
+    wlr_output->data = output;
 
     wlr_output_layout_add_auto(server->output_layout, wlr_output);
 
