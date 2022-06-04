@@ -122,7 +122,7 @@ static bool server_init(struct sycamore_server *server) {
         return false;
     }
 
-    return server;
+    return true;
 }
 
 void server_destroy(struct sycamore_server *server) {
