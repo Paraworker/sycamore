@@ -15,7 +15,8 @@ static void handle_xdg_shell_view_request_move(struct wl_listener *listener, voi
      * provided serial against a list of button press serials sent to this
      * client, to prevent the client from requesting this whenever they want. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_move);
-    seatop_begin_pointer_move(view->base_view.server->seat, &view->base_view);
+    struct sycamore_view *base = &view->base_view;
+    seatop_begin_pointer_move(base->server->seat, base);
 }
 
 static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *data) {
@@ -24,9 +25,10 @@ static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, v
      * decorations. Note that a more sophisticated compositor should check the
      * provided serial against a list of button press serials sent to this
      * client, to prevent the client from requesting this whenever they want. */
-    struct wlr_xdg_toplevel_resize_event *event = data;
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_resize);
-    seatop_begin_pointer_resize(view->base_view.server->seat, &view->base_view, event->edges);
+    struct sycamore_view *base = &view->base_view;
+    struct wlr_xdg_toplevel_resize_event *event = data;
+    seatop_begin_pointer_resize(base->server->seat, base, event->edges);
 }
 
 static void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {
