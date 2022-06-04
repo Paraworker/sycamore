@@ -71,6 +71,7 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_resize;
     struct wl_listener request_fullscreen;
     struct wl_listener request_maximize;
+    struct wl_listener request_minimize;
 };
 
 void view_init(struct sycamore_view *view, struct wlr_surface *surface,

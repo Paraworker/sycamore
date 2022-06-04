@@ -71,6 +71,12 @@ static void handle_xdg_shell_view_request_maximize(struct wl_listener *listener,
     }
 }
 
+static void handle_xdg_shell_view_request_minimize(struct wl_listener *listener, void *data) {
+    struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_minimize);
+
+    wlr_xdg_surface_schedule_configure(view->xdg_toplevel->base);
+}
+
 static void handle_xdg_shell_view_destroy(struct wl_listener *listener, void *data) {
     /* Called when the surface is destroyed and should never be shown again. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, destroy);
@@ -126,6 +132,9 @@ static void xdg_shell_view_map(struct sycamore_view *view) {
     xdg_shell_view->request_maximize.notify = handle_xdg_shell_view_request_maximize;
     wl_signal_add(&toplevel->events.request_maximize,
                   &xdg_shell_view->request_maximize);
+    xdg_shell_view->request_minimize.notify = handle_xdg_shell_view_request_minimize;
+    wl_signal_add(&toplevel->events.request_minimize,
+                  &xdg_shell_view->request_minimize);
 }
 
 /* view interface */
@@ -135,8 +144,9 @@ static void xdg_shell_view_unmap(struct sycamore_view *view) {
 
     wl_list_remove(&xdg_shell_view->request_move.link);
     wl_list_remove(&xdg_shell_view->request_resize.link);
-    wl_list_remove(&xdg_shell_view->request_maximize.link);
     wl_list_remove(&xdg_shell_view->request_fullscreen.link);
+    wl_list_remove(&xdg_shell_view->request_maximize.link);
+    wl_list_remove(&xdg_shell_view->request_minimize.link);
 }
 
 /* view interface */
