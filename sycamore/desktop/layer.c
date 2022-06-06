@@ -52,9 +52,28 @@ void layer_unmap(struct sycamore_layer *layer) {
     seat->seatop_impl->cursor_rebase(seat);
 }
 
+void layer_surface_commit(struct sycamore_layer *layer) {
+    struct wlr_layer_surface_v1 *layer_surface = layer->layer_surface;
+    struct sycamore_output *output = layer->output;
+    uint32_t committed = layer_surface->current.committed;
+
+    if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
+        enum zwlr_layer_shell_v1_layer layer_type = layer_surface->current.layer;
+        struct wlr_scene_tree *scene_tree = layer_get_scene_tree(layer->server->scene, layer_type);
+        wlr_scene_node_reparent(&layer->scene->tree->node, scene_tree);
+        wl_list_remove(&layer->link);
+        wl_list_insert(&output->layers[layer_type], &layer->link);
+    }
+
+    if (committed || layer_surface->mapped != layer->mapped) {
+        layer->mapped = layer_surface->mapped;
+        arrange_layers(output);
+    }
+}
+
 struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *root,
-        struct sycamore_layer *layer) {
-    switch (layer->layer_type) {
+        enum zwlr_layer_shell_v1_layer type) {
+    switch (type) {
         case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
             return root->trees.shell_background;
         case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
@@ -89,10 +108,12 @@ void arrange_layers(struct sycamore_output *output) {
     output->usable_area = usable_area;
 }
 
-struct sycamore_layer *sycamore_layer_create(struct sycamore_server *server, struct wlr_layer_surface_v1 *layer_surface) {
-    struct sycamore_layer *sycamore_layer = calloc(1, sizeof(struct sycamore_layer));
-    if (!sycamore_layer) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_layer");
+struct sycamore_layer *layer_create(struct sycamore_server *server,
+        struct wlr_layer_surface_v1 *layer_surface) {
+    struct sycamore_layer *layer =
+            calloc(1, sizeof(struct sycamore_layer));
+    if (!layer) {
+        wlr_log(WLR_ERROR, "Unable to allocate layer");
         return NULL;
     }
 
@@ -101,7 +122,7 @@ struct sycamore_layer *sycamore_layer_create(struct sycamore_server *server, str
         struct wl_list *all_outputs = &server->all_outputs;
         if (wl_list_empty(all_outputs)) {
             wlr_log(WLR_ERROR, "No output for layer_surface");
-            free(sycamore_layer);
+            free(layer);
             return NULL;
         }
 
@@ -109,25 +130,17 @@ struct sycamore_layer *sycamore_layer_create(struct sycamore_server *server, str
         layer_surface->output = output->wlr_output;
     }
 
-    sycamore_layer->scene_descriptor = SCENE_DESC_LAYER;
-    sycamore_layer->layer_surface = layer_surface;
-    sycamore_layer->layer_type = layer_surface->pending.layer;
-    sycamore_layer->mapped = false;
-    sycamore_layer->linked = false;
-    sycamore_layer->output = layer_surface->output->data;
-    sycamore_layer->server = server;
+    layer->scene_descriptor = SCENE_DESC_LAYER;
+    layer->layer_surface = layer_surface;
+    layer->mapped = false;
+    layer->linked = false;
+    layer->output = layer_surface->output->data;
+    layer->server = server;
 
-    sycamore_layer->map.notify = handle_sycamore_layer_map;
-    wl_signal_add(&layer_surface->events.map, &sycamore_layer->map);
-    sycamore_layer->unmap.notify = handle_sycamore_layer_unmap;
-    wl_signal_add(&layer_surface->events.unmap, &sycamore_layer->unmap);
-    sycamore_layer->destroy.notify = handle_sycamore_layer_destroy;
-    wl_signal_add(&layer_surface->events.destroy, &sycamore_layer->destroy);
-
-    return sycamore_layer;
+    return layer;
 }
 
-void sycamore_layer_destroy(struct sycamore_layer *layer) {
+void layer_destroy(struct sycamore_layer *layer) {
     if (!layer) {
         return;
     }
@@ -139,6 +152,7 @@ void sycamore_layer_destroy(struct sycamore_layer *layer) {
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
+    wl_list_remove(&layer->surface_commit.link);
 
     if (layer->linked) {
         wl_list_remove(&layer->link);
