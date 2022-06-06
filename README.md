@@ -3,7 +3,7 @@ My experimental Wayland compositor
 
 Built-in keybindings:
 * Logo+Tab: Switch between windows
-* Logo+t: Open gnome-terminal
+* Logo+Return: Open gnome-terminal
 * Logo+b: Open Chromium
 * Ctrl+Alt+Esc: Terminate
 * Ctrl+Alt+F1~F6: Switch to VT
