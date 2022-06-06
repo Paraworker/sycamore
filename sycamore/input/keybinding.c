@@ -46,7 +46,7 @@ static void terminate_server(struct sycamore_server *server, struct sycamore_key
 /* action */
 static void open_launcher(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
-        execl("/bin/sh", "/bin/sh", "-c", "wofi --show run", (void *)NULL);
+        execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus ", (void *)NULL);
     }
 }
 
