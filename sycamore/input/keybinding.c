@@ -148,7 +148,7 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
     }
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_d, open_launcher);
-    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_t, open_terminal);
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Return, open_terminal);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
 
     /* ctrl+alt */
