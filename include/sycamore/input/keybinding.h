@@ -1,8 +1,10 @@
 #ifndef SYCAMORE_KEYBINDING_H
 #define SYCAMORE_KEYBINDING_H
 
+#include <wayland-util.h>
 #include <xkbcommon/xkbcommon.h>
-#include "sycamore/server.h"
+
+struct sycamore_server;
 
 struct sycamore_keybinding_manager {
     struct wl_list modifiers_nodes;
@@ -10,7 +12,7 @@ struct sycamore_keybinding_manager {
     struct sycamore_server *server;
 };
 
-struct sycamore_modifiers_node {
+struct keybinding_modifiers_node {
     struct wl_list link;
     struct wl_list keybindings;
     uint32_t modifiers;
@@ -25,7 +27,7 @@ struct sycamore_keybinding {
 
     void (*action)(struct sycamore_server *server, struct sycamore_keybinding *keybinding);
 
-    struct sycamore_modifiers_node *modifiers_node;
+    struct keybinding_modifiers_node *modifiers_node;
 };
 
 struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(

@@ -2,6 +2,7 @@
 #include <wlr/util/log.h>
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/keybinding.h"
+#include "sycamore/server.h"
 
 static void handle_keyboard_modifiers(struct wl_listener *listener, void *data) {
     /* This event is raised when a modifier key, such as shift or alt, is

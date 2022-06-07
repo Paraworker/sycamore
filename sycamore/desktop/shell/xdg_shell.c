@@ -109,9 +109,9 @@ static void xdg_shell_view_destroy(struct sycamore_view *view) {
     struct sycamore_xdg_shell_view *xdg_shell_view =
             wl_container_of(view, xdg_shell_view, base_view);
 
+    wl_list_remove(&xdg_shell_view->destroy.link);
     wl_list_remove(&xdg_shell_view->map.link);
     wl_list_remove(&xdg_shell_view->unmap.link);
-    wl_list_remove(&xdg_shell_view->destroy.link);
 
     free(xdg_shell_view);
 }
