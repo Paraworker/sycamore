@@ -282,13 +282,6 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
         return;
     }
 
-    if (cursor->xcursor_manager) {
-        wlr_xcursor_manager_destroy(cursor->xcursor_manager);
-    }
-    if (cursor->wlr_cursor) {
-        wlr_cursor_destroy(cursor->wlr_cursor);
-    }
-
     wl_list_remove(&cursor->cursor_axis.link);
     wl_list_remove(&cursor->cursor_button.link);
     wl_list_remove(&cursor->cursor_motion.link);
@@ -303,6 +296,13 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
     wl_list_remove(&cursor->pinch_end.link);
     wl_list_remove(&cursor->hold_begin.link);
     wl_list_remove(&cursor->hold_end.link);
+
+    if (cursor->xcursor_manager) {
+        wlr_xcursor_manager_destroy(cursor->xcursor_manager);
+    }
+    if (cursor->wlr_cursor) {
+        wlr_cursor_destroy(cursor->wlr_cursor);
+    }
 
     free(cursor);
 }
