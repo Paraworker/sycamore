@@ -197,6 +197,14 @@ static void xdg_shell_view_get_geometry(struct sycamore_view *view, struct wlr_b
     wlr_xdg_surface_get_geometry(xdg_shell_view->xdg_toplevel->base, box);
 }
 
+/* view interface */
+static void xdg_shell_view_close(struct sycamore_view *view) {
+    struct sycamore_xdg_shell_view *xdg_shell_view =
+            wl_container_of(view, xdg_shell_view, base_view);
+
+    wlr_xdg_toplevel_send_close(xdg_shell_view->xdg_toplevel);
+}
+
 static const struct view_interface xdg_shell_view_interface = {
     .destroy = xdg_shell_view_destroy,
     .map = xdg_shell_view_map,
@@ -207,6 +215,7 @@ static const struct view_interface xdg_shell_view_interface = {
     .set_maximized = xdg_shell_view_set_maximized,
     .set_resizing = xdg_shell_view_set_resizing,
     .get_geometry = xdg_shell_view_get_geometry,
+    .close = xdg_shell_view_close,
 };
 
 struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(

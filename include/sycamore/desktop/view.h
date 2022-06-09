@@ -34,6 +34,7 @@ struct view_interface {
     void (*set_maximized)(struct sycamore_view *view, bool maximized);
     void (*set_resizing)(struct sycamore_view *view, bool resizing);
     void (*get_geometry)(struct sycamore_view *view, struct wlr_box *box);
+    void (*close)(struct sycamore_view *view);
 };
 
 /* base view */
