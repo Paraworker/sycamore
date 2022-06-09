@@ -40,13 +40,6 @@ static void open_terminal(struct sycamore_server *server, struct sycamore_keybin
 }
 
 /* action */
-static void open_browser(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    if (fork() == 0) {
-        execl("/bin/sh", "/bin/sh", "-c", "chromium", (void *)NULL);
-    }
-}
-
-/* action */
 static void close_focused_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     struct sycamore_view *view = server->focused_view.view;
     if (view) {
@@ -157,7 +150,6 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
     }
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_d, open_launcher);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Return, open_terminal);
-    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_q, close_focused_view);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
 
