@@ -26,25 +26,6 @@ bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t mod
 }
 
 /* action */
-static void cycle_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    /* Cycle to the next view */
-    if (wl_list_length(&server->mapped_views) < 2) {
-        return;
-    }
-
-    struct sycamore_view *next_view = wl_container_of(
-            server->mapped_views.prev, next_view, link);
-    view_set_focus(next_view);
-    struct sycamore_seat *seat = server->seat;
-    seat->seatop_impl->cursor_rebase(seat);
-}
-
-/* action */
-static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    wl_display_terminate(server->wl_display);
-}
-
-/* action */
 static void open_launcher(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus ", (void *)NULL);
@@ -63,6 +44,33 @@ static void open_browser(struct sycamore_server *server, struct sycamore_keybind
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "chromium", (void *)NULL);
     }
+}
+
+/* action */
+static void close_focused_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    struct sycamore_view *view = server->focused_view.view;
+    if (view) {
+        view->interface->close(view);
+    }
+}
+
+/* action */
+static void cycle_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    /* Cycle to the next view */
+    if (wl_list_length(&server->mapped_views) < 2) {
+        return;
+    }
+
+    struct sycamore_view *next_view = wl_container_of(
+            server->mapped_views.prev, next_view, link);
+    view_set_focus(next_view);
+    struct sycamore_seat *seat = server->seat;
+    seat->seatop_impl->cursor_rebase(seat);
+}
+
+/* action */
+static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+    wl_display_terminate(server->wl_display);
 }
 
 /* action */
@@ -147,10 +155,11 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
         sycamore_keybinding_manager_destroy(manager);
         return NULL;
     }
-    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_d, open_launcher);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Return, open_terminal);
     sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_b, open_browser);
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_q, close_focused_view);
+    sycamore_keybinding_create(logo, logo->modifiers, XKB_KEY_Tab, cycle_view);
 
     /* ctrl+alt */
     struct keybinding_modifiers_node *ctrl_alt =
