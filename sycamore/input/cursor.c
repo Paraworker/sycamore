@@ -300,6 +300,7 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
     wl_list_remove(&cursor->swipe_end.link);
     wl_list_remove(&cursor->pinch_begin.link);
     wl_list_remove(&cursor->pinch_update.link);
+    wl_list_remove(&cursor->pinch_end.link);
     wl_list_remove(&cursor->hold_begin.link);
     wl_list_remove(&cursor->hold_end.link);
 
