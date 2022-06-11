@@ -22,13 +22,14 @@ bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t mod
             } //for each
         }
     } //for each
+
     return false;
 }
 
 /* action */
 static void open_launcher(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
-        execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus ", (void *)NULL);
+        execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus", (void *)NULL);
     }
 }
 

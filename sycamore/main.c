@@ -44,5 +44,6 @@ int main(int argc, char **argv) {
 
     server_run(server);
     server_destroy(server);
+
     return EXIT_SUCCESS;
 }

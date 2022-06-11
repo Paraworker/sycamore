@@ -172,6 +172,7 @@ struct sycamore_server *server_create() {
         server_destroy(server);
         return NULL;
     }
+
     return server;
 }
 
@@ -184,6 +185,7 @@ bool server_start(struct sycamore_server *server) {
         wlr_log(WLR_ERROR, "Unable to start backend");
         return false;
     }
+
     return true;
 }
 

@@ -122,6 +122,7 @@ void view_set_focus(struct sycamore_view *view) {
     if (!view || view->view_type == VIEW_TYPE_UNKNOWN) {
         return;
     }
+
     struct sycamore_server *server = view->server;
     struct sycamore_seat *seat = server->seat;
     struct sycamore_view *prev_view = server->focused_view.view;
