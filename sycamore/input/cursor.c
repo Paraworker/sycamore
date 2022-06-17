@@ -336,6 +336,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     cursor->gestures = wlr_pointer_gestures_v1_create(display);
     if (!cursor->gestures) {
+        wlr_xcursor_manager_destroy(cursor->xcursor_manager);
         wlr_cursor_destroy(cursor->wlr_cursor);
         free(cursor);
         return NULL;
