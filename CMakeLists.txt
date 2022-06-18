@@ -38,3 +38,5 @@ target_link_libraries(
         ${XKBCOMMON_LINK_LIBRARIES}
         ${LIBINPUT_LINK_LIBRARIES}
 )
+
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
