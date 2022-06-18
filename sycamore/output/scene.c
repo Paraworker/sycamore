@@ -16,6 +16,8 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
         return NULL;
     }
 
+    scene->server = server;
+
     scene->wlr_scene = wlr_scene_create();
     if (!scene->wlr_scene) {
         wlr_log(WLR_ERROR, "Unable to create wlr_scene");
@@ -23,15 +25,14 @@ struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
         return NULL;
     }
 
-    scene->server = server;
+    wlr_scene_attach_output_layout(scene->wlr_scene, layout);
+    wlr_scene_set_presentation(scene->wlr_scene, presentation);
+
     scene->trees.shell_background = wlr_scene_tree_create(&scene->wlr_scene->tree);
     scene->trees.shell_button = wlr_scene_tree_create(&scene->wlr_scene->tree);
     scene->trees.shell_view = wlr_scene_tree_create(&scene->wlr_scene->tree);
     scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->tree);
     scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->tree);
-
-    wlr_scene_attach_output_layout(scene->wlr_scene, layout);
-    wlr_scene_set_presentation(scene->wlr_scene, presentation);
 
     return scene;
 }
