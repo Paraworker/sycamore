@@ -5,6 +5,10 @@
 #include <xkbcommon/xkbcommon.h>
 
 struct sycamore_server;
+struct sycamore_keybinding;
+
+typedef void (*keybinding_action)(struct sycamore_server *server,
+        struct sycamore_keybinding *keybinding);
 
 struct sycamore_keybinding_manager {
     struct wl_list modifiers_nodes;
@@ -25,7 +29,7 @@ struct sycamore_keybinding {
     uint32_t modifiers;
     xkb_keysym_t sym;
 
-    void (*action)(struct sycamore_server *server, struct sycamore_keybinding *keybinding);
+    keybinding_action action;
 
     struct keybinding_modifiers_node *modifiers_node;
 };

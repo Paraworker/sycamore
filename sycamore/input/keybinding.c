@@ -20,9 +20,9 @@ bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t mod
                     return true;
                 }
             } //for each
+            return false;
         }
     } //for each
-
     return false;
 }
 
@@ -95,8 +95,7 @@ static struct keybinding_modifiers_node *keybinding_modifiers_node_create(
 }
 
 static struct sycamore_keybinding *sycamore_keybinding_create(struct keybinding_modifiers_node *node,
-        uint32_t modifiers, xkb_keysym_t sym,
-        void (*action)(struct sycamore_server *server, struct sycamore_keybinding *keybinding)) {
+        uint32_t modifiers, xkb_keysym_t sym, keybinding_action action) {
     struct sycamore_keybinding *keybinding = calloc(1, sizeof(struct sycamore_keybinding));
     if (!keybinding) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_keybinding");
