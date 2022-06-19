@@ -27,6 +27,10 @@
 static bool server_init(struct sycamore_server *server) {
     wlr_log(WLR_INFO, "Initializing Wayland server");
 
+    wl_list_init(&server->all_outputs);
+    wl_list_init(&server->mapped_views);
+    server->focused_view.view = NULL;
+
     server->wl_display = wl_display_create();
     server->backend = wlr_backend_autocreate(server->wl_display);
     if (!server->backend) {
@@ -38,8 +42,6 @@ static bool server_init(struct sycamore_server *server) {
                      handle_backend_new_input);
     listener_connect(&server->backend_new_output, &server->backend->events.new_output,
                      handle_backend_new_output);
-
-    wl_list_init(&server->all_outputs);
 
     server->renderer = wlr_renderer_autocreate(server->backend);
     if (!server->renderer) {
@@ -105,9 +107,6 @@ static bool server_init(struct sycamore_server *server) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_keybinding_manager");
         return false;
     }
-
-    wl_list_init(&server->mapped_views);
-    server->focused_view.view = NULL;
 
     wlr_export_dmabuf_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);

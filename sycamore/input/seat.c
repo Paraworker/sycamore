@@ -99,7 +99,7 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device) {
     }
 
     listener_disconnect(&seat_device->destroy);
-
+  
     wl_list_remove(&seat_device->link);
 
     if (seat_device->derived_destroy) {
@@ -291,16 +291,17 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
 
     seatop_end(seat);
 
+    listener_disconnect(&seat->destroy);
     listener_disconnect(&seat->request_set_cursor);
     listener_disconnect(&seat->request_set_selection);
     listener_disconnect(&seat->request_set_primary_selection);
     listener_disconnect(&seat->request_start_drag);
     listener_disconnect(&seat->start_drag);
-    listener_disconnect(&seat->destroy);
 
     if (seat->wlr_seat) {
         wlr_seat_destroy(seat->wlr_seat);
     }
+
     if (seat->cursor) {
         sycamore_cursor_destroy(seat->cursor);
     }
