@@ -20,11 +20,15 @@
 #include "sycamore/input/keybinding.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/scene.h"
-#include "sycamore/server.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 static bool server_init(struct sycamore_server *server) {
     wlr_log(WLR_INFO, "Initializing Wayland server");
+
+    wl_list_init(&server->all_outputs);
+    wl_list_init(&server->mapped_views);
+    server->focused_view.view = NULL;
 
     server->wl_display = wl_display_create();
     server->backend = wlr_backend_autocreate(server->wl_display);
@@ -32,6 +36,11 @@ static bool server_init(struct sycamore_server *server) {
         wlr_log(WLR_ERROR, "Unable to create backend");
         return false;
     }
+
+    server->backend_new_input.notify = handle_backend_new_input;
+    wl_signal_add(&server->backend->events.new_input, &server->backend_new_input);
+    server->backend_new_output.notify = handle_backend_new_output;
+    wl_signal_add(&server->backend->events.new_output, &server->backend_new_output);
 
     server->renderer = wlr_renderer_autocreate(server->backend);
     if (!server->renderer) {
@@ -46,13 +55,6 @@ static bool server_init(struct sycamore_server *server) {
         wlr_log(WLR_ERROR, "Unable to create allocator");
         return false;
     }
-
-    wl_list_init(&server->all_outputs);
-    server->backend_new_output.notify = handle_backend_new_output;
-    wl_signal_add(&server->backend->events.new_output, &server->backend_new_output);
-
-    server->backend_new_input.notify = handle_backend_new_input;
-    wl_signal_add(&server->backend->events.new_input, &server->backend_new_input);
 
     server->compositor = wlr_compositor_create(server->wl_display, server->renderer);
     if (!server->compositor) {
@@ -105,9 +107,6 @@ static bool server_init(struct sycamore_server *server) {
         return false;
     }
 
-    wl_list_init(&server->mapped_views);
-    server->focused_view.view = NULL;
-
     wlr_export_dmabuf_manager_v1_create(server->wl_display);
     wlr_data_device_manager_create(server->wl_display);
     wlr_data_control_manager_v1_create(server->wl_display);
@@ -131,12 +130,13 @@ void server_destroy(struct sycamore_server *server) {
     }
 
     if (server->backend) {
+        wl_list_remove(&server->backend_new_input.link);
+        wl_list_remove(&server->backend_new_output.link);
         wlr_backend_destroy(server->backend);
-    }
-    if (server->wl_display) {
         wl_display_destroy_clients(server->wl_display);
         wl_display_destroy(server->wl_display);
     }
+
     if (server->output_layout) {
         wlr_output_layout_destroy(server->output_layout);
     }
@@ -144,15 +144,19 @@ void server_destroy(struct sycamore_server *server) {
     if (server->seat) {
         sycamore_seat_destroy(server->seat);
     }
+
     if (server->scene) {
         sycamore_scene_destroy(server->scene);
     }
+
     if (server->xdg_shell) {
         sycamore_xdg_shell_destroy(server->xdg_shell);
     }
+
     if (server->layer_shell) {
         sycamore_layer_shell_destroy(server->layer_shell);
     }
+
     if (server->keybinding_manager) {
         sycamore_keybinding_manager_destroy(server->keybinding_manager);
     }

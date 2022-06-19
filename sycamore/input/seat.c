@@ -5,12 +5,12 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/server.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/libinput.h"
 #include "sycamore/input/pointer.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/server.h"
 
 static void handle_request_start_drag(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, request_start_drag);
@@ -38,8 +38,9 @@ static void handle_request_start_drag(struct wl_listener *listener, void *data) 
 static void handle_sycamore_drag_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_drag *drag = wl_container_of(listener, drag, destroy);
 
-    drag->wlr_drag->data = NULL;
     wl_list_remove(&drag->destroy.link);
+    drag->wlr_drag->data = NULL;
+
     free(drag);
 }
 
@@ -96,12 +97,12 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device) {
         return;
     }
 
+    wl_list_remove(&seat_device->destroy.link);
+    wl_list_remove(&seat_device->link);
+
     if (seat_device->derived_destroy) {
         seat_device->derived_destroy(seat_device);
     }
-
-    wl_list_remove(&seat_device->destroy.link);
-    wl_list_remove(&seat_device->link);
 
     free(seat_device);
 }
@@ -288,16 +289,17 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
 
     seatop_end(seat);
 
+    wl_list_remove(&seat->destroy.link);
     wl_list_remove(&seat->request_set_cursor.link);
     wl_list_remove(&seat->request_set_selection.link);
     wl_list_remove(&seat->request_set_primary_selection.link);
     wl_list_remove(&seat->request_start_drag.link);
     wl_list_remove(&seat->start_drag.link);
-    wl_list_remove(&seat->destroy.link);
 
     if (seat->wlr_seat) {
         wlr_seat_destroy(seat->wlr_seat);
     }
+
     if (seat->cursor) {
         sycamore_cursor_destroy(seat->cursor);
     }

@@ -157,7 +157,7 @@ struct wlr_output *cursor_at_output(struct sycamore_cursor *cursor,
     return output;
 }
 
-static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
+static void handle_cursor_motion(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion);
@@ -282,10 +282,10 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
         return;
     }
 
-    wl_list_remove(&cursor->cursor_axis.link);
-    wl_list_remove(&cursor->cursor_button.link);
     wl_list_remove(&cursor->cursor_motion.link);
     wl_list_remove(&cursor->cursor_motion_absolute.link);
+    wl_list_remove(&cursor->cursor_button.link);
+    wl_list_remove(&cursor->cursor_axis.link);
     wl_list_remove(&cursor->cursor_frame.link);
 
     wl_list_remove(&cursor->swipe_begin.link);
@@ -300,6 +300,7 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
     if (cursor->xcursor_manager) {
         wlr_xcursor_manager_destroy(cursor->xcursor_manager);
     }
+
     if (cursor->wlr_cursor) {
         wlr_cursor_destroy(cursor->wlr_cursor);
     }
@@ -342,7 +343,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    cursor->cursor_motion.notify = handle_cursor_motion_relative;
+    cursor->cursor_motion.notify = handle_cursor_motion;
     wl_signal_add(&cursor->wlr_cursor->events.motion, &cursor->cursor_motion);
     cursor->cursor_motion_absolute.notify = handle_cursor_motion_absolute;
     wl_signal_add(&cursor->wlr_cursor->events.motion_absolute, &cursor->cursor_motion_absolute);

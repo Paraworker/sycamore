@@ -1,5 +1,5 @@
 #include <time.h>
-#include <sycamore/util.h>
+#include "sycamore/util/time.h"
 
 uint32_t get_current_time_msec() {
     struct timespec now;

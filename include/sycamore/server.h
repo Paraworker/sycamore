@@ -24,13 +24,8 @@ struct sycamore_server {
     struct wlr_renderer *renderer;
     struct wlr_allocator *allocator;
 
-    struct wl_list all_outputs;
-    struct wl_listener backend_new_output;
-    struct wl_listener backend_new_input;
-
     struct wlr_compositor *compositor;
     struct wlr_output_layout *output_layout;
-    struct wl_listener output_layout_change;
     struct wlr_presentation *presentation;
 
     struct sycamore_seat *seat;
@@ -39,6 +34,11 @@ struct sycamore_server {
     struct sycamore_layer_shell *layer_shell;
     struct sycamore_keybinding_manager *keybinding_manager;
 
+    struct wl_listener backend_new_input;
+    struct wl_listener backend_new_output;
+    struct wl_listener output_layout_change;
+
+    struct wl_list all_outputs;
     struct wl_list mapped_views;
     struct view_ptr focused_view;
 

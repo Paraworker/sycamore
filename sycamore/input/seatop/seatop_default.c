@@ -2,7 +2,7 @@
 #include "sycamore/input/seat.h"
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
-#include "sycamore/util.h"
+#include "sycamore/util/time.h"
 
 static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
     /* Notify the client with pointer focus that a button press has occurred */
