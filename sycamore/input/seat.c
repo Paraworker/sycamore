@@ -5,12 +5,13 @@
 #include <wlr/types/wlr_seat.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/server.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/libinput.h"
 #include "sycamore/input/pointer.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 static void handle_request_start_drag(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, request_start_drag);
@@ -38,8 +39,9 @@ static void handle_request_start_drag(struct wl_listener *listener, void *data) 
 static void handle_sycamore_drag_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_drag *drag = wl_container_of(listener, drag, destroy);
 
+    listener_disconnect(&drag->destroy);
     drag->wlr_drag->data = NULL;
-    wl_list_remove(&drag->destroy.link);
+
     free(drag);
 }
 
@@ -56,8 +58,8 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
     drag->wlr_drag = wlr_drag;
     wlr_drag->data = drag;
 
-    drag->destroy.notify = handle_sycamore_drag_destroy;
-    wl_signal_add(&wlr_drag->events.destroy, &drag->destroy);
+    listener_connect(&drag->destroy, &wlr_drag->events.destroy,
+                     handle_sycamore_drag_destroy);
 
     struct wlr_drag_icon *wlr_drag_icon = wlr_drag->icon;
     if (wlr_drag_icon) {
@@ -85,8 +87,8 @@ struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, stru
     seat_device->derived_destroy = derived_destroy;
     seat_device->seat = seat;
 
-    seat_device->destroy.notify = handle_seat_device_destroy;
-    wl_signal_add(&wlr_device->events.destroy, &seat_device->destroy);
+    listener_connect(&seat_device->destroy, &wlr_device->events.destroy,
+                     handle_seat_device_destroy);
 
     return seat_device;
 }
@@ -96,12 +98,13 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device) {
         return;
     }
 
+    listener_disconnect(&seat_device->destroy);
+
+    wl_list_remove(&seat_device->link);
+
     if (seat_device->derived_destroy) {
         seat_device->derived_destroy(seat_device);
     }
-
-    wl_list_remove(&seat_device->destroy.link);
-    wl_list_remove(&seat_device->link);
 
     free(seat_device);
 }
@@ -288,12 +291,12 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
 
     seatop_end(seat);
 
-    wl_list_remove(&seat->request_set_cursor.link);
-    wl_list_remove(&seat->request_set_selection.link);
-    wl_list_remove(&seat->request_set_primary_selection.link);
-    wl_list_remove(&seat->request_start_drag.link);
-    wl_list_remove(&seat->start_drag.link);
-    wl_list_remove(&seat->destroy.link);
+    listener_disconnect(&seat->request_set_cursor);
+    listener_disconnect(&seat->request_set_selection);
+    listener_disconnect(&seat->request_set_primary_selection);
+    listener_disconnect(&seat->request_start_drag);
+    listener_disconnect(&seat->start_drag);
+    listener_disconnect(&seat->destroy);
 
     if (seat->wlr_seat) {
         wlr_seat_destroy(seat->wlr_seat);
@@ -333,24 +336,18 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
         return NULL;
     }
 
-    seat->request_set_cursor.notify = handle_seat_request_set_cursor;
-    wl_signal_add(&seat->wlr_seat->events.request_set_cursor,
-                  &seat->request_set_cursor);
-    seat->request_set_selection.notify = handle_seat_request_set_selection;
-    wl_signal_add(&seat->wlr_seat->events.request_set_selection,
-                  &seat->request_set_selection);
-    seat->request_set_primary_selection.notify = handle_seat_request_set_primary_selection;
-    wl_signal_add(&seat->wlr_seat->events.request_set_primary_selection,
-                  &seat->request_set_primary_selection);
-    seat->request_start_drag.notify = handle_request_start_drag;
-    wl_signal_add(&seat->wlr_seat->events.request_start_drag,
-                  &seat->request_start_drag);
-    seat->start_drag.notify = handle_start_drag;
-    wl_signal_add(&seat->wlr_seat->events.start_drag,
-                  &seat->start_drag);
-    seat->destroy.notify = handle_seat_destroy;
-    wl_signal_add(&seat->wlr_seat->events.destroy,
-                  &seat->destroy);
+    listener_connect(&seat->request_set_cursor, &seat->wlr_seat->events.request_set_cursor,
+                     handle_seat_request_set_cursor);
+    listener_connect(&seat->request_set_selection, &seat->wlr_seat->events.request_set_selection,
+                     handle_seat_request_set_selection);
+    listener_connect(&seat->request_set_primary_selection, &seat->wlr_seat->events.request_set_primary_selection,
+                     handle_seat_request_set_primary_selection);
+    listener_connect(&seat->request_start_drag, &seat->wlr_seat->events.request_start_drag,
+                     handle_request_start_drag);
+    listener_connect(&seat->start_drag, &seat->wlr_seat->events.start_drag,
+                     handle_start_drag);
+    listener_connect(&seat->destroy, &seat->wlr_seat->events.destroy,
+                     handle_seat_destroy);
 
     seatop_begin_default(seat);
 

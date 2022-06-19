@@ -9,6 +9,7 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
@@ -51,10 +52,8 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
         wl_list_init(&output->layers[i]);
     }
 
-    output->frame.notify = handle_output_frame;
-    wl_signal_add(&wlr_output->events.frame, &output->frame);
-    output->destroy.notify = handle_output_destroy;
-    wl_signal_add(&wlr_output->events.destroy, &output->destroy);
+    listener_connect(&output->frame, &wlr_output->events.frame, handle_output_frame);
+    listener_connect(&output->destroy, &wlr_output->events.destroy, handle_output_destroy);
 
     return output;
 }
@@ -95,8 +94,9 @@ void sycamore_output_destroy(struct sycamore_output *output) {
         return;
     }
 
-    wl_list_remove(&output->destroy.link);
-    wl_list_remove(&output->frame.link);
+    listener_disconnect(&output->destroy);
+    listener_disconnect(&output->frame);
+
     wl_list_remove(&output->link);
 
     for (int i = 0; i < LAYERS_ALL; ++i) {

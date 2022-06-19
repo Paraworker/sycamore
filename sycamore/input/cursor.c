@@ -13,6 +13,7 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image) {
     if (!cursor->enabled) {
@@ -157,7 +158,7 @@ struct wlr_output *cursor_at_output(struct sycamore_cursor *cursor,
     return output;
 }
 
-static void handle_cursor_motion_relative(struct wl_listener *listener, void *data) {
+static void handle_cursor_motion(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a _relative_
      * pointer motion event (i.e. a delta) */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_motion);
@@ -282,24 +283,25 @@ void sycamore_cursor_destroy(struct sycamore_cursor *cursor) {
         return;
     }
 
-    wl_list_remove(&cursor->cursor_axis.link);
-    wl_list_remove(&cursor->cursor_button.link);
-    wl_list_remove(&cursor->cursor_motion.link);
-    wl_list_remove(&cursor->cursor_motion_absolute.link);
-    wl_list_remove(&cursor->cursor_frame.link);
+    listener_disconnect(&cursor->cursor_motion);
+    listener_disconnect(&cursor->cursor_motion_absolute);
+    listener_disconnect(&cursor->cursor_button);
+    listener_disconnect(&cursor->cursor_axis);
+    listener_disconnect(&cursor->cursor_frame);
 
-    wl_list_remove(&cursor->swipe_begin.link);
-    wl_list_remove(&cursor->swipe_update.link);
-    wl_list_remove(&cursor->swipe_end.link);
-    wl_list_remove(&cursor->pinch_begin.link);
-    wl_list_remove(&cursor->pinch_update.link);
-    wl_list_remove(&cursor->pinch_end.link);
-    wl_list_remove(&cursor->hold_begin.link);
-    wl_list_remove(&cursor->hold_end.link);
+    listener_disconnect(&cursor->swipe_begin);
+    listener_disconnect(&cursor->swipe_update);
+    listener_disconnect(&cursor->swipe_end);
+    listener_disconnect(&cursor->pinch_begin);
+    listener_disconnect(&cursor->pinch_update);
+    listener_disconnect(&cursor->pinch_end);
+    listener_disconnect(&cursor->hold_begin);
+    listener_disconnect(&cursor->hold_end);
 
     if (cursor->xcursor_manager) {
         wlr_xcursor_manager_destroy(cursor->xcursor_manager);
     }
+
     if (cursor->wlr_cursor) {
         wlr_cursor_destroy(cursor->wlr_cursor);
     }
@@ -342,33 +344,34 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    cursor->cursor_motion.notify = handle_cursor_motion_relative;
-    wl_signal_add(&cursor->wlr_cursor->events.motion, &cursor->cursor_motion);
-    cursor->cursor_motion_absolute.notify = handle_cursor_motion_absolute;
-    wl_signal_add(&cursor->wlr_cursor->events.motion_absolute, &cursor->cursor_motion_absolute);
-    cursor->cursor_button.notify = handle_cursor_button;
-    wl_signal_add(&cursor->wlr_cursor->events.button, &cursor->cursor_button);
-    cursor->cursor_axis.notify = handle_cursor_axis;
-    wl_signal_add(&cursor->wlr_cursor->events.axis, &cursor->cursor_axis);
-    cursor->cursor_frame.notify = handle_cursor_frame;
-    wl_signal_add(&cursor->wlr_cursor->events.frame, &cursor->cursor_frame);
+    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
+    listener_connect(&cursor->cursor_motion, &wlr_cursor->events.motion,
+                     handle_cursor_motion);
+    listener_connect(&cursor->cursor_motion_absolute, &wlr_cursor->events.motion_absolute,
+                     handle_cursor_motion_absolute);
+    listener_connect(&cursor->cursor_button, &wlr_cursor->events.button,
+                     handle_cursor_button);
+    listener_connect(&cursor->cursor_axis, &wlr_cursor->events.axis,
+                     handle_cursor_axis);
+    listener_connect(&cursor->cursor_frame, &wlr_cursor->events.frame,
+                     handle_cursor_frame);
 
-    cursor->swipe_begin.notify = handle_swipe_begin;
-    wl_signal_add(&cursor->wlr_cursor->events.swipe_begin, &cursor->swipe_begin);
-    cursor->swipe_update.notify = handle_swipe_update;
-    wl_signal_add(&cursor->wlr_cursor->events.swipe_update, &cursor->swipe_update);
-    cursor->swipe_end.notify = handle_swipe_end;
-    wl_signal_add(&cursor->wlr_cursor->events.swipe_end, &cursor->swipe_end);
-    cursor->pinch_begin.notify = handle_pinch_begin;
-    wl_signal_add(&cursor->wlr_cursor->events.pinch_begin, &cursor->pinch_begin);
-    cursor->pinch_update.notify = handle_pinch_update;
-    wl_signal_add(&cursor->wlr_cursor->events.pinch_update, &cursor->pinch_update);
-    cursor->pinch_end.notify = handle_pinch_end;
-    wl_signal_add(&cursor->wlr_cursor->events.pinch_end, &cursor->pinch_end);
-    cursor->hold_begin.notify = handle_hold_begin;
-    wl_signal_add(&cursor->wlr_cursor->events.hold_begin, &cursor->hold_begin);
-    cursor->hold_end.notify = handle_hold_end;
-    wl_signal_add(&cursor->wlr_cursor->events.hold_end, &cursor->hold_end);
+    listener_connect(&cursor->swipe_begin, &wlr_cursor->events.swipe_begin,
+                     handle_swipe_begin);
+    listener_connect(&cursor->swipe_update, &wlr_cursor->events.swipe_update,
+                     handle_swipe_update);
+    listener_connect(&cursor->swipe_end, &wlr_cursor->events.swipe_end,
+                     handle_swipe_end);
+    listener_connect(&cursor->pinch_begin, &wlr_cursor->events.pinch_begin,
+                     handle_pinch_begin);
+    listener_connect(&cursor->pinch_update, &wlr_cursor->events.pinch_update,
+                     handle_pinch_update);
+    listener_connect(&cursor->pinch_end, &wlr_cursor->events.pinch_end,
+                     handle_pinch_end);
+    listener_connect(&cursor->hold_begin, &wlr_cursor->events.hold_begin,
+                     handle_hold_begin);
+    listener_connect(&cursor->hold_end, &wlr_cursor->events.hold_end,
+                     handle_hold_end);
 
     return cursor;
 }

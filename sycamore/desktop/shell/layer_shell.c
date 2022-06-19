@@ -5,6 +5,7 @@
 #include "sycamore/desktop/shell/layer_shell.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 static void handle_layer_map(struct wl_listener *listener, void *data) {
     struct sycamore_layer *layer = wl_container_of(listener, layer, map);
@@ -56,14 +57,14 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
     wl_list_insert(&output->layers[layer_type], &layer->link);
     layer->linked = true;
 
-    layer->map.notify = handle_layer_map;
-    wl_signal_add(&layer_surface->events.map, &layer->map);
-    layer->unmap.notify = handle_layer_unmap;
-    wl_signal_add(&layer_surface->events.unmap, &layer->unmap);
-    layer->destroy.notify = handle_layer_destroy;
-    wl_signal_add(&layer_surface->events.destroy, &layer->destroy);
-    layer->surface_commit.notify = handle_layer_surface_commit;
-    wl_signal_add(&layer_surface->surface->events.commit, &layer->surface_commit);
+    listener_connect(&layer->map, &layer_surface->events.map,
+                     handle_layer_map);
+    listener_connect(&layer->unmap, &layer_surface->events.unmap,
+                     handle_layer_unmap);
+    listener_connect(&layer->destroy, &layer_surface->events.destroy,
+                     handle_layer_destroy);
+    listener_connect(&layer->surface_commit, &layer_surface->surface->events.commit,
+                     handle_layer_surface_commit);
 
     // Temporarily set the layer's current state to pending
     // So that we can easily arrange it
@@ -91,9 +92,8 @@ struct sycamore_layer_shell *sycamore_layer_shell_create(
         return NULL;
     }
 
-    layer_shell->new_layer_shell_surface.notify = handle_new_layer_shell_surface;
-    wl_signal_add(&layer_shell->wlr_layer_shell->events.new_surface,
-                  &layer_shell->new_layer_shell_surface);
+    listener_connect(&layer_shell->new_layer_shell_surface, &layer_shell->wlr_layer_shell->events.new_surface,
+                     handle_new_layer_shell_surface);
 
     return layer_shell;
 }
@@ -103,7 +103,7 @@ void sycamore_layer_shell_destroy(struct sycamore_layer_shell *layer_shell) {
         return;
     }
 
-    wl_list_remove(&layer_shell->new_layer_shell_surface.link);
+    listener_disconnect(&layer_shell->new_layer_shell_surface);
 
     free(layer_shell);
 }

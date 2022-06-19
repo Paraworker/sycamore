@@ -7,6 +7,7 @@
 #include "sycamore/output/output.h"
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 void layer_map(struct sycamore_layer *layer) {
     if (layer->mapped) {
@@ -149,10 +150,10 @@ void layer_destroy(struct sycamore_layer *layer) {
         layer_unmap(layer);
     }
 
-    wl_list_remove(&layer->destroy.link);
-    wl_list_remove(&layer->map.link);
-    wl_list_remove(&layer->unmap.link);
-    wl_list_remove(&layer->surface_commit.link);
+    listener_disconnect(&layer->destroy);
+    listener_disconnect(&layer->map);
+    listener_disconnect(&layer->unmap);
+    listener_disconnect(&layer->surface_commit);
 
     if (layer->linked) {
         wl_list_remove(&layer->link);

@@ -7,6 +7,7 @@
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/output/output.h"
+#include "sycamore/util/listener.h"
 
 static void handle_xdg_shell_view_request_move(struct wl_listener *listener, void *data) {
     /* This event is raised when a client would like to begin an interactive
@@ -109,9 +110,9 @@ static void xdg_shell_view_destroy(struct sycamore_view *view) {
     struct sycamore_xdg_shell_view *xdg_shell_view =
             wl_container_of(view, xdg_shell_view, base_view);
 
-    wl_list_remove(&xdg_shell_view->destroy.link);
-    wl_list_remove(&xdg_shell_view->map.link);
-    wl_list_remove(&xdg_shell_view->unmap.link);
+    listener_disconnect(&xdg_shell_view->destroy);
+    listener_disconnect(&xdg_shell_view->map);
+    listener_disconnect(&xdg_shell_view->unmap);
 
     free(xdg_shell_view);
 }
@@ -122,21 +123,16 @@ static void xdg_shell_view_map(struct sycamore_view *view) {
             wl_container_of(view, xdg_shell_view, base_view);
     struct wlr_xdg_toplevel *toplevel = xdg_shell_view->xdg_toplevel;
 
-    xdg_shell_view->request_move.notify = handle_xdg_shell_view_request_move;
-    wl_signal_add(&toplevel->events.request_move,
-                  &xdg_shell_view->request_move);
-    xdg_shell_view->request_resize.notify = handle_xdg_shell_view_request_resize;
-    wl_signal_add(&toplevel->events.request_resize,
-                  &xdg_shell_view->request_resize);
-    xdg_shell_view->request_fullscreen.notify = handle_xdg_shell_view_request_fullscreen;
-    wl_signal_add(&toplevel->events.request_fullscreen,
-                  &xdg_shell_view->request_fullscreen);
-    xdg_shell_view->request_maximize.notify = handle_xdg_shell_view_request_maximize;
-    wl_signal_add(&toplevel->events.request_maximize,
-                  &xdg_shell_view->request_maximize);
-    xdg_shell_view->request_minimize.notify = handle_xdg_shell_view_request_minimize;
-    wl_signal_add(&toplevel->events.request_minimize,
-                  &xdg_shell_view->request_minimize);
+    listener_connect(&xdg_shell_view->request_move, &toplevel->events.request_move,
+                     handle_xdg_shell_view_request_move);
+    listener_connect(&xdg_shell_view->request_resize, &toplevel->events.request_resize,
+                     handle_xdg_shell_view_request_resize);
+    listener_connect(&xdg_shell_view->request_fullscreen, &toplevel->events.request_fullscreen,
+                     handle_xdg_shell_view_request_fullscreen);
+    listener_connect(&xdg_shell_view->request_maximize, &toplevel->events.request_maximize,
+                     handle_xdg_shell_view_request_maximize);
+    listener_connect(&xdg_shell_view->request_minimize, &toplevel->events.request_minimize,
+                     handle_xdg_shell_view_request_minimize);
 }
 
 /* view interface */
@@ -144,11 +140,11 @@ static void xdg_shell_view_unmap(struct sycamore_view *view) {
     struct sycamore_xdg_shell_view *xdg_shell_view =
             wl_container_of(view, xdg_shell_view, base_view);
 
-    wl_list_remove(&xdg_shell_view->request_move.link);
-    wl_list_remove(&xdg_shell_view->request_resize.link);
-    wl_list_remove(&xdg_shell_view->request_fullscreen.link);
-    wl_list_remove(&xdg_shell_view->request_maximize.link);
-    wl_list_remove(&xdg_shell_view->request_minimize.link);
+    listener_disconnect(&xdg_shell_view->request_move);
+    listener_disconnect(&xdg_shell_view->request_resize);
+    listener_disconnect(&xdg_shell_view->request_fullscreen);
+    listener_disconnect(&xdg_shell_view->request_maximize);
+    listener_disconnect(&xdg_shell_view->request_minimize);
 }
 
 /* view interface */
@@ -232,12 +228,12 @@ struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(
 
     view->xdg_toplevel = toplevel;
 
-    view->map.notify = handle_xdg_shell_view_map;
-    wl_signal_add(&toplevel->base->events.map, &view->map);
-    view->unmap.notify = handle_xdg_shell_view_unmap;
-    wl_signal_add(&toplevel->base->events.unmap, &view->unmap);
-    view->destroy.notify = handle_xdg_shell_view_destroy;
-    wl_signal_add(&toplevel->base->events.destroy, &view->destroy);
+    listener_connect(&view->map, &toplevel->base->events.map,
+                     handle_xdg_shell_view_map);
+    listener_connect(&view->unmap, &toplevel->base->events.unmap,
+                     handle_xdg_shell_view_unmap);
+    listener_connect(&view->destroy, &toplevel->base->events.destroy,
+                     handle_xdg_shell_view_destroy);
 
     return view;
 }
@@ -299,7 +295,7 @@ void sycamore_xdg_shell_destroy(struct sycamore_xdg_shell *xdg_shell) {
         return;
     }
 
-    wl_list_remove(&xdg_shell->new_xdg_shell_surface.link);
+    listener_disconnect(&xdg_shell->new_xdg_shell_surface);
 
     free(xdg_shell);
 }
@@ -321,9 +317,8 @@ struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct sycamore_server *ser
         return NULL;
     }
 
-    xdg_shell->new_xdg_shell_surface.notify = handle_new_xdg_shell_surface;
-    wl_signal_add(&xdg_shell->wlr_xdg_shell->events.new_surface,
-                  &xdg_shell->new_xdg_shell_surface);
+    listener_connect(&xdg_shell->new_xdg_shell_surface, &xdg_shell->wlr_xdg_shell->events.new_surface,
+                     handle_new_xdg_shell_surface);
 
     return xdg_shell;
 }

@@ -3,6 +3,7 @@
 #include "sycamore/input/keyboard.h"
 #include "sycamore/input/keybinding.h"
 #include "sycamore/server.h"
+#include "sycamore/util/listener.h"
 
 static void handle_keyboard_modifiers(struct wl_listener *listener, void *data) {
     /* This event is raised when a modifier key, such as shift or alt, is
@@ -54,8 +55,8 @@ static void sycamore_keyboard_destroy(struct sycamore_seat_device *seat_device) 
         return;
     }
 
-    wl_list_remove(&seat_device->keyboard->modifiers.link);
-    wl_list_remove(&seat_device->keyboard->key.link);
+    listener_disconnect(&seat_device->keyboard->modifiers);
+    listener_disconnect(&seat_device->keyboard->key);
 
     struct wlr_seat *wlr_seat = seat_device->seat->wlr_seat;
     struct wlr_keyboard *wlr_keyboard = seat_device->keyboard->wlr_keyboard;
@@ -84,10 +85,10 @@ struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
 
     keyboard->wlr_keyboard = wlr_device->keyboard;
 
-    keyboard->modifiers.notify = handle_keyboard_modifiers;
-    wl_signal_add(&keyboard->wlr_keyboard->events.modifiers, &keyboard->modifiers);
-    keyboard->key.notify = handle_keyboard_key;
-    wl_signal_add(&keyboard->wlr_keyboard->events.key, &keyboard->key);
+    listener_connect(&keyboard->modifiers, &keyboard->wlr_keyboard->events.modifiers,
+                     handle_keyboard_modifiers);
+    listener_connect(&keyboard->key, &keyboard->wlr_keyboard->events.key,
+                     handle_keyboard_key);
 
     return keyboard;
 }
