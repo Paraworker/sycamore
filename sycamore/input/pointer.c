@@ -30,7 +30,7 @@ struct sycamore_pointer *sycamore_pointer_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    pointer->wlr_pointer = wlr_device->pointer;
+    pointer->wlr_pointer = wlr_pointer_from_input_device(wlr_device);
 
     return pointer;
 }

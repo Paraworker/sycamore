@@ -82,7 +82,7 @@ struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
         return NULL;
     }
 
-    keyboard->wlr_keyboard = wlr_device->keyboard;
+    keyboard->wlr_keyboard = wlr_keyboard_from_input_device(wlr_device);
 
     keyboard->modifiers.notify = handle_keyboard_modifiers;
     wl_signal_add(&keyboard->wlr_keyboard->events.modifiers, &keyboard->modifiers);
