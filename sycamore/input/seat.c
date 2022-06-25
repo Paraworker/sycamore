@@ -227,15 +227,7 @@ void handle_backend_new_input(struct wl_listener *listener, void *data) {
 static void handle_seat_request_set_cursor(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, request_set_cursor);
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
-    struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
-    if (focused_client != event->seat_client) {
-        return;
-    }
 
-    /* Once we've vetted the client, we can tell the cursor to use the
-     * provided surface as the cursor image. It will set the hardware cursor
-     * on the output that it's currently on and continue to do so as the
-     * cursor moves between outputs. */
     cursor_set_image_surface(seat->cursor, event);
 }
 
@@ -247,6 +239,7 @@ static void handle_seat_request_set_selection(struct wl_listener *listener, void
     struct sycamore_seat *seat = wl_container_of(
             listener, seat, request_set_selection);
     struct wlr_seat_request_set_selection_event *event = data;
+
     wlr_seat_set_selection(seat->wlr_seat, event->source, event->serial);
 }
 
@@ -254,6 +247,7 @@ static void handle_seat_request_set_primary_selection(struct wl_listener *listen
     struct sycamore_seat *seat = wl_container_of(
             listener, seat, request_set_primary_selection);
     struct wlr_seat_request_set_primary_selection_event *event = data;
+
     wlr_seat_set_primary_selection(seat->wlr_seat, event->source, event->serial);
 }
 

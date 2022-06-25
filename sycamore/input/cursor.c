@@ -35,6 +35,12 @@ void cursor_set_image_surface(struct sycamore_cursor *cursor,
         return;
     }
 
+    struct wlr_seat_client *focused_client =
+            cursor->seat->wlr_seat->pointer_state.focused_client;
+    if (focused_client != event->seat_client) {
+        return;
+    }
+
     cursor->image = NULL;
     wlr_cursor_set_surface(cursor->wlr_cursor, event->surface,
                            event->hotspot_x, event->hotspot_y);
