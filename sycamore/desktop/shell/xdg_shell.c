@@ -327,7 +327,3 @@ struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct sycamore_server *ser
 
     return xdg_shell;
 }
-
-
-
-

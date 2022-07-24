@@ -52,5 +52,3 @@ void seatop_begin_default(struct sycamore_seat *seat) {
     seat->seatop_impl = &seatop_impl;
     process_cursor_rebase(seat);
 }
-
-

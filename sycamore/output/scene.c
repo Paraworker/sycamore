@@ -79,4 +79,3 @@ struct sycamore_view *view_under(struct sycamore_scene *scene, double lx, double
     }
     return tree->node.data;
 }
-

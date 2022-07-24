@@ -117,6 +117,3 @@ void sycamore_keyboard_configure(struct sycamore_keyboard *keyboard) {
     wlr_keyboard_set_keymap(keyboard->wlr_keyboard, keymap);
     xkb_keymap_unref(keymap);
 }
-
-
-

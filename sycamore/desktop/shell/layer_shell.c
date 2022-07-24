@@ -107,4 +107,3 @@ void sycamore_layer_shell_destroy(struct sycamore_layer_shell *layer_shell) {
 
     free(layer_shell);
 }
-

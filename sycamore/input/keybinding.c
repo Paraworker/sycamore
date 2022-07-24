@@ -171,10 +171,3 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
 
     return manager;
 }
-
-
-
-
-
-
-

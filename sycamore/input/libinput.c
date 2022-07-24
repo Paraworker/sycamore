@@ -82,5 +82,3 @@ void touchpad_set_accel_speed(struct wlr_input_device* device, double speed) {
     struct libinput_device *libinput_device = wlr_libinput_get_device_handle(device);
     set_accel_speed(libinput_device, speed);
 }
-
-

@@ -202,5 +202,3 @@ void server_run(struct sycamore_server *server) {
 
     wl_display_run(server->wl_display);
 }
-
-

@@ -378,4 +378,3 @@ bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view 
 
     return true;
 }
-

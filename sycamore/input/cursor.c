@@ -379,4 +379,3 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     return cursor;
 }
-

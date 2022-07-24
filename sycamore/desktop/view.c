@@ -234,4 +234,3 @@ void view_ptr_disconnect(struct view_ptr *ptr) {
     ptr->view = NULL;
     wl_list_remove(&ptr->link);
 }
-
