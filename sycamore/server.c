@@ -12,6 +12,7 @@
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_single_pixel_buffer_v1.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
@@ -116,6 +117,7 @@ static bool server_init(struct sycamore_server *server) {
     wlr_viewporter_create(server->wl_display);
     wlr_gamma_control_manager_v1_create(server->wl_display);
     wlr_xdg_output_manager_v1_create(server->wl_display, server->output_layout);
+    wlr_single_pixel_buffer_manager_v1_create(server->wl_display);
 
     server->socket = wl_display_add_socket_auto(server->wl_display);
     if (!server->socket) {
