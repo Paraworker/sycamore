@@ -9,7 +9,10 @@
 
 struct sycamore_layer;
 struct sycamore_seat;
+struct sycamore_seat_device;
 struct sycamore_server;
+
+typedef void (*derived_seat_device_destroy)(struct sycamore_seat_device *seat_device);
 
 enum seatop_mode {
     SEATOP_DEFAULT,
@@ -35,7 +38,7 @@ struct sycamore_seat_device {
         struct sycamore_keyboard *keyboard;
     };
 
-    void (*derived_destroy)(struct sycamore_seat_device *seat_device);
+    derived_seat_device_destroy derived_destroy;
 
     struct wl_listener destroy;
 

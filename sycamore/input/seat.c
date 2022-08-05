@@ -75,7 +75,7 @@ static void handle_seat_device_destroy(struct wl_listener *listener, void *data)
 }
 
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *derived_device, void (*derived_destroy)(struct sycamore_seat_device *seat_device)) {
+        void *derived_device, derived_seat_device_destroy derived_destroy) {
     struct sycamore_seat_device *seat_device = calloc(1, sizeof(struct sycamore_seat_device));
     if (!seat_device) {
         return NULL;
