@@ -56,13 +56,12 @@ struct sycamore_output *sycamore_output_create(struct wlr_output *wlr_output) {
     return output;
 }
 
-void output_get_center_coords(struct sycamore_output *output, struct wlr_fbox *box) {
-    struct wlr_box output_box;
+void output_get_center_coords(struct sycamore_output *output, struct wlr_box *box) {
     wlr_output_layout_get_box(server.output_layout,
-                              output->wlr_output, &output_box);
+                              output->wlr_output, box);
 
-    box->x = output_box.x + output_box.width / 2.0;
-    box->y = output_box.y + output_box.height / 2.0;
+    box->x += (box->width / 2);
+    box->y += (box->height / 2);
 }
 
 struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
