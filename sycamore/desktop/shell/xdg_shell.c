@@ -37,42 +37,31 @@ static void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listene
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_fullscreen);
     struct sycamore_view *base = &view->base_view;
     bool fullscreen = view->xdg_toplevel->requested.fullscreen;
+    struct sycamore_output *output = NULL;
+
     if (fullscreen) {
-        /* If there is a fullscreen_output, satisfy it first */
-        struct wlr_output *output = view->xdg_toplevel->requested.fullscreen_output;
-        if (!output) {
-            struct sycamore_output *sycamore_output = view_get_main_output(base);
-            if (sycamore_output) {
-                output = sycamore_output->wlr_output;
-            }
+        struct wlr_output *fullscreen_output = view->xdg_toplevel->requested.fullscreen_output;
+        if (fullscreen_output && fullscreen_output->data) {
+            output = fullscreen_output->data;
+        } else {
+            output = view_get_main_output(base);
         }
-
-        /* output may still be NULL, but we apply it anyway */
-        struct wlr_box box;
-        wlr_output_layout_get_box(server.output_layout, output, &box);
-
-        view_set_fullscreen(base, &box, fullscreen);
-    } else {
-        view_set_fullscreen(base, NULL, fullscreen);
     }
+
+    view_set_fullscreen(base, output, fullscreen);
 }
 
 static void handle_xdg_shell_view_request_maximize(struct wl_listener *listener, void *data) {
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_maximize);
     struct sycamore_view *base = &view->base_view;
     bool maximized = view->xdg_toplevel->requested.maximized;
+    struct sycamore_output *output = NULL;
+
     if (maximized) {
-        struct sycamore_output *output = view_get_main_output(base);
-        if (output) {
-            view_set_maximized(base, &output->usable_area, maximized);
-        } else {
-            struct wlr_box box;
-            wlr_output_layout_get_box(server.output_layout, NULL, &box);
-            view_set_maximized(base, &box, maximized);
-        }
-    } else {
-        view_set_maximized(base, NULL, maximized);
+        output = view_get_main_output(base);
     }
+
+    view_set_maximized(base, output, maximized);
 }
 
 static void handle_xdg_shell_view_request_minimize(struct wl_listener *listener, void *data) {
