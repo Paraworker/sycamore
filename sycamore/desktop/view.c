@@ -32,11 +32,7 @@ void view_map(struct sycamore_view *view,
 
     struct sycamore_output *output = cursor_at_output(server.seat->cursor, server.output_layout);
 
-    if (output) {
-        struct wlr_box box;
-        wlr_output_layout_get_box(server.output_layout, output->wlr_output, &box);
-        view_move_to(view, box.x, box.y);
-    }
+    view_set_to_output_center(view, output);
 
     view_set_maximized(view, output, maximized);
 
@@ -224,6 +220,23 @@ void view_set_maximized(struct sycamore_view *view,
     view->interface->set_size(view, max_box.width, max_box.height);
     view->is_maximized = maximized;
     view->interface->set_maximized(view, maximized);
+}
+
+void view_set_to_output_center(struct sycamore_view *view, struct sycamore_output *output) {
+    if (!output) {
+        return;
+    }
+
+    struct wlr_box center;
+    output_get_center_coords(output, &center);
+
+    struct wlr_box view_box;
+    view->interface->get_geometry(view, &view_box);
+
+    view_box.x = center.x - (view_box.width / 2);
+    view_box.y = center.y - (view_box.height / 2);
+
+    view_move_to(view, view_box.x, view_box.y);
 }
 
 void view_ptr_connect(struct view_ptr *ptr, struct sycamore_view *view) {

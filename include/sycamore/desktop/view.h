@@ -94,6 +94,8 @@ void view_set_maximized(struct sycamore_view *view,
 
 void view_set_focus(struct sycamore_view *view);
 
+void view_set_to_output_center(struct sycamore_view *view, struct sycamore_output *output);
+
 void view_ptr_connect(struct view_ptr *ptr, struct sycamore_view *view);
 
 void view_ptr_disconnect(struct view_ptr *ptr);
