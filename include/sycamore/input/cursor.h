@@ -20,6 +20,7 @@ struct sycamore_cursor {
 
     bool enabled;
     const char *image;
+    size_t pressed_button_count;
 
     struct wl_listener cursor_motion;
     struct wl_listener cursor_motion_absolute;
