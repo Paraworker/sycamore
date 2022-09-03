@@ -3,13 +3,11 @@
 
 static void process_pointer_button(struct sycamore_seat *seat,
         struct wlr_pointer_button_event *event) {
-    if (event->state == WLR_BUTTON_PRESSED) {
-        return;
+    if (seat->cursor->pressed_button_count == 0) {
+        // If there is no button being pressed
+        // we back to default.
+        seatop_begin_default(seat);
     }
-
-    /* If you released any buttons
-     * switch to default mode. */
-    seatop_begin_default(seat);
 }
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
