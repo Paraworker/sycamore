@@ -192,6 +192,13 @@ static void handle_cursor_button(struct wl_listener *listener, void *data) {
     /* This event is forwarded by the cursor when a pointer emits a button event. */
     struct sycamore_cursor *cursor = wl_container_of(listener, cursor, cursor_button);
     struct wlr_pointer_button_event *event = data;
+
+    if (event->state == WLR_BUTTON_PRESSED) {
+        ++(cursor->pressed_button_count);
+    } else if (cursor->pressed_button_count > 0) {
+        --(cursor->pressed_button_count);
+    }
+
     cursor_enable(cursor);
     cursor->seat->seatop_impl->pointer_button(cursor->seat, event);
 }
@@ -324,6 +331,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     cursor->image = NULL;
     cursor->xcursor_manager = NULL;
+    cursor->pressed_button_count = 0;
     cursor->enabled = false;
     cursor->seat = seat;
 
