@@ -4,6 +4,18 @@
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
 
+void load_background() {
+    if (fork() == 0) {
+        execl("/bin/sh", "/bin/sh", "-c", "swaybg -m fill -i /home/ha/Pictures/wallpaper.jpg", (void *)NULL);
+    }
+}
+
+void load_bar() {
+    if (fork() == 0) {
+        execl("/bin/sh", "/bin/sh", "-c", "waybar", (void *)NULL);
+    }
+}
+
 int main(int argc, char **argv) {
     wlr_log_init(WLR_DEBUG, NULL);
 
@@ -41,6 +53,9 @@ int main(int argc, char **argv) {
             execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void *)NULL);
         }
     }
+
+    load_background();
+    load_bar();
 
     server_run();
 
