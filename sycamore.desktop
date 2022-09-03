@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Sycamore
+Comment=A Wayland compositor
+Exec=sycamore
+Type=Application
