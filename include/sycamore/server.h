@@ -12,10 +12,12 @@
 #include <wlr/types/wlr_presentation_time.h>
 #include "sycamore/desktop/shell/layer_shell.h"
 #include "sycamore/desktop/shell/xdg_shell.h"
-#include "sycamore/desktop/view.h"
 #include "sycamore/input/keybinding.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/scene.h"
+
+// The global server instance.
+extern struct sycamore_server server;
 
 struct sycamore_server {
     struct wl_display *wl_display;
@@ -45,12 +47,12 @@ struct sycamore_server {
     const char *socket;
 };
 
-struct sycamore_server *server_create();
+bool server_init();
 
-bool server_start(struct sycamore_server *server);
+bool server_start();
 
-void server_run(struct sycamore_server *server);
+void server_run();
 
-void server_destroy(struct sycamore_server *server);
+void server_fini();
 
 #endif //SYCAMORE_SERVER_H

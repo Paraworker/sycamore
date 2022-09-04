@@ -4,16 +4,12 @@
 #include <wayland-util.h>
 #include <xkbcommon/xkbcommon.h>
 
-struct sycamore_server;
 struct sycamore_keybinding;
 
-typedef void (*keybinding_action)(struct sycamore_server *server,
-        struct sycamore_keybinding *keybinding);
+typedef void (*keybinding_action)(struct sycamore_keybinding *keybinding);
 
 struct sycamore_keybinding_manager {
     struct wl_list modifiers_nodes;
-
-    struct sycamore_server *server;
 };
 
 struct keybinding_modifiers_node {
@@ -34,8 +30,7 @@ struct sycamore_keybinding {
     struct keybinding_modifiers_node *modifiers_node;
 };
 
-struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(
-        struct sycamore_server *server);
+struct sycamore_keybinding_manager *sycamore_keybinding_manager_create();
 
 void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager *manager);
 

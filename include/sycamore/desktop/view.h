@@ -11,7 +11,6 @@
 
 struct sycamore_view;
 struct sycamore_output;
-struct sycamore_server;
 
 enum sycamore_view_type {
     VIEW_TYPE_UNKNOWN,
@@ -56,8 +55,6 @@ struct sycamore_view {
 
     struct wlr_box maximize_restore;
     struct wlr_box fullscreen_restore;
-
-    struct sycamore_server *server;
 };
 
 struct sycamore_xdg_shell_view {
@@ -76,7 +73,7 @@ struct sycamore_xdg_shell_view {
 };
 
 void view_init(struct sycamore_view *view, struct wlr_surface *surface,
-        const struct view_interface *interface, struct sycamore_server *server);
+        const struct view_interface *interface);
 
 void view_map(struct sycamore_view *view,
         struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);

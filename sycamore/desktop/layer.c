@@ -4,6 +4,7 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
@@ -14,7 +15,7 @@ void layer_map(struct sycamore_layer *layer) {
     }
 
     struct wlr_layer_surface_v1 *layer_surface = layer->layer_surface;
-    struct sycamore_seat *seat = layer->server->seat;
+    struct sycamore_seat *seat = server.seat;
 
     // focus on new layer_surface
     if (layer_surface->current.keyboard_interactive &&
@@ -36,12 +37,11 @@ void layer_unmap(struct sycamore_layer *layer) {
         return;
     }
 
-    struct sycamore_server *server = layer->server;
-    struct sycamore_seat *seat = server->seat;
+    struct sycamore_seat *seat = server.seat;
 
     if (seat->focused_layer == layer) {
         seat->focused_layer = NULL;
-        struct sycamore_view *view = server->focused_view.view;
+        struct sycamore_view *view = server.focused_view.view;
         if (view) {
             seat_set_keyboard_focus(seat, view->wlr_surface);
         }
@@ -59,7 +59,7 @@ void layer_surface_commit(struct sycamore_layer *layer) {
 
     if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
         enum zwlr_layer_shell_v1_layer layer_type = layer_surface->current.layer;
-        struct wlr_scene_tree *scene_tree = layer_get_scene_tree(layer->server->scene, layer_type);
+        struct wlr_scene_tree *scene_tree = layer_get_scene_tree(server.scene, layer_type);
         wlr_scene_node_reparent(&layer->scene->tree->node, scene_tree);
         wl_list_remove(&layer->link);
         wl_list_insert(&output->layers[layer_type], &layer->link);
@@ -97,7 +97,7 @@ void arrange_surface(struct sycamore_output *output, struct wlr_box *full_area,
 
 void arrange_layers(struct sycamore_output *output) {
     struct wlr_box full_area;
-    wlr_output_layout_get_box(output->server->output_layout,
+    wlr_output_layout_get_box(server.output_layout,
                               output->wlr_output, &full_area);
     struct wlr_box usable_area = full_area;
 
@@ -108,10 +108,8 @@ void arrange_layers(struct sycamore_output *output) {
     output->usable_area = usable_area;
 }
 
-struct sycamore_layer *layer_create(struct sycamore_server *server,
-        struct wlr_layer_surface_v1 *layer_surface) {
-    struct sycamore_layer *layer =
-            calloc(1, sizeof(struct sycamore_layer));
+struct sycamore_layer *layer_create(struct wlr_layer_surface_v1 *layer_surface) {
+    struct sycamore_layer *layer = calloc(1, sizeof(struct sycamore_layer));
     if (!layer) {
         wlr_log(WLR_ERROR, "Unable to allocate layer");
         return NULL;
@@ -119,7 +117,7 @@ struct sycamore_layer *layer_create(struct sycamore_server *server,
 
     /* Allocate an output for this layer. */
     if (!layer_surface->output) {
-        struct wl_list *all_outputs = &server->all_outputs;
+        struct wl_list *all_outputs = &server.all_outputs;
         if (wl_list_empty(all_outputs)) {
             wlr_log(WLR_ERROR, "No output for layer_surface");
             free(layer);
@@ -135,7 +133,6 @@ struct sycamore_layer *layer_create(struct sycamore_server *server,
     layer->mapped = false;
     layer->linked = false;
     layer->output = layer_surface->output->data;
-    layer->server = server;
 
     return layer;
 }

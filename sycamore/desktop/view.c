@@ -6,11 +6,12 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
+#include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
 void view_init(struct sycamore_view *view, struct wlr_surface *surface,
-        const struct view_interface *interface, struct sycamore_server *server) {
+        const struct view_interface *interface) {
     view->scene_descriptor = SCENE_DESC_VIEW;
     view->interface = interface;
     view->wlr_surface = surface;
@@ -21,8 +22,6 @@ void view_init(struct sycamore_view *view, struct wlr_surface *surface,
     view->is_maximized = false;
 
     wl_list_init(&view->ptrs);
-
-    view->server = server;
 }
 
 void view_map(struct sycamore_view *view,
@@ -31,11 +30,10 @@ void view_map(struct sycamore_view *view,
         return;
     }
 
-    wl_list_insert(&view->server->mapped_views, &view->link);
+    wl_list_insert(&server.mapped_views, &view->link);
 
-    struct sycamore_server *server = view->server;
-    struct wlr_output_layout *layout = server->output_layout;
-    struct wlr_output *output = cursor_at_output(server->seat->cursor, layout);
+    struct wlr_output_layout *layout = server.output_layout;
+    struct wlr_output *output = cursor_at_output(server.seat->cursor, layout);
     struct wlr_box box;
     wlr_output_layout_get_box(layout, output, &box);
 
@@ -66,7 +64,7 @@ void view_map(struct sycamore_view *view,
 
     view_set_focus(view);
 
-    struct sycamore_seat *seat = view->server->seat;
+    struct sycamore_seat *seat = server.seat;
     seat->seatop_impl->cursor_rebase(seat);
 }
 
@@ -86,7 +84,7 @@ void view_unmap(struct sycamore_view *view) {
 
     view->mapped = false;
 
-    struct sycamore_seat *seat = view->server->seat;
+    struct sycamore_seat *seat = server.seat;
     seat->seatop_impl->cursor_rebase(seat);
 }
 
@@ -113,7 +111,8 @@ struct sycamore_output *view_get_main_output(struct sycamore_view *view) {
         return NULL;
     }
 
-    struct wlr_surface_output *surface_output = wl_container_of(surface->current_outputs.prev, surface_output, link);
+    struct wlr_surface_output *surface_output =
+            wl_container_of(surface->current_outputs.prev, surface_output, link);
     return surface_output->output->data;
 }
 
@@ -123,9 +122,8 @@ void view_set_focus(struct sycamore_view *view) {
         return;
     }
 
-    struct sycamore_server *server = view->server;
-    struct sycamore_seat *seat = server->seat;
-    struct sycamore_view *prev_view = server->focused_view.view;
+    struct sycamore_seat *seat = server.seat;
+    struct sycamore_view *prev_view = server.focused_view.view;
     if (prev_view == view) {
         /* Don't refocus */
         return;
@@ -136,13 +134,13 @@ void view_set_focus(struct sycamore_view *view) {
          * it no longer has focus and the client will repaint accordingly, e.g.
          * stop displaying a caret. */
         prev_view->interface->set_activated(prev_view, false);
-        view_ptr_disconnect(&server->focused_view);
+        view_ptr_disconnect(&server.focused_view);
     }
 
     /* Move the view to the front */
     wlr_scene_node_raise_to_top(&view->scene_tree->node);
     wl_list_remove(&view->link);
-    wl_list_insert(&server->mapped_views, &view->link);
+    wl_list_insert(&server.mapped_views, &view->link);
 
     /* Activate the new view */
     view->interface->set_activated(view, true);
@@ -151,7 +149,7 @@ void view_set_focus(struct sycamore_view *view) {
         seat_set_keyboard_focus(seat, view->wlr_surface);
     }
 
-    view_ptr_connect(&server->focused_view, view);
+    view_ptr_connect(&server.focused_view, view);
 }
 
 void view_set_fullscreen(struct sycamore_view *view,
@@ -172,7 +170,7 @@ void view_set_fullscreen(struct sycamore_view *view,
         view->fullscreen_restore.width = window_box.width;
         view->fullscreen_restore.height = window_box.height;
 
-        struct sycamore_scene *scene = view->server->scene;
+        struct sycamore_scene *scene = server.scene;
         wlr_scene_node_place_above(&scene->trees.shell_view->node,
                                    &scene->trees.shell_top->node);
 
@@ -180,7 +178,7 @@ void view_set_fullscreen(struct sycamore_view *view,
         view->interface->set_size(view, full_box->width, full_box->height);
     } else {
         /* Restore from fullscreen mode */
-        struct sycamore_scene *scene = view->server->scene;
+        struct sycamore_scene *scene = server.scene;
         wlr_scene_node_place_below(&scene->trees.shell_view->node,
                                    &scene->trees.shell_top->node);
 

@@ -8,15 +8,13 @@
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 
-struct sycamore_scene *sycamore_scene_create(struct sycamore_server *server,
-        struct wlr_output_layout *layout, struct wlr_presentation *presentation) {
+struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
+        struct wlr_presentation *presentation) {
     struct sycamore_scene *scene = calloc(1, sizeof(struct sycamore_scene));
     if (!scene) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_scene");
         return NULL;
     }
-
-    scene->server = server;
 
     scene->wlr_scene = wlr_scene_create();
     if (!scene->wlr_scene) {

@@ -132,7 +132,7 @@ void xcursor_reload(struct sycamore_cursor *cursor) {
     }
 
     struct sycamore_output *output;
-    wl_list_for_each(output, &cursor->seat->server->all_outputs, link) {
+    wl_list_for_each(output, &server.all_outputs, link) {
         wlr_xcursor_manager_load(cursor->xcursor_manager,
                                  output->wlr_output->scale);
     }
@@ -144,7 +144,7 @@ void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output
     wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
 
     /* If this is the first output, cursor should be in the center of it*/
-    if (wl_list_length(&output->server->all_outputs) == 1) {
+    if (wl_list_length(&server.all_outputs) == 1) {
         struct wlr_fbox box;
         output_get_center_coords(output, &box);
         cursor->wlr_cursor->x = box.x;

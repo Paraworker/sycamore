@@ -24,15 +24,15 @@ int main(int argc, char **argv) {
         return EXIT_SUCCESS;
     }
 
-    struct sycamore_server *server = server_create();
-    if (!server) {
+    if (!server_init()) {
+        server_fini();
         exit(EXIT_FAILURE);
     }
 
-    setenv("WAYLAND_DISPLAY", server->socket, true);
+    setenv("WAYLAND_DISPLAY", server.socket, true);
 
-    if (!server_start(server)) {
-        server_destroy(server);
+    if (!server_start()) {
+        server_fini();
         exit(EXIT_FAILURE);
     }
 
@@ -42,8 +42,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    server_run(server);
-    server_destroy(server);
+    server_run();
 
+    server_fini();
     return EXIT_SUCCESS;
 }

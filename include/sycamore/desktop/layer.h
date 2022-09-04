@@ -7,7 +7,6 @@
 #define LAYERS_ALL 4
 
 struct sycamore_output;
-struct sycamore_server;
 
 struct sycamore_layer {
     enum scene_descriptor_type scene_descriptor;    //must be first
@@ -24,7 +23,6 @@ struct sycamore_layer {
     struct wl_listener surface_commit;
 
     struct sycamore_output *output;
-    struct sycamore_server *server;
 };
 
 void layer_map(struct sycamore_layer *layer);
@@ -33,8 +31,7 @@ void layer_unmap(struct sycamore_layer *layer);
 
 void layer_surface_commit(struct sycamore_layer *layer);
 
-struct sycamore_layer *layer_create(struct sycamore_server *server,
-        struct wlr_layer_surface_v1 *layer_surface);
+struct sycamore_layer *layer_create(struct wlr_layer_surface_v1 *layer_surface);
 
 void layer_destroy(struct sycamore_layer *layer);
 
