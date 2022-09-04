@@ -6,7 +6,9 @@
 #include <wlr/util/log.h>
 #include "sycamore/desktop/shell/xdg_shell.h"
 #include "sycamore/desktop/view.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
+#include "sycamore/server.h"
 
 static void handle_xdg_shell_view_request_move(struct wl_listener *listener, void *data) {
     /* This event is raised when a client would like to begin an interactive
@@ -16,7 +18,7 @@ static void handle_xdg_shell_view_request_move(struct wl_listener *listener, voi
      * client, to prevent the client from requesting this whenever they want. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_move);
     struct sycamore_view *base = &view->base_view;
-    seatop_begin_pointer_move(base->server->seat, base);
+    seatop_begin_pointer_move(server.seat, base);
 }
 
 static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *data) {
@@ -28,7 +30,7 @@ static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, v
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_resize);
     struct sycamore_view *base = &view->base_view;
     struct wlr_xdg_toplevel_resize_event *event = data;
-    seatop_begin_pointer_resize(base->server->seat, base, event->edges);
+    seatop_begin_pointer_resize(server.seat, base, event->edges);
 }
 
 static void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {
@@ -47,7 +49,7 @@ static void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listene
 
         /* output may still be NULL, but we apply it anyway */
         struct wlr_box box;
-        wlr_output_layout_get_box(base->server->output_layout, output, &box);
+        wlr_output_layout_get_box(server.output_layout, output, &box);
 
         view_set_fullscreen(base, &box, fullscreen);
     } else {
@@ -65,7 +67,7 @@ static void handle_xdg_shell_view_request_maximize(struct wl_listener *listener,
             view_set_maximized(base, &output->usable_area, maximized);
         } else {
             struct wlr_box box;
-            wlr_output_layout_get_box(base->server->output_layout, NULL, &box);
+            wlr_output_layout_get_box(server.output_layout, NULL, &box);
             view_set_maximized(base, &box, maximized);
         }
     } else {
@@ -218,8 +220,7 @@ static const struct view_interface xdg_shell_view_interface = {
     .close = xdg_shell_view_close,
 };
 
-struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(
-        struct sycamore_server *server, struct wlr_xdg_toplevel *toplevel) {
+struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(struct wlr_xdg_toplevel *toplevel) {
     struct sycamore_xdg_shell_view *view =
             calloc(1, sizeof(struct sycamore_xdg_shell_view));
     if (!view) {
@@ -228,7 +229,7 @@ struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(
     }
 
     view_init(&view->base_view, toplevel->base->surface,
-              &xdg_shell_view_interface, server);
+              &xdg_shell_view_interface);
 
     view->xdg_toplevel = toplevel;
 
@@ -274,12 +275,11 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
         return;
     }
 
-    struct sycamore_server *server = xdg_shell->server;
     struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
 
     /* Allocate a sycamore_xdg_shell_view for this surface */
     struct sycamore_xdg_shell_view *view =
-            sycamore_xdg_shell_view_create(server, toplevel);
+            sycamore_xdg_shell_view_create(toplevel);
     if (!view) {
         wlr_log(WLR_ERROR, "Unable to create xdg_shell_view");
         return;
@@ -287,7 +287,7 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
 
     /* Add to scene graph */
     view->base_view.scene_tree = wlr_scene_xdg_surface_create(
-            server->scene->trees.shell_view, xdg_surface);
+            server.scene->trees.shell_view, xdg_surface);
 
     struct wlr_scene_tree *scene_tree = view->base_view.scene_tree;
     scene_tree->node.data = &view->base_view;
@@ -304,15 +304,12 @@ void sycamore_xdg_shell_destroy(struct sycamore_xdg_shell *xdg_shell) {
     free(xdg_shell);
 }
 
-struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct sycamore_server *server,
-        struct wl_display *display) {
+struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct wl_display *display) {
     struct sycamore_xdg_shell *xdg_shell = calloc(1, sizeof(struct sycamore_xdg_shell));
     if (!xdg_shell) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_xdg_shell");
         return NULL;
     }
-
-    xdg_shell->server = server;
 
     xdg_shell->wlr_xdg_shell = wlr_xdg_shell_create(display, 3);
     if (!xdg_shell->wlr_xdg_shell) {

@@ -16,7 +16,7 @@ static void handle_output_frame(struct wl_listener *listener, void *data) {
     struct sycamore_output *output = wl_container_of(listener, output, frame);
 
     struct wlr_scene_output *scene_output =
-            wlr_scene_get_scene_output(output->scene, output->wlr_output);
+            wlr_scene_get_scene_output(server.scene->wlr_scene, output->wlr_output);
 
     /* Render the scene if needed and commit the output */
     wlr_scene_output_commit(scene_output);
@@ -34,8 +34,7 @@ static void handle_output_destroy(struct wl_listener *listener, void *data) {
     sycamore_output_destroy(output);
 }
 
-struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
-        struct wlr_output *wlr_output) {
+struct sycamore_output *sycamore_output_create(struct wlr_output *wlr_output) {
     struct sycamore_output *output =
             calloc(1, sizeof(struct sycamore_output));
     if (!output) {
@@ -44,8 +43,6 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
     }
 
     output->wlr_output = wlr_output;
-    output->scene = server->scene->wlr_scene;
-    output->server = server;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
         wl_list_init(&output->layers[i]);
@@ -61,7 +58,7 @@ struct sycamore_output *sycamore_output_create(struct sycamore_server *server,
 
 void output_get_center_coords(struct sycamore_output *output, struct wlr_fbox *box) {
     struct wlr_box output_box;
-    wlr_output_layout_get_box(output->server->output_layout,
+    wlr_output_layout_get_box(server.output_layout,
                               output->wlr_output, &output_box);
 
     box->x = output_box.x + output_box.width / 2.0;
@@ -115,15 +112,13 @@ void sycamore_output_destroy(struct sycamore_output *output) {
 }
 
 void handle_backend_new_output(struct wl_listener *listener, void *data) {
-    struct sycamore_server *server =
-            wl_container_of(listener, server, backend_new_output);
     struct wlr_output *wlr_output = data;
     wlr_log(WLR_DEBUG, "new output: %s", wlr_output->name);
 
     /* Configures the output created by the backend to use our allocator
      * and our renderer. Must be done once, before commiting the output */
-    if (!wlr_output_init_render(wlr_output, server->allocator,
-                                server->renderer)) {
+    if (!wlr_output_init_render(wlr_output, server.allocator,
+                                server.renderer)) {
         wlr_log(WLR_ERROR, "Unable to init output render");
         return;
     }
@@ -142,7 +137,7 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
         }
     }
 
-    struct sycamore_output *output = sycamore_output_create(server, wlr_output);
+    struct sycamore_output *output = sycamore_output_create(wlr_output);
     if (!output) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_output");
         return;
@@ -150,10 +145,10 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
 
     wlr_output->data = output;
 
-    wlr_output_layout_add_auto(server->output_layout, wlr_output);
+    wlr_output_layout_add_auto(server.output_layout, wlr_output);
 
-    wlr_output_layout_get_box(server->output_layout, wlr_output, &output->usable_area);
-    wl_list_insert(&server->all_outputs, &output->link);
+    wlr_output_layout_get_box(server.output_layout, wlr_output, &output->usable_area);
+    wl_list_insert(&server.all_outputs, &output->link);
 
-    output_setup_xcursor(server->seat->cursor, output);
+    output_setup_xcursor(server.seat->cursor, output);
 }

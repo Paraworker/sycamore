@@ -36,8 +36,7 @@ static void handle_keyboard_key(struct wl_listener *listener, void *data) {
          * process it as a compositor keybinding. */
         uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
         for (int i = 0; i < nsyms; ++i) {
-            handled = handle_keybinding(keyboard->base->seat->server->keybinding_manager,
-                                        modifiers, syms[i]);
+            handled = handle_keybinding(server.keybinding_manager, modifiers, syms[i]);
         }
     }
 

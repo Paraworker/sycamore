@@ -36,9 +36,8 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
     struct sycamore_layer_shell *layer_shell =
             wl_container_of(listener, layer_shell, new_layer_shell_surface);
     struct wlr_layer_surface_v1 *layer_surface = data;
-    struct sycamore_server *server = layer_shell->server;
 
-    struct sycamore_layer *layer = layer_create(server, layer_surface);
+    struct sycamore_layer *layer = layer_create(layer_surface);
     if (!layer) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_layer");
         return;
@@ -46,7 +45,7 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
 
     enum zwlr_layer_shell_v1_layer layer_type = layer_surface->pending.layer;
 
-    struct wlr_scene_tree *parent = layer_get_scene_tree(server->scene, layer_type);
+    struct wlr_scene_tree *parent = layer_get_scene_tree(server.scene, layer_type);
     layer->scene = wlr_scene_layer_surface_v1_create(
             parent, layer->layer_surface);
     layer->scene->tree->node.data = layer;
@@ -73,16 +72,13 @@ static void handle_new_layer_shell_surface(struct wl_listener *listener, void *d
     layer_surface->current = old_state;
 }
 
-struct sycamore_layer_shell *sycamore_layer_shell_create(
-        struct sycamore_server *server, struct wl_display *display) {
+struct sycamore_layer_shell *sycamore_layer_shell_create(struct wl_display *display) {
     struct sycamore_layer_shell *layer_shell =
             calloc(1, sizeof(struct sycamore_layer_shell));
     if (!layer_shell) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_layer_shell");
         return NULL;
     }
-
-    layer_shell->server = server;
 
     layer_shell->wlr_layer_shell = wlr_layer_shell_v1_create(display);
     if (!layer_shell->wlr_layer_shell) {

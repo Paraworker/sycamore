@@ -12,14 +12,14 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
     if (event->state == WLR_BUTTON_PRESSED) {
         /* Focus the view if the button was pressed */
         struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
-        view_set_focus(view_under(seat->server->scene, cursor->x, cursor->y));
+        view_set_focus(view_under(server.scene, cursor->x, cursor->y));
     }
 }
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     struct sycamore_cursor *cursor = seat->cursor;
     double sx, sy;
-    struct wlr_surface *surface = surface_under(seat->server->scene,
+    struct wlr_surface *surface = surface_under(server.scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     pointer_update(cursor, surface, sx, sy, time_msec);
 }
@@ -31,7 +31,7 @@ static void process_cursor_rebase(struct sycamore_seat *seat) {
     }
 
     double sx, sy;
-    struct wlr_surface *surface = surface_under(seat->server->scene,
+    struct wlr_surface *surface = surface_under(server.scene,
             cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
     pointer_update(cursor, surface, sx, sy, get_current_time_msec());
 }

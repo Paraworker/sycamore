@@ -214,10 +214,8 @@ static void (*seat_configure_device[])(struct sycamore_seat *seat, struct wlr_in
 void handle_backend_new_input(struct wl_listener *listener, void *data) {
     /* This event is raised by the backend when a new input device becomes
      * available. */
-    struct sycamore_server *server =
-            wl_container_of(listener, server, backend_new_input);
     struct wlr_input_device *device = data;
-    struct sycamore_seat *seat = server->seat;
+    struct sycamore_seat *seat = server.seat;
 
     seat_configure_device[device->type](seat, device);
 
@@ -255,7 +253,7 @@ static void handle_seat_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, destroy);
 
     seat->wlr_seat = NULL;
-    seat->server->seat = NULL;
+    server.seat = NULL;
 
     sycamore_seat_destroy(seat);
 }
@@ -301,8 +299,8 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
     free(seat);
 }
 
-struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
-        struct wl_display *display, struct wlr_output_layout *output_layout) {
+struct sycamore_seat *sycamore_seat_create(struct wl_display *display,
+        struct wlr_output_layout *output_layout) {
     struct sycamore_seat *seat = calloc(1, sizeof(struct sycamore_seat));
     if (!seat) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_seat");
@@ -311,7 +309,6 @@ struct sycamore_seat *sycamore_seat_create(struct sycamore_server *server,
 
     seat->seatop_impl = NULL;
     seat->focused_layer = NULL;
-    seat->server = server;
     wl_list_init(&seat->devices);
 
     seat->wlr_seat = wlr_seat_create(display, "seat0");
@@ -372,7 +369,7 @@ bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view 
     }
 
     /* Deny move from unfocused clients or there is no focused clients. */
-    if (view != seat->server->focused_view.view) {
+    if (view != server.focused_view.view) {
         return false;
     }
 

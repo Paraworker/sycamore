@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <wlr/util/log.h>
 #include "sycamore/input/keybinding.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/desktop/view.h"
 #include "sycamore/server.h"
 
@@ -16,7 +17,7 @@ bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t mod
             struct sycamore_keybinding *keybinding;
             wl_list_for_each(keybinding, &node->keybindings, link) {
                 if (sym == keybinding->sym) {
-                    keybinding->action(manager->server, keybinding);
+                    keybinding->action(keybinding);
                     return true;
                 }
             } //for each
@@ -27,49 +28,48 @@ bool handle_keybinding(struct sycamore_keybinding_manager *manager, uint32_t mod
 }
 
 /* action */
-static void open_launcher(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+static void open_launcher(struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus", (void *)NULL);
     }
 }
 
 /* action */
-static void open_terminal(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+static void open_terminal(struct sycamore_keybinding *keybinding) {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", (void *)NULL);
     }
 }
 
 /* action */
-static void close_focused_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    struct sycamore_view *view = server->focused_view.view;
+static void close_focused_view(struct sycamore_keybinding *keybinding) {
+    struct sycamore_view *view = server.focused_view.view;
     if (view) {
         view->interface->close(view);
     }
 }
 
 /* action */
-static void cycle_view(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
+static void cycle_view(struct sycamore_keybinding *keybinding) {
     /* Cycle to the next view */
-    if (wl_list_length(&server->mapped_views) < 2) {
+    if (wl_list_length(&server.mapped_views) < 2) {
         return;
     }
 
-    struct sycamore_view *next_view = wl_container_of(
-            server->mapped_views.prev, next_view, link);
+    struct sycamore_view *next_view = wl_container_of(server.mapped_views.prev, next_view, link);
     view_set_focus(next_view);
-    struct sycamore_seat *seat = server->seat;
+    struct sycamore_seat *seat = server.seat;
     seat->seatop_impl->cursor_rebase(seat);
 }
 
 /* action */
-static void terminate_server(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    wl_display_terminate(server->wl_display);
+static void terminate_server(struct sycamore_keybinding *keybinding) {
+    wl_display_terminate(server.wl_display);
 }
 
 /* action */
-static void switch_vt(struct sycamore_server *server, struct sycamore_keybinding *keybinding) {
-    struct wlr_session *session = wlr_backend_get_session(server->backend);
+static void switch_vt(struct sycamore_keybinding *keybinding) {
+    struct wlr_session *session = wlr_backend_get_session(server.backend);
 
     if (session != NULL) {
         unsigned vt = keybinding->sym - XKB_KEY_XF86Switch_VT_1 + 1;
@@ -130,7 +130,7 @@ void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager *man
     free(manager);
 }
 
-struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sycamore_server *server) {
+struct sycamore_keybinding_manager *sycamore_keybinding_manager_create() {
     struct sycamore_keybinding_manager *manager =
             calloc(1, sizeof(struct sycamore_keybinding_manager));
     if (!manager) {
@@ -139,7 +139,6 @@ struct sycamore_keybinding_manager *sycamore_keybinding_manager_create(struct sy
     }
 
     wl_list_init(&manager->modifiers_nodes);
-    manager->server = server;
 
     /* logo */
     struct keybinding_modifiers_node *logo = keybinding_modifiers_node_create(manager, WLR_MODIFIER_LOGO);
