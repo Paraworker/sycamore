@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdbool.h>
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
