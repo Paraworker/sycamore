@@ -55,6 +55,9 @@ void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
 void cursor_set_image_surface(struct sycamore_cursor *cursor,
         struct wlr_seat_pointer_request_set_cursor_event *event);
 
+/* Warp cursor again and reset image. */
+void cursor_reset(struct sycamore_cursor *cursor);
+
 void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
 struct sycamore_output *cursor_at_output(struct sycamore_cursor *cursor,
