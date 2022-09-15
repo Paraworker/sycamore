@@ -16,8 +16,6 @@ struct sycamore_output {
     struct wl_listener frame;
 };
 
-void output_get_center_coords(struct sycamore_output *output, struct wlr_box *box);
-
 /* Center cursor on this output. */
 void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor);
 

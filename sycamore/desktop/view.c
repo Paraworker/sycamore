@@ -9,6 +9,7 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
+#include "sycamore/util/box.h"
 
 void view_init(struct sycamore_view *view, struct wlr_surface *surface,
         const struct view_interface *interface) {
@@ -227,14 +228,21 @@ void view_set_to_output_center(struct sycamore_view *view, struct sycamore_outpu
         return;
     }
 
-    struct wlr_box center;
-    output_get_center_coords(output, &center);
+    struct wlr_box output_box;
+    wlr_output_layout_get_box(server.output_layout, output->wlr_output, &output_box);
+    if (wlr_box_empty(&output_box)) {
+        wlr_log(WLR_ERROR, "output_box is empty.");
+        return;
+    }
+
+    int32_t center_x = 0, center_y = 0;
+    box_get_center_coords(&output_box, &center_x, &center_y);
 
     struct wlr_box view_box;
     view->interface->get_geometry(view, &view_box);
 
-    view_box.x = center.x - (view_box.width / 2);
-    view_box.y = center.y - (view_box.height / 2);
+    view_box.x = center_x - (view_box.width / 2);
+    view_box.y = center_y - (view_box.height / 2);
 
     view_move_to(view, view_box.x, view_box.y);
 }
