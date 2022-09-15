@@ -9,6 +9,7 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
+#include "sycamore/util/box.h"
 
 static void handle_output_frame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
@@ -84,6 +85,23 @@ struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
     }
 
     return max_mode;
+}
+
+void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
+    struct wlr_box output_box;
+    wlr_output_layout_get_box(server.output_layout, output->wlr_output, &output_box);
+    if (wlr_box_empty(&output_box)) {
+        wlr_log(WLR_ERROR, "output_box is empty.");
+        return;
+    }
+
+    int32_t center_x = 0, center_y = 0;
+    box_get_center_coords(&output_box, &center_x, &center_y);
+
+    wlr_cursor_warp(cursor->wlr_cursor, NULL, center_x, center_y);
+
+    cursor_set_image(cursor, NULL);
+    cursor_set_image(cursor, "left_ptr");
 }
 
 void sycamore_output_destroy(struct sycamore_output *output) {
