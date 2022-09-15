@@ -104,6 +104,19 @@ void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor
     cursor_set_image(cursor, "left_ptr");
 }
 
+static void output_setup_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
+    /* Setup cursor for a new output */
+    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
+
+    if (wl_list_length(&server.all_outputs) == 1) {
+        // If this is the only output, ensure cursor.
+        output_ensure_cursor(output, cursor);
+    } else {
+        // Otherwise, reset cursor.
+        cursor_reset(cursor);
+    }
+}
+
 void sycamore_output_destroy(struct sycamore_output *output) {
     if (!output) {
         return;
@@ -167,5 +180,5 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
     wlr_output_layout_get_box(server.output_layout, wlr_output, &output->usable_area);
     wl_list_insert(&server.all_outputs, &output->link);
 
-    output_setup_xcursor(server.seat->cursor, output);
+    output_setup_cursor(output, server.seat->cursor);
 }

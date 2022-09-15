@@ -77,13 +77,6 @@ void cursor_disable(struct sycamore_cursor *cursor) {
     cursor->enabled = false;
 }
 
-void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamore_output *output) {
-    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
-    struct wlr_box box;
-    output_get_center_coords(output, &box);
-    wlr_cursor_warp(wlr_cursor, NULL, box.x, box.y);
-}
-
 bool xcursor_init(struct sycamore_cursor *cursor) {
     /* TODO: Get cursor theme/size from config file
      * recreate xcursor manager if theme/size changed. */
@@ -129,20 +122,6 @@ void xcursor_reload(struct sycamore_cursor *cursor) {
     wl_list_for_each(output, &server.all_outputs, link) {
         wlr_xcursor_manager_load(cursor->xcursor_manager,
                                  output->wlr_output->scale);
-    }
-
-    cursor_reset(cursor);
-}
-
-void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output) {
-    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
-
-    /* If this is the first output, cursor should be in the center of it*/
-    if (wl_list_length(&server.all_outputs) == 1) {
-        struct wlr_box box;
-        output_get_center_coords(output, &box);
-        cursor->wlr_cursor->x = box.x;
-        cursor->wlr_cursor->y = box.y;
     }
 
     cursor_reset(cursor);
