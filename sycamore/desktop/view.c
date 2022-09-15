@@ -244,6 +244,11 @@ void view_set_to_output_center(struct sycamore_view *view, struct sycamore_outpu
     view_box.x = center_x - (view_box.width / 2);
     view_box.y = center_y - (view_box.height / 2);
 
+    // Don't allow view's top being out of output.
+    if (view_box.y < output_box.y) {
+        view_box.y = output_box.y;
+    }
+
     view_move_to(view, view_box.x, view_box.y);
 }
 
