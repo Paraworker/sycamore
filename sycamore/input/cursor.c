@@ -111,19 +111,13 @@ bool xcursor_init(struct sycamore_cursor *cursor) {
     return true;
 }
 
-/* Refresh cursor image and warp it. */
-void xcursor_reset(struct sycamore_cursor *cursor) {
-    /* Refresh cursor image. */
-    const char *current_image = cursor->image;
-    cursor_set_image(cursor, NULL);
-    if (current_image) {
-        cursor_set_image(cursor, current_image);
-    } else {
-        cursor_set_image(cursor, "left_ptr");
-    }
-
+void cursor_reset(struct sycamore_cursor *cursor) {
     struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
     wlr_cursor_warp(wlr_cursor, NULL, wlr_cursor->x, wlr_cursor->y);
+
+    // Clear the image first so that image could be reloaded.
+    cursor_set_image(cursor, NULL);
+    cursor_set_image(cursor, "left_ptr");
 }
 
 void xcursor_reload(struct sycamore_cursor *cursor) {
@@ -137,7 +131,7 @@ void xcursor_reload(struct sycamore_cursor *cursor) {
                                  output->wlr_output->scale);
     }
 
-    xcursor_reset(cursor);
+    cursor_reset(cursor);
 }
 
 void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output) {
@@ -151,7 +145,7 @@ void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output
         cursor->wlr_cursor->y = box.y;
     }
 
-    xcursor_reset(cursor);
+    cursor_reset(cursor);
 }
 
 struct sycamore_output *cursor_at_output(struct sycamore_cursor *cursor,
