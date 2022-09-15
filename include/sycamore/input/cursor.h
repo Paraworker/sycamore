@@ -8,10 +8,9 @@
 #include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_pointer_gestures_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
-#include <wlr/util/box.h>
-#include "sycamore/input/seat.h"
 
 struct sycamore_output;
+struct sycamore_seat;
 
 struct sycamore_cursor {
     struct wlr_cursor *wlr_cursor;
@@ -43,8 +42,6 @@ struct sycamore_cursor {
 void pointer_update(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, double sx, double sy, uint32_t time_msec);
 
-void cursor_warp_to_output_center(struct sycamore_cursor *cursor, struct sycamore_output *output);
-
 void cursor_enable(struct sycamore_cursor *cursor);
 
 void cursor_disable(struct sycamore_cursor *cursor);
@@ -57,8 +54,6 @@ void cursor_set_image_surface(struct sycamore_cursor *cursor,
 
 /* Warp cursor again and reset image. */
 void cursor_reset(struct sycamore_cursor *cursor);
-
-void output_setup_xcursor(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
 struct sycamore_output *cursor_at_output(struct sycamore_cursor *cursor,
         struct wlr_output_layout *layout);
