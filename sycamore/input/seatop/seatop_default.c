@@ -4,6 +4,23 @@
 #include "sycamore/server.h"
 #include "sycamore/util/time.h"
 
+static inline void cursor_update(struct sycamore_cursor *cursor, const uint32_t time_msec) {
+    struct wlr_seat *seat = cursor->seat->wlr_seat;
+    struct wlr_cursor *cur = cursor->wlr_cursor;
+
+    double sx, sy;
+    struct wlr_surface *surface =
+            surface_under(server.scene, cur->x, cur->y, &sx, &sy);
+
+    if (surface) {
+        wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
+        wlr_seat_pointer_notify_motion(seat, time_msec, sx, sy);
+    } else {
+        wlr_seat_pointer_clear_focus(seat);
+        cursor_set_image(cursor, "left_ptr");
+    }
+}
+
 static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
     /* Notify the client with pointer focus that a button press has occurred */
     wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec,
@@ -17,23 +34,11 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
 }
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
-    struct sycamore_cursor *cursor = seat->cursor;
-    double sx, sy;
-    struct wlr_surface *surface = surface_under(server.scene,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    pointer_update(cursor, surface, sx, sy, time_msec);
+    cursor_update(seat->cursor, time_msec);
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {
-    struct sycamore_cursor *cursor = seat->cursor;
-    if (!cursor->enabled) {
-        return;
-    }
-
-    double sx, sy;
-    struct wlr_surface *surface = surface_under(server.scene,
-            cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy);
-    pointer_update(cursor, surface, sx, sy, get_current_time_msec());
+    cursor_update(seat->cursor, get_current_time_msec());
 }
 
 static void process_end(struct sycamore_seat *seat) {}
@@ -50,5 +55,5 @@ void seatop_begin_default(struct sycamore_seat *seat) {
     seatop_end(seat);
 
     seat->seatop_impl = &seatop_impl;
-    process_cursor_rebase(seat);
+    cursor_rebase(seat->cursor);
 }

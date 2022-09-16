@@ -23,10 +23,6 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {
-    if (!seat->cursor->enabled) {
-        return;
-    }
-
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
     cursor_set_image(seat->cursor, "grabbing");
 }
@@ -61,5 +57,5 @@ void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view 
 
     seat->seatop_impl = &seatop_impl;
 
-    process_cursor_rebase(seat);
+    cursor_rebase(seat->cursor);
 }

@@ -226,7 +226,13 @@ static void handle_seat_request_set_cursor(struct wl_listener *listener, void *d
     struct sycamore_seat *seat = wl_container_of(listener, seat, request_set_cursor);
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
 
-    cursor_set_image_surface(seat->cursor, event);
+    struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
+    if (focused_client != event->seat_client) {
+        return;
+    }
+
+    cursor_set_image_surface(seat->cursor, event->surface,
+                             event->hotspot_x, event->hotspot_y);
 }
 
 static void handle_seat_request_set_selection(struct wl_listener *listener, void *data) {

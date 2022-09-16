@@ -79,33 +79,15 @@ struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
     return max_mode;
 }
 
-void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
-    struct wlr_box output_box;
-    wlr_output_layout_get_box(server.output_layout, output->wlr_output, &output_box);
-    if (wlr_box_empty(&output_box)) {
-        wlr_log(WLR_ERROR, "output_box is empty.");
-        return;
-    }
-
-    int32_t center_x = 0, center_y = 0;
-    box_get_center_coords(&output_box, &center_x, &center_y);
-
-    wlr_cursor_warp(cursor->wlr_cursor, NULL, center_x, center_y);
-
-    cursor_set_image(cursor, NULL);
-    cursor_set_image(cursor, "left_ptr");
-}
-
 static void output_setup_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
     /* Setup cursor for a new output */
     wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
 
     if (wl_list_length(&server.all_outputs) == 1) {
-        // If this is the only output, ensure cursor.
-        output_ensure_cursor(output, cursor);
+        // If this is the only output, center cursor.
+        cursor_set_to_output(cursor, output);
     } else {
-        // Otherwise, reset cursor.
-        cursor_reset(cursor);
+        cursor_refresh(cursor);
     }
 }
 

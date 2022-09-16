@@ -58,8 +58,7 @@ static void cycle_view(struct sycamore_keybinding *keybinding) {
 
     struct sycamore_view *next_view = wl_container_of(server.mapped_views.prev, next_view, link);
     view_set_focus(next_view);
-    struct sycamore_seat *seat = server.seat;
-    seat->seatop_impl->cursor_rebase(seat);
+    cursor_rebase(server.seat->cursor);
 }
 
 /* action */

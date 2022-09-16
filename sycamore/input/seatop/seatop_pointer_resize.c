@@ -64,10 +64,6 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {
-    if (!seat->cursor->enabled) {
-        return;
-    }
-
     struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
     const char *image = wlr_xcursor_get_resize_name(data->edges);
 
@@ -122,5 +118,5 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat,
     seat->seatop_impl = &seatop_impl;
 
     view->interface->set_resizing(view, true);
-    process_cursor_rebase(seat);
+    cursor_rebase(seat->cursor);
 }

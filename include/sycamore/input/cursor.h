@@ -18,7 +18,9 @@ struct sycamore_cursor {
     struct wlr_pointer_gestures_v1 *gestures;
 
     bool enabled;
+
     const char *image;
+
     size_t pressed_button_count;
 
     struct wl_listener cursor_motion;
@@ -39,21 +41,23 @@ struct sycamore_cursor {
     struct sycamore_seat *seat;
 };
 
-void pointer_update(struct sycamore_cursor *cursor,
-        struct wlr_surface *surface, double sx, double sy, uint32_t time_msec);
+/* This will avoid setting duplicate image. Pass NULL to clear cursor image. */
+void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
+
+void cursor_set_image_surface(struct sycamore_cursor *cursor,
+        struct wlr_surface *surface, int32_t hotspot_x, int32_t hotspot_y);
+
+void cursor_rebase(struct sycamore_cursor *cursor);
 
 void cursor_enable(struct sycamore_cursor *cursor);
 
 void cursor_disable(struct sycamore_cursor *cursor);
 
-/* This will avoid setting duplicate image. Pass NULL to clear cursor image. */
-void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
+/* Warp cursor again and refresh image. */
+void cursor_refresh(struct sycamore_cursor *cursor);
 
-void cursor_set_image_surface(struct sycamore_cursor *cursor,
-        struct wlr_seat_pointer_request_set_cursor_event *event);
-
-/* Warp cursor again and reset image. */
-void cursor_reset(struct sycamore_cursor *cursor);
+/* Center cursor on this output. */
+void cursor_set_to_output(struct sycamore_cursor *cursor, struct sycamore_output *output);
 
 struct sycamore_output *cursor_at_output(struct sycamore_cursor *cursor,
         struct wlr_output_layout *layout);

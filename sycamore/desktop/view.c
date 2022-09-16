@@ -52,8 +52,7 @@ void view_map(struct sycamore_view *view,
 
     view_set_focus(view);
 
-    struct sycamore_seat *seat = server.seat;
-    seat->seatop_impl->cursor_rebase(seat);
+    cursor_rebase(server.seat->cursor);
 }
 
 void view_unmap(struct sycamore_view *view) {
@@ -72,8 +71,7 @@ void view_unmap(struct sycamore_view *view) {
 
     view->mapped = false;
 
-    struct sycamore_seat *seat = server.seat;
-    seat->seatop_impl->cursor_rebase(seat);
+    cursor_rebase(server.seat->cursor);
 }
 
 void view_destroy(struct sycamore_view *view) {
