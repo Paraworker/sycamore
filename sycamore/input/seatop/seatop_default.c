@@ -9,8 +9,7 @@ static inline void cursor_update(struct sycamore_cursor *cursor, const uint32_t 
     struct wlr_cursor *cur = cursor->wlr_cursor;
 
     double sx, sy;
-    struct wlr_surface *surface =
-            surface_under(server.scene, cur->x, cur->y, &sx, &sy);
+    struct wlr_surface *surface = find_surface(server.scene, cur->x, cur->y, &sx, &sy);
 
     if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
@@ -29,7 +28,7 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
     if (event->state == WLR_BUTTON_PRESSED) {
         /* Focus the view if the button was pressed */
         struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
-        view_set_focus(view_under(server.scene, cursor->x, cursor->y));
+        view_set_focus(find_view(server.scene, cursor->x, cursor->y));
     }
 }
 

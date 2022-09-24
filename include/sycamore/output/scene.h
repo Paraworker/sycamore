@@ -6,6 +6,8 @@
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
 
+struct sycamore_view;
+
 enum scene_descriptor_type {
     SCENE_DESC_VIEW,
     SCENE_DESC_LAYER,
@@ -29,9 +31,9 @@ struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
 
 void sycamore_scene_destroy(struct sycamore_scene *scene);
 
-struct wlr_surface *surface_under(struct sycamore_scene *scene,
+struct wlr_surface *find_surface(struct sycamore_scene *scene,
         double lx, double ly, double *sx, double *sy);
 
-struct sycamore_view *view_under(struct sycamore_scene *scene, double lx, double ly);
+struct sycamore_view *find_view(struct sycamore_scene *scene, double lx, double ly);
 
 #endif //SYCAMORE_SCENE_H
