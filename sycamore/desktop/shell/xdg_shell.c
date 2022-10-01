@@ -244,29 +244,19 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
     }
 
     if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
-        struct wlr_surface *parent_surface = xdg_surface->popup->parent;
-
-        struct wlr_scene_tree *parent_tree = NULL;
-        if (wlr_surface_is_xdg_surface(parent_surface)) {
-            struct wlr_xdg_surface *parent =
-                    wlr_xdg_surface_from_wlr_surface(parent_surface);
-            parent_tree = parent->data;
-        } else if (wlr_surface_is_layer_surface(parent_surface)) {
-            struct wlr_layer_surface_v1 *parent =
-                    wlr_layer_surface_v1_from_wlr_surface(parent_surface);
-            parent_tree = parent->data;
-        } else {
-            wlr_log(WLR_ERROR, "Unknown parent surface type");
+        struct wlr_scene_tree *parent_tree = xdg_surface->popup->parent->data;
+        if (!parent_tree) {
+            wlr_log(WLR_ERROR, "xdg_popup: parent tree is NULL");
             return;
         }
 
-        xdg_surface->data = wlr_scene_xdg_surface_create(parent_tree, xdg_surface);
+        xdg_surface->surface->data = wlr_scene_xdg_surface_create(parent_tree, xdg_surface);
         return;
     }
 
+    // xdg_surface is toplevel
     struct wlr_xdg_toplevel *toplevel = xdg_surface->toplevel;
 
-    /* Allocate a sycamore_xdg_shell_view for this surface */
     struct sycamore_xdg_shell_view *view =
             sycamore_xdg_shell_view_create(toplevel);
     if (!view) {
@@ -274,13 +264,13 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
         return;
     }
 
-    /* Add to scene graph */
+    // Add to scene graph
     view->base_view.scene_tree = wlr_scene_xdg_surface_create(
             server.scene->trees.shell_view, xdg_surface);
 
     struct wlr_scene_tree *scene_tree = view->base_view.scene_tree;
     scene_tree->node.data = &view->base_view;
-    xdg_surface->data = scene_tree;
+    xdg_surface->surface->data = scene_tree;
 }
 
 void sycamore_xdg_shell_destroy(struct sycamore_xdg_shell *xdg_shell) {
