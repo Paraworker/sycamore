@@ -17,13 +17,25 @@ enum scene_descriptor_type {
 struct sycamore_scene {
     struct wlr_scene *wlr_scene;
 
+    // tree structure:
+    // - root
+    //   - shell
+    // 	   - background
+    // 	   - bottom
+    // 	   - view
+    // 	   - top
+    //     - overlay
+    // 	 - drag_icons
     struct {
-        struct wlr_scene_tree *shell_background;
-        struct wlr_scene_tree *shell_button;
-        struct wlr_scene_tree *shell_view;
-        struct wlr_scene_tree *shell_top;
-        struct wlr_scene_tree *shell_overlay;
-    } trees;
+        struct wlr_scene_tree *root;
+        struct wlr_scene_tree *background;
+        struct wlr_scene_tree *bottom;
+        struct wlr_scene_tree *view;
+        struct wlr_scene_tree *top;
+        struct wlr_scene_tree *overlay;
+    } shell;
+
+    struct wlr_scene_tree *drag_icons;
 };
 
 struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,

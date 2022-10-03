@@ -79,15 +79,15 @@ bool server_init() {
         return false;
     }
 
-    server.seat = sycamore_seat_create(server.wl_display, server.output_layout);
-    if (!server.seat) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_seat");
-        return false;
-    }
-
     server.scene = sycamore_scene_create(server.output_layout, server.presentation);
     if (!server.scene) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_scene");
+        return false;
+    }
+
+    server.seat = sycamore_seat_create(server.wl_display, server.output_layout);
+    if (!server.seat) {
+        wlr_log(WLR_ERROR, "Unable to create sycamore_seat");
         return false;
     }
 
@@ -141,12 +141,8 @@ void server_fini() {
         wlr_output_layout_destroy(server.output_layout);
     }
 
-    if (server.seat) {
-        sycamore_seat_destroy(server.seat);
-    }
-
-    if (server.scene) {
-        sycamore_scene_destroy(server.scene);
+    if (server.keybinding_manager) {
+        sycamore_keybinding_manager_destroy(server.keybinding_manager);
     }
 
     if (server.xdg_shell) {
@@ -157,8 +153,12 @@ void server_fini() {
         sycamore_layer_shell_destroy(server.layer_shell);
     }
 
-    if (server.keybinding_manager) {
-        sycamore_keybinding_manager_destroy(server.keybinding_manager);
+    if (server.seat) {
+        sycamore_seat_destroy(server.seat);
+    }
+
+    if (server.scene) {
+        sycamore_scene_destroy(server.scene);
     }
 }
 
