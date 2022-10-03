@@ -20,6 +20,13 @@ static inline void cursor_update(struct sycamore_cursor *cursor, const uint32_t 
     }
 }
 
+static inline void drag_icons_update_position(struct sycamore_seat *seat) {
+    struct wlr_scene_node *node;
+    wl_list_for_each(node, &server.scene->drag_icons->children, link) {
+        seat_drag_icon_update_position(seat, node->data);
+    }
+}
+
 static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
     /* Notify the client with pointer focus that a button press has occurred */
     wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec,
@@ -34,6 +41,7 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     cursor_update(seat->cursor, time_msec);
+    drag_icons_update_position(seat);
 }
 
 static void process_cursor_rebase(struct sycamore_seat *seat) {

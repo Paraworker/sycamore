@@ -45,14 +45,12 @@ struct sycamore_seat_device {
 };
 
 struct sycamore_drag_icon {
-    struct sycamore_seat *seat;
     struct wlr_drag_icon *wlr_drag_icon;
 
-    double x, y; // in layout-local coordinates
+    struct wlr_scene_tree *tree;
+    struct wlr_scene_tree *surface_tree;
 
-    struct wl_listener surface_commit;
-    struct wl_listener map;
-    struct wl_listener unmap;
+    struct wl_listener commit;
     struct wl_listener destroy;
 };
 
@@ -98,19 +96,20 @@ struct sycamore_seat {
 
 void handle_backend_new_input(struct wl_listener *listener, void *data);
 
-struct sycamore_seat *sycamore_seat_create(struct wl_display *display,
-        struct wlr_output_layout *output_layout);
+struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wlr_output_layout *layout);
 
 void sycamore_seat_destroy(struct sycamore_seat *seat);
 
 struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *derived_device, void (*derived_destroy)(struct sycamore_seat_device *seat_device));
+        void *derived_device, derived_seat_device_destroy derived_destroy);
 
 void seat_device_destroy(struct sycamore_seat_device *seat_device);
 
 void seat_update_capabilities(struct sycamore_seat *seat);
 
 void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface);
+
+void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon);
 
 void seatop_begin_default(struct sycamore_seat *seat);
 
