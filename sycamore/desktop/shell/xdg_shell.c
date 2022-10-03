@@ -266,7 +266,7 @@ static void handle_new_xdg_shell_surface(struct wl_listener *listener, void *dat
 
     // Add to scene graph
     view->base_view.scene_tree = wlr_scene_xdg_surface_create(
-            server.scene->trees.shell_view, xdg_surface);
+            server.scene->shell.view, xdg_surface);
 
     struct wlr_scene_tree *scene_tree = view->base_view.scene_tree;
     scene_tree->node.data = &view->base_view;

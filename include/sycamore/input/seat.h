@@ -57,9 +57,9 @@ struct sycamore_drag_icon {
 };
 
 struct sycamore_drag {
-    struct sycamore_seat *seat;
     struct wlr_drag *wlr_drag;
     struct wl_listener destroy;
+    struct sycamore_seat *seat;
 };
 
 struct seatop_pointer_move_data {

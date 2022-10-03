@@ -30,8 +30,8 @@ struct sycamore_server {
     struct wlr_output_layout *output_layout;
     struct wlr_presentation *presentation;
 
-    struct sycamore_seat *seat;
     struct sycamore_scene *scene;
+    struct sycamore_seat *seat;
     struct sycamore_xdg_shell *xdg_shell;
     struct sycamore_layer_shell *layer_shell;
     struct sycamore_keybinding_manager *keybinding_manager;

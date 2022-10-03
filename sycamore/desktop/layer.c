@@ -71,17 +71,17 @@ void layer_surface_commit(struct sycamore_layer *layer) {
     }
 }
 
-struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *root,
+struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *scene,
         enum zwlr_layer_shell_v1_layer type) {
     switch (type) {
         case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
-            return root->trees.shell_background;
+            return scene->shell.background;
         case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
-            return root->trees.shell_button;
+            return scene->shell.bottom;
         case ZWLR_LAYER_SHELL_V1_LAYER_TOP:
-            return root->trees.shell_top;
+            return scene->shell.top;
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
-            return root->trees.shell_overlay;
+            return scene->shell.overlay;
         default:
             return NULL;
     }

@@ -37,7 +37,7 @@ void layer_destroy(struct sycamore_layer *layer);
 
 void arrange_layers(struct sycamore_output *output);
 
-struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *root,
+struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *scene,
         enum zwlr_layer_shell_v1_layer type);
 
 #endif //SYCAMORE_LAYER_H

@@ -23,14 +23,20 @@ struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
         return NULL;
     }
 
+    // Create trees
+    scene->shell.root = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    struct wlr_scene_tree *shell_root = scene->shell.root;
+
+    scene->shell.background = wlr_scene_tree_create(shell_root);
+    scene->shell.bottom = wlr_scene_tree_create(shell_root);
+    scene->shell.view = wlr_scene_tree_create(shell_root);
+    scene->shell.top = wlr_scene_tree_create(shell_root);
+    scene->shell.overlay = wlr_scene_tree_create(shell_root);
+
+    scene->drag_icons = wlr_scene_tree_create(&scene->wlr_scene->tree);
+
     wlr_scene_attach_output_layout(scene->wlr_scene, layout);
     wlr_scene_set_presentation(scene->wlr_scene, presentation);
-
-    scene->trees.shell_background = wlr_scene_tree_create(&scene->wlr_scene->tree);
-    scene->trees.shell_button = wlr_scene_tree_create(&scene->wlr_scene->tree);
-    scene->trees.shell_view = wlr_scene_tree_create(&scene->wlr_scene->tree);
-    scene->trees.shell_top = wlr_scene_tree_create(&scene->wlr_scene->tree);
-    scene->trees.shell_overlay = wlr_scene_tree_create(&scene->wlr_scene->tree);
 
     return scene;
 }
@@ -40,12 +46,16 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
         return;
     }
 
+    if (scene->wlr_scene) {
+        wlr_scene_node_destroy(&scene->wlr_scene->tree.node);
+    }
+
     free(scene);
 }
 
 struct wlr_surface *find_surface(struct sycamore_scene *scene,
         const double lx, const double ly, double *sx, double *sy) {
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->tree.node, lx, ly, sx, sy);
+    struct wlr_scene_node *node = wlr_scene_node_at(&scene->shell.root->node, lx, ly, sx, sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
@@ -62,7 +72,7 @@ struct wlr_surface *find_surface(struct sycamore_scene *scene,
 struct sycamore_view *find_view(struct sycamore_scene *scene,
         const double lx, const double ly) {
     double sx, sy;
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->wlr_scene->tree.node, lx, ly, &sx, &sy);
+    struct wlr_scene_node *node = wlr_scene_node_at(&scene->shell.root->node, lx, ly, &sx, &sy);
     if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
