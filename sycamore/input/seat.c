@@ -44,6 +44,26 @@ static void handle_sycamore_drag_destroy(struct wl_listener *listener, void *dat
     free(drag);
 }
 
+static void handle_drag_icon_destroy(struct wl_listener *listener, void *data) {
+    struct sycamore_drag_icon *icon = wl_container_of(listener, icon, destroy);
+
+    icon->wlr_drag_icon->data = NULL;
+
+    wl_list_remove(&icon->destroy.link);
+    wl_list_remove(&icon->commit.link);
+
+    wlr_scene_node_destroy(&icon->tree->node);
+
+    free(icon);
+}
+
+static void handle_drag_icon_commit(struct wl_listener *listener, void *data) {
+    struct sycamore_drag_icon *icon = wl_container_of(listener, icon, commit);
+    struct wlr_surface *surface = icon->wlr_drag_icon->surface;
+
+    wlr_scene_node_set_position(&icon->surface_tree->node, surface->sx, surface->sy);
+}
+
 static void handle_start_drag(struct wl_listener *listener, void *data) {
     struct sycamore_seat *seat = wl_container_of(listener, seat, start_drag);
     struct wlr_drag *wlr_drag = data;
@@ -62,7 +82,58 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
 
     struct wlr_drag_icon *wlr_drag_icon = wlr_drag->icon;
     if (wlr_drag_icon) {
-        /* TODO: drag icon */
+        // Create sycamore_drag_icon
+        struct sycamore_drag_icon *icon =
+                calloc(1, sizeof(struct sycamore_drag_icon));
+        if (!icon) {
+            wlr_log(WLR_ERROR, "Failed to allocate sycamore_drag_icon");
+            return;
+        }
+
+        icon->tree = wlr_scene_tree_create(server.scene->drag_icons);
+        if (!icon->tree) {
+            wlr_log(WLR_ERROR, "Failed to create drag icon's scene tree");
+            free(icon);
+            return;
+        }
+
+        icon->surface_tree = wlr_scene_subsurface_tree_create(icon->tree, wlr_drag_icon->surface);
+        if (!icon->surface_tree) {
+            wlr_log(WLR_ERROR, "Failed to create drag icon's surface tree");
+            wlr_scene_node_destroy(&icon->tree->node);
+            free(icon);
+            return;
+        }
+
+        icon->tree->node.data = icon;
+
+        icon->wlr_drag_icon = wlr_drag_icon;
+        wlr_drag_icon->data = icon;
+
+        icon->destroy.notify = handle_drag_icon_destroy;
+        wl_signal_add(&wlr_drag_icon->events.destroy, &icon->destroy);
+        icon->commit.notify = handle_drag_icon_commit;
+        wl_signal_add(&wlr_drag_icon->surface->events.commit, &icon->commit);
+
+        seat_drag_icon_update_position(seat, icon);
+    }
+
+    seatop_begin_default(seat);
+}
+
+void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon) {
+    struct wlr_drag_icon *wlr_icon = icon->wlr_drag_icon;
+    struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
+
+    switch (wlr_icon->drag->grab_type) {
+        case WLR_DRAG_GRAB_KEYBOARD:
+            return;
+        case WLR_DRAG_GRAB_KEYBOARD_POINTER:
+            wlr_scene_node_set_position(&icon->tree->node, (int)cursor->x, (int)cursor->y);
+            break;
+        case WLR_DRAG_GRAB_KEYBOARD_TOUCH:
+            /* TODO */
+            break;
     }
 }
 
@@ -294,19 +365,18 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
     wl_list_remove(&seat->request_start_drag.link);
     wl_list_remove(&seat->start_drag.link);
 
-    if (seat->wlr_seat) {
-        wlr_seat_destroy(seat->wlr_seat);
-    }
-
     if (seat->cursor) {
         sycamore_cursor_destroy(seat->cursor);
+    }
+
+    if (seat->wlr_seat) {
+        wlr_seat_destroy(seat->wlr_seat);
     }
 
     free(seat);
 }
 
-struct sycamore_seat *sycamore_seat_create(struct wl_display *display,
-        struct wlr_output_layout *output_layout) {
+struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wlr_output_layout *layout) {
     struct sycamore_seat *seat = calloc(1, sizeof(struct sycamore_seat));
     if (!seat) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_seat");
@@ -324,7 +394,7 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display,
         return NULL;
     }
 
-    seat->cursor = sycamore_cursor_create(seat, display, output_layout);
+    seat->cursor = sycamore_cursor_create(seat, display, layout);
     if (!seat->cursor) {
         wlr_log(WLR_ERROR, "Unable to create sycamore_cursor");
         wlr_seat_destroy(seat->wlr_seat);
