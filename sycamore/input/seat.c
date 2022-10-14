@@ -426,14 +426,7 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wl
     return seat;
 }
 
-void seatop_end(struct sycamore_seat *seat) {
-    if (seat->seatop_impl) {
-        seat->seatop_impl->end(seat);
-        seat->seatop_impl = NULL;
-    }
-}
-
-bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view) {
+bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view) {
     /* Deny move/resize if we are already in the move/resize mode. */
     if (seat->seatop_impl->mode != SEATOP_DEFAULT) {
         return false;

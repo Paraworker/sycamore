@@ -22,7 +22,7 @@ enum seatop_mode {
 struct sycamore_seatop_impl {
     void (*pointer_button)(struct sycamore_seat *seat, struct wlr_pointer_button_event *event);
     void (*pointer_motion)(struct sycamore_seat *seat, uint32_t time_msec);
-    void (*cursor_rebase)(struct sycamore_seat *seat);
+    void (*pointer_rebase)(struct sycamore_seat *seat);
     void (*end)(struct sycamore_seat *seat);
     enum seatop_mode mode;
 };
@@ -111,14 +111,37 @@ void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *sur
 
 void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon);
 
+static inline void seatop_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
+    if (seat->seatop_impl->pointer_button) {
+        seat->seatop_impl->pointer_button(seat, event);
+    }
+}
+
+static inline void seatop_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
+    if (seat->seatop_impl->pointer_motion) {
+        seat->seatop_impl->pointer_motion(seat, time_msec);
+    }
+}
+
+static inline void seatop_pointer_rebase(struct sycamore_seat *seat) {
+    if (seat->seatop_impl->pointer_rebase) {
+        seat->seatop_impl->pointer_rebase(seat);
+    }
+}
+
+static inline void seatop_end(struct sycamore_seat *seat) {
+    if (seat->seatop_impl && seat->seatop_impl->end) {
+        seat->seatop_impl->end(seat);
+    }
+    seat->seatop_impl = NULL;
+}
+
 void seatop_begin_default(struct sycamore_seat *seat);
 
 void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view);
 
 void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges);
 
-void seatop_end(struct sycamore_seat *seat);
-
-bool seatop_interactive_assert(struct sycamore_seat *seat, struct sycamore_view *view);
+bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view);
 
 #endif //SYCAMORE_SEAT_H
