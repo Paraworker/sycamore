@@ -63,7 +63,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     view->interface->set_size(view, new_right - new_left, new_bottom - new_top);
 }
 
-static void process_cursor_rebase(struct sycamore_seat *seat) {
+static void process_pointer_rebase(struct sycamore_seat *seat) {
     struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
     const char *image = wlr_xcursor_get_resize_name(data->edges);
 
@@ -82,14 +82,14 @@ static void process_end(struct sycamore_seat *seat) {
 static const struct sycamore_seatop_impl seatop_impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
-        .cursor_rebase = process_cursor_rebase,
+        .pointer_rebase = process_pointer_rebase,
         .end = process_end,
         .mode = SEATOP_POINTER_RESIZE,
 };
 
 void seatop_begin_pointer_resize(struct sycamore_seat *seat,
         struct sycamore_view *view, uint32_t edges) {
-    if (!seatop_interactive_assert(seat, view)) {
+    if (!seatop_interactive_check(seat, view)) {
         return;
     }
 

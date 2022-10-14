@@ -44,8 +44,7 @@ void cursor_rebase(struct sycamore_cursor *cursor) {
         return;
     }
 
-    struct sycamore_seat *seat = cursor->seat;
-    seat->seatop_impl->cursor_rebase(seat);
+    seatop_pointer_rebase(cursor->seat);
 }
 
 void cursor_enable(struct sycamore_cursor *cursor) {
@@ -167,7 +166,7 @@ static void handle_cursor_motion(struct wl_listener *listener, void *data) {
 
     wlr_cursor_move(cursor->wlr_cursor, &event->pointer->base,
                     event->delta_x, event->delta_y);
-    cursor->seat->seatop_impl->pointer_motion(cursor->seat, event->time_msec);
+    seatop_pointer_motion(cursor->seat, event->time_msec);
 }
 
 static void handle_cursor_motion_absolute(struct wl_listener *listener, void *data) {
@@ -183,7 +182,7 @@ static void handle_cursor_motion_absolute(struct wl_listener *listener, void *da
     cursor_enable(cursor);
 
     wlr_cursor_warp_absolute(cursor->wlr_cursor, &event->pointer->base, event->x, event->y);
-    cursor->seat->seatop_impl->pointer_motion(cursor->seat, event->time_msec);
+    seatop_pointer_motion(cursor->seat, event->time_msec);
 }
 
 static void handle_cursor_button(struct wl_listener *listener, void *data) {
@@ -199,7 +198,7 @@ static void handle_cursor_button(struct wl_listener *listener, void *data) {
 
     cursor_enable(cursor);
 
-    cursor->seat->seatop_impl->pointer_button(cursor->seat, event);
+    seatop_pointer_button(cursor->seat, event);
 }
 
 static void handle_cursor_axis(struct wl_listener *listener, void *data) {
