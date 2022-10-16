@@ -426,18 +426,25 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wl
     return seat;
 }
 
-bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view) {
-    /* Deny move/resize if we are already in the move/resize mode. */
-    if (seat->seatop_impl->mode != SEATOP_DEFAULT) {
+bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view, enum seatop_mode mode) {
+    /* This fuction is used for checking whether an
+     * 'interactive' seatop mode should begin. including:
+     *
+     * seatop_pointer_move
+     * seatop_pointer_resize
+     */
+
+    // Don't renter.
+    if (seat->seatop_impl->mode == mode) {
         return false;
     }
 
-    /* Deny move/resize from maximized/fullscreen clients. */
+    // Deny move/resize from maximized/fullscreen clients.
     if (view->is_maximized || view->is_fullscreen) {
         return false;
     }
 
-    /* Deny move from unfocused clients or there is no focused clients. */
+    // Deny move/resize from unfocused clients or there is no focused clients.
     if (view != server.focused_view.view) {
         return false;
     }

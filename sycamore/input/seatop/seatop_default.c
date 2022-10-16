@@ -30,12 +30,17 @@ static inline void drag_icons_update_position(struct sycamore_seat *seat) {
 static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
     if (event->state == WLR_BUTTON_PRESSED) {
         struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
+        struct wlr_seat_pointer_state *state = &seat->wlr_seat->pointer_state;
 
+        // If pressed on a view, focus it.
         double sx, sy;
         view_set_focus(find_view_by_node(find_node(server.scene, cursor->x, cursor->y, &sx, &sy)));
+
+        // Switch to seatop_pointer_down if seat has a focused surface.
+        seatop_begin_pointer_down(seat, state->focused_surface, state->sx, state->sy);
     }
 
-    /* Notify the client with pointer focus that a button press has occurred */
+    /* Notify the client with pointer focus that a button event has occurred */
     wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec,
                                    event->button, event->state);
 }

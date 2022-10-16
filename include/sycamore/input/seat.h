@@ -15,8 +15,28 @@ typedef void (*derived_seat_device_destroy)(struct sycamore_seat_device *seat_de
 
 enum seatop_mode {
     SEATOP_DEFAULT,
+    SEATOP_POINTER_DOWN,
     SEATOP_POINTER_MOVE,
     SEATOP_POINTER_RESIZE,
+};
+
+struct seatop_pointer_down_data {
+    struct wlr_surface *surface;
+    struct wl_listener surface_destroy;
+    double dx, dy;
+    struct sycamore_seat *seat;
+};
+
+struct seatop_pointer_move_data {
+    struct view_ptr view_ptr;
+    double dx, dy;
+};
+
+struct seatop_pointer_resize_data {
+    struct view_ptr view_ptr;
+    double dx, dy;
+    struct wlr_box grab_geobox;
+    uint32_t edges;
 };
 
 struct sycamore_seatop_impl {
@@ -60,18 +80,6 @@ struct sycamore_drag {
     struct sycamore_seat *seat;
 };
 
-struct seatop_pointer_move_data {
-    struct view_ptr view_ptr;
-    double dx, dy;
-};
-
-struct seatop_pointer_resize_data {
-    struct view_ptr view_ptr;
-    double dx, dy;
-    struct wlr_box grab_geobox;
-    uint32_t edges;
-};
-
 struct sycamore_seat {
     struct wlr_seat *wlr_seat;
     struct sycamore_cursor *cursor;
@@ -80,6 +88,7 @@ struct sycamore_seat {
     const struct sycamore_seatop_impl *seatop_impl;
 
     union {
+        struct seatop_pointer_down_data pointer_down_data;
         struct seatop_pointer_move_data pointer_move_data;
         struct seatop_pointer_resize_data pointer_resize_data;
     };
@@ -138,10 +147,12 @@ static inline void seatop_end(struct sycamore_seat *seat) {
 
 void seatop_begin_default(struct sycamore_seat *seat);
 
+void seatop_begin_pointer_down(struct sycamore_seat *seat, struct wlr_surface *surface, double sx, double sy);
+
 void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view);
 
 void seatop_begin_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges);
 
-bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view);
+bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view, enum seatop_mode mode);
 
 #endif //SYCAMORE_SEAT_H
