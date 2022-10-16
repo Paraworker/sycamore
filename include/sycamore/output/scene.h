@@ -9,12 +9,14 @@
 struct sycamore_view;
 
 enum scene_descriptor_type {
+    SCENE_DESC_ROOT,
     SCENE_DESC_VIEW,
     SCENE_DESC_LAYER,
     SCENE_DESC_POPUP,
 };
 
 struct sycamore_scene {
+    enum scene_descriptor_type scene_descriptor; // must be first
     struct wlr_scene *wlr_scene;
 
     // tree structure:

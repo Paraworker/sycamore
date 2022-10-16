@@ -23,6 +23,9 @@ struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
         return NULL;
     }
 
+    scene->scene_descriptor = SCENE_DESC_ROOT;
+    scene->wlr_scene->tree.node.data = scene;
+
     // Create trees
     scene->shell.root = wlr_scene_tree_create(&scene->wlr_scene->tree);
     struct wlr_scene_tree *shell_root = scene->shell.root;
