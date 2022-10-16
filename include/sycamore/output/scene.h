@@ -45,9 +45,11 @@ struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
 
 void sycamore_scene_destroy(struct sycamore_scene *scene);
 
-struct wlr_surface *find_surface(struct sycamore_scene *scene,
-        double lx, double ly, double *sx, double *sy);
+#define find_node(scene, lx, ly, sx, sy) \
+        wlr_scene_node_at(&scene->shell.root->node, lx, ly, sx, sy)
 
-struct sycamore_view *find_view(struct sycamore_scene *scene, double lx, double ly);
+struct wlr_surface *find_surface_by_node(struct wlr_scene_node *node);
+
+struct sycamore_view *find_view_by_node(struct wlr_scene_node *node);
 
 #endif //SYCAMORE_SCENE_H

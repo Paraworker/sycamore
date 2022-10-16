@@ -56,9 +56,7 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
     free(scene);
 }
 
-struct wlr_surface *find_surface(struct sycamore_scene *scene,
-        const double lx, const double ly, double *sx, double *sy) {
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->shell.root->node, lx, ly, sx, sy);
+struct wlr_surface *find_surface_by_node(struct wlr_scene_node *node) {
     if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
@@ -72,16 +70,21 @@ struct wlr_surface *find_surface(struct sycamore_scene *scene,
     return scene_surface->surface;
 }
 
-struct sycamore_view *find_view(struct sycamore_scene *scene,
-        const double lx, const double ly) {
-    double sx, sy;
-    struct wlr_scene_node *node = wlr_scene_node_at(&scene->shell.root->node, lx, ly, &sx, &sy);
-    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
+struct sycamore_view *find_view_by_node(struct wlr_scene_node *node) {
+    if (!node) {
         return NULL;
     }
 
-    struct wlr_scene_tree *tree = node->parent;
-    while (tree != NULL && tree->node.data == NULL) {
+    struct wlr_scene_tree *tree;
+    if (node->type == WLR_SCENE_NODE_BUFFER) {
+        tree = node->parent;
+    } else if (node->type == WLR_SCENE_NODE_TREE) {
+        tree = wl_container_of(node, tree, node);
+    } else {
+        return NULL;
+    }
+
+    while (!tree->node.data) {
         tree = tree->node.parent;
     }
 
