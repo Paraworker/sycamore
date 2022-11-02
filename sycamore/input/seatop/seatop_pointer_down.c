@@ -2,7 +2,7 @@
 
 static void handle_surface_destroy(struct wl_listener *listener, void *data) {
     struct seatop_pointer_down_data *d = wl_container_of(listener, d, surface_destroy);
-    seatop_begin_default(d->seat);
+    seatop_begin_pointer_passthrough(d->seat);
 }
 
 static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
@@ -10,12 +10,12 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
                                    event->button, event->state);
 
     if (seat->cursor->pressed_button_count == 0) {
-        seatop_begin_default(seat);
+        seatop_begin_pointer_passthrough(seat);
     }
 }
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
-    struct seatop_pointer_down_data *data = &(seat->pointer_down_data);
+    struct seatop_pointer_down_data *data = &(seat->seatop_pointer_data.down);
 
     double sx = data->dx + seat->cursor->wlr_cursor->x;
     double sy = data->dy + seat->cursor->wlr_cursor->y;
@@ -24,11 +24,11 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
 }
 
 static void process_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_down_data *data = &(seat->pointer_down_data);
+    struct seatop_pointer_down_data *data = &(seat->seatop_pointer_data.down);
     wl_list_remove(&data->surface_destroy.link);
 }
 
-static const struct sycamore_seatop_impl seatop_impl = {
+static const struct seatop_pointer_impl impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
         .end = process_end,
@@ -42,7 +42,7 @@ void seatop_begin_pointer_down(struct sycamore_seat *seat, struct wlr_surface *s
 
     seatop_end(seat);
 
-    struct seatop_pointer_down_data *data = &(seat->pointer_down_data);
+    struct seatop_pointer_down_data *data = &(seat->seatop_pointer_data.down);
 
     data->surface = surface;
     wl_signal_add(&surface->events.destroy, &data->surface_destroy);
@@ -51,5 +51,5 @@ void seatop_begin_pointer_down(struct sycamore_seat *seat, struct wlr_surface *s
     data->dy = sy - seat->cursor->wlr_cursor->y;
     data->seat = seat;
 
-    seat->seatop_impl = &seatop_impl;
+    seat->seatop_pointer_impl = &impl;
 }

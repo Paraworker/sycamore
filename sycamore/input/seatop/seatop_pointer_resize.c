@@ -6,7 +6,7 @@ static void process_pointer_button(struct sycamore_seat *seat,
     if (seat->cursor->pressed_button_count == 0) {
         // If there is no button being pressed
         // we back to default.
-        seatop_begin_default(seat);
+        seatop_begin_pointer_passthrough(seat);
     }
 }
 
@@ -19,7 +19,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
      * Note that I took some shortcuts here. In a more fleshed-out compositor,
      * you'd wait for the client to prepare a buffer at the new size, then
      * commit any movement that was prepared. */
-    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
+    struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
     struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
@@ -64,7 +64,7 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
 }
 
 static void process_pointer_rebase(struct sycamore_seat *seat) {
-    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
+    struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
     const char *image = wlr_xcursor_get_resize_name(data->edges);
 
     wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
@@ -72,14 +72,14 @@ static void process_pointer_rebase(struct sycamore_seat *seat) {
 }
 
 static void process_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
+    struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
     if (data->view_ptr.view) {
         data->view_ptr.view->interface->set_resizing(data->view_ptr.view, false);
         view_ptr_disconnect(&data->view_ptr);
     }
 }
 
-static const struct sycamore_seatop_impl seatop_impl = {
+static const struct seatop_pointer_impl impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
         .pointer_rebase = process_pointer_rebase,
@@ -89,13 +89,13 @@ static const struct sycamore_seatop_impl seatop_impl = {
 
 void seatop_begin_pointer_resize(struct sycamore_seat *seat,
         struct sycamore_view *view, uint32_t edges) {
-    if (!seatop_interactive_check(seat, view, SEATOP_POINTER_RESIZE)) {
+    if (!seatop_pointer_interactive_check(seat, view, SEATOP_POINTER_RESIZE)) {
         return;
     }
 
     seatop_end(seat);
 
-    struct seatop_pointer_resize_data *data = &(seat->pointer_resize_data);
+    struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
 
     view_ptr_connect(&data->view_ptr, view);
 
@@ -115,7 +115,7 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat,
 
     data->edges = edges;
 
-    seat->seatop_impl = &seatop_impl;
+    seat->seatop_pointer_impl = &impl;
 
     view->interface->set_resizing(view, true);
     cursor_rebase(seat->cursor);

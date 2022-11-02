@@ -118,7 +118,7 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
         seat_drag_icon_update_position(seat, icon);
     }
 
-    seatop_begin_default(seat);
+    seatop_begin_pointer_passthrough(seat);
 }
 
 void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon) {
@@ -383,7 +383,7 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wl
         return NULL;
     }
 
-    seat->seatop_impl = NULL;
+    seat->seatop_pointer_impl = NULL;
     seat->focused_layer = NULL;
     wl_list_init(&seat->devices);
 
@@ -421,12 +421,12 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wl
     wl_signal_add(&seat->wlr_seat->events.destroy,
                   &seat->destroy);
 
-    seatop_begin_default(seat);
+    seatop_begin_pointer_passthrough(seat);
 
     return seat;
 }
 
-bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view, enum seatop_mode mode) {
+bool seatop_pointer_interactive_check(struct sycamore_seat *seat, struct sycamore_view *view, enum seatop_pointer_mode mode) {
     /* This fuction is used for checking whether an
      * 'interactive' seatop mode should begin. including:
      *
@@ -435,16 +435,16 @@ bool seatop_interactive_check(struct sycamore_seat *seat, struct sycamore_view *
      */
 
     // Don't renter.
-    if (seat->seatop_impl->mode == mode) {
+    if (seat->seatop_pointer_impl->mode == mode) {
         return false;
     }
 
-    // Deny move/resize from maximized/fullscreen clients.
+    // Deny move/resize from maximized/fullscreen view.
     if (view->is_maximized || view->is_fullscreen) {
         return false;
     }
 
-    // Deny move/resize from unfocused clients or there is no focused clients.
+    // Deny move/resize from unfocused view or there is no focused view.
     if (view != server.focused_view.view) {
         return false;
     }

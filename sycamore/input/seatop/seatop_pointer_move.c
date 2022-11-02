@@ -6,13 +6,13 @@ static void process_pointer_button(struct sycamore_seat *seat,
     if (seat->cursor->pressed_button_count == 0) {
         // If there is no button being pressed
         // we back to default.
-        seatop_begin_default(seat);
+        seatop_begin_pointer_passthrough(seat);
     }
 }
 
 static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     /* Move the grabbed view to the new position. */
-    struct seatop_pointer_move_data *data = &(seat->pointer_move_data);
+    struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
     struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
     struct sycamore_view *view = data->view_ptr.view;
     if (!view) {
@@ -28,13 +28,13 @@ static void process_pointer_rebase(struct sycamore_seat *seat) {
 }
 
 static void process_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_move_data *data = &(seat->pointer_move_data);
+    struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
     if (data->view_ptr.view) {
         view_ptr_disconnect(&data->view_ptr);
     }
 }
 
-static const struct sycamore_seatop_impl seatop_impl = {
+static const struct seatop_pointer_impl impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
         .pointer_rebase = process_pointer_rebase,
@@ -43,19 +43,19 @@ static const struct sycamore_seatop_impl seatop_impl = {
 };
 
 void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view) {
-    if (!seatop_interactive_check(seat, view, SEATOP_POINTER_MOVE)) {
+    if (!seatop_pointer_interactive_check(seat, view, SEATOP_POINTER_MOVE)) {
         return;
     }
 
     seatop_end(seat);
 
-    struct seatop_pointer_move_data *data = &(seat->pointer_move_data);
+    struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
 
     view_ptr_connect(&data->view_ptr, view);
     data->dx = seat->cursor->wlr_cursor->x - view->x;
     data->dy = seat->cursor->wlr_cursor->y - view->y;
 
-    seat->seatop_impl = &seatop_impl;
+    seat->seatop_pointer_impl = &impl;
 
     cursor_rebase(seat->cursor);
 }
