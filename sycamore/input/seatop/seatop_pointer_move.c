@@ -1,16 +1,16 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
 
-static void process_pointer_button(struct sycamore_seat *seat,
+static void process_button(struct sycamore_seat *seat,
         struct wlr_pointer_button_event *event) {
     if (seat->cursor->pressed_button_count == 0) {
         // If there is no button being pressed
         // we back to default.
-        seatop_begin_pointer_passthrough(seat);
+        seatop_pointer_begin_full(seat);
     }
 }
 
-static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
+static void process_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     /* Move the grabbed view to the new position. */
     struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
     struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
@@ -22,11 +22,6 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     view_move_to(view, cursor->x - data->dx, cursor->y - data->dy);
 }
 
-static void process_pointer_rebase(struct sycamore_seat *seat) {
-    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
-    cursor_set_image(seat->cursor, "grabbing");
-}
-
 static void process_end(struct sycamore_seat *seat) {
     struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
     if (data->view_ptr.view) {
@@ -35,19 +30,18 @@ static void process_end(struct sycamore_seat *seat) {
 }
 
 static const struct seatop_pointer_impl impl = {
-        .pointer_button = process_pointer_button,
-        .pointer_motion = process_pointer_motion,
-        .pointer_rebase = process_pointer_rebase,
+        .button = process_button,
+        .motion = process_motion,
         .end = process_end,
-        .mode = SEATOP_POINTER_MOVE,
+        .mode = MOVE,
 };
 
-void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view *view) {
-    if (!seatop_pointer_interactive_check(seat, view, SEATOP_POINTER_MOVE)) {
+void seatop_pointer_begin_move(struct sycamore_seat *seat, struct sycamore_view *view) {
+    if (!seatop_pointer_interactive_check(seat, view, MOVE)) {
         return;
     }
 
-    seatop_end(seat);
+    seatop_pointer_end(seat);
 
     struct seatop_pointer_move_data *data = &(seat->seatop_pointer_data.move);
 
@@ -57,5 +51,6 @@ void seatop_begin_pointer_move(struct sycamore_seat *seat, struct sycamore_view 
 
     seat->seatop_pointer_impl = &impl;
 
-    cursor_rebase(seat->cursor);
+    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
+    cursor_set_image(seat->cursor, "grabbing");
 }

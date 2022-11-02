@@ -29,7 +29,7 @@ void layer_map(struct sycamore_layer *layer) {
 
     layer->mapped = true;
 
-    cursor_rebase(seat->cursor);
+    seatop_pointer_rebase(seat);
 }
 
 void layer_unmap(struct sycamore_layer *layer) {
@@ -49,7 +49,7 @@ void layer_unmap(struct sycamore_layer *layer) {
 
     layer->mapped = false;
 
-    cursor_rebase(seat->cursor);
+    seatop_pointer_rebase(seat);
 }
 
 void layer_surface_commit(struct sycamore_layer *layer) {

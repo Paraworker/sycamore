@@ -1,16 +1,16 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
 
-static void process_pointer_button(struct sycamore_seat *seat,
+static void process_button(struct sycamore_seat *seat,
         struct wlr_pointer_button_event *event) {
     if (seat->cursor->pressed_button_count == 0) {
         // If there is no button being pressed
         // we back to default.
-        seatop_begin_pointer_passthrough(seat);
+        seatop_pointer_begin_full(seat);
     }
 }
 
-static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
+static void process_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     /* Resizing the grabbed view can be a little bit complicated, because we
      * could be resizing from any corner or edge. This not only resizes the view
      * on one or two axes, but can also move the view if you resize from the top
@@ -63,14 +63,6 @@ static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_mse
     view->interface->set_size(view, new_right - new_left, new_bottom - new_top);
 }
 
-static void process_pointer_rebase(struct sycamore_seat *seat) {
-    struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
-    const char *image = wlr_xcursor_get_resize_name(data->edges);
-
-    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
-    cursor_set_image(seat->cursor, image);
-}
-
 static void process_end(struct sycamore_seat *seat) {
     struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
     if (data->view_ptr.view) {
@@ -80,20 +72,19 @@ static void process_end(struct sycamore_seat *seat) {
 }
 
 static const struct seatop_pointer_impl impl = {
-        .pointer_button = process_pointer_button,
-        .pointer_motion = process_pointer_motion,
-        .pointer_rebase = process_pointer_rebase,
+        .button = process_button,
+        .motion = process_motion,
         .end = process_end,
-        .mode = SEATOP_POINTER_RESIZE,
+        .mode = RESIZE,
 };
 
-void seatop_begin_pointer_resize(struct sycamore_seat *seat,
-        struct sycamore_view *view, uint32_t edges) {
-    if (!seatop_pointer_interactive_check(seat, view, SEATOP_POINTER_RESIZE)) {
+void seatop_pointer_begin_resize(struct sycamore_seat *seat,
+                                 struct sycamore_view *view, uint32_t edges) {
+    if (!seatop_pointer_interactive_check(seat, view, RESIZE)) {
         return;
     }
 
-    seatop_end(seat);
+    seatop_pointer_end(seat);
 
     struct seatop_pointer_resize_data *data = &(seat->seatop_pointer_data.resize);
 
@@ -118,5 +109,7 @@ void seatop_begin_pointer_resize(struct sycamore_seat *seat,
     seat->seatop_pointer_impl = &impl;
 
     view->interface->set_resizing(view, true);
-    cursor_rebase(seat->cursor);
+
+    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
+    cursor_set_image(seat->cursor, wlr_xcursor_get_resize_name(edges));
 }
