@@ -27,7 +27,7 @@ static inline void drag_icons_update_position(struct sycamore_seat *seat) {
     }
 }
 
-static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
+static void process_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
     if (event->state == WLR_BUTTON_RELEASED) {
         wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec, event->button, event->state);
         return;
@@ -41,29 +41,29 @@ static void process_pointer_button(struct sycamore_seat *seat, struct wlr_pointe
     view_set_focus(find_view_by_node(find_node(server.scene, cursor->x, cursor->y, &sx, &sy)));
 
     // Switch to seatop_pointer_down if seat has a focused surface.
-    seatop_begin_pointer_down(seat, state->focused_surface, state->sx, state->sy);
+    seatop_pointer_begin_down(seat, state->focused_surface, state->sx, state->sy);
 
     wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec, event->button, event->state);
 }
 
-static void process_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
+static void process_motion(struct sycamore_seat *seat, uint32_t time_msec) {
     pointer_update(seat->cursor, time_msec);
     drag_icons_update_position(seat);
 }
 
-static void process_pointer_rebase(struct sycamore_seat *seat) {
+static void process_rebase(struct sycamore_seat *seat) {
     pointer_update(seat->cursor, get_current_time_msec());
 }
 
 static const struct seatop_pointer_impl impl = {
-        .pointer_button = process_pointer_button,
-        .pointer_motion = process_pointer_motion,
-        .pointer_rebase = process_pointer_rebase,
-        .mode = SEATOP_POINTER_PASSTHROUGH,
+        .button = process_button,
+        .motion = process_motion,
+        .rebase = process_rebase,
+        .mode = FULL,
 };
 
-void seatop_begin_pointer_passthrough(struct sycamore_seat *seat) {
-    seatop_end(seat);
+void seatop_pointer_begin_full(struct sycamore_seat *seat) {
+    seatop_pointer_end(seat);
     seat->seatop_pointer_impl = &impl;
-    cursor_rebase(seat->cursor);
+    pointer_update(seat->cursor, get_current_time_msec());
 }

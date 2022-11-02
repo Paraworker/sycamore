@@ -7,6 +7,7 @@
 #include <wlr/util/log.h>
 #include "sycamore/desktop/layer.h"
 #include "sycamore/input/cursor.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 #include "sycamore/util/box.h"
@@ -79,13 +80,32 @@ struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
     return max_mode;
 }
 
+void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
+    if (!cursor) {
+        return;
+    }
+
+    struct wlr_box output_box;
+    wlr_output_layout_get_box(server.output_layout, output->wlr_output, &output_box);
+    if (wlr_box_empty(&output_box)) {
+        wlr_log(WLR_ERROR, "output_box is empty.");
+        return;
+    }
+
+    int32_t center_x = 0, center_y = 0;
+    box_get_center_coords(&output_box, &center_x, &center_y);
+
+    cursor_warp(cursor, center_x, center_y);
+    seatop_pointer_rebase(cursor->seat);
+}
+
 static void output_setup_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
     /* Setup cursor for a new output */
     wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
 
     if (wl_list_length(&server.all_outputs) == 1) {
         // If this is the only output, center cursor.
-        cursor_set_to_output(cursor, output);
+        output_ensure_cursor(output, cursor);
     } else {
         cursor_refresh(cursor);
     }

@@ -16,6 +16,9 @@ struct sycamore_output {
     struct wl_listener frame;
 };
 
+/* Center cursor on this output. */
+void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor);
+
 void sycamore_output_destroy(struct sycamore_output *output);
 
 struct sycamore_output *sycamore_output_create(struct wlr_output *wlr_output);

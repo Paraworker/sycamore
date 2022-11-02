@@ -118,7 +118,7 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
         seat_drag_icon_update_position(seat, icon);
     }
 
-    seatop_begin_pointer_passthrough(seat);
+    seatop_pointer_begin_full(seat);
 }
 
 void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon) {
@@ -203,9 +203,9 @@ void seat_update_capabilities(struct sycamore_seat *seat) {
 
     wlr_seat_set_capabilities(seat->wlr_seat, caps);
 
-    // Disable cursor if seat doesn't have pointer capability.
+    // Switch to seatop_pointer_no if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0) {
-        cursor_disable(seat->cursor);
+        seatop_pointer_begin_no(seat, FULL);
     }
 }
 
@@ -356,7 +356,7 @@ void sycamore_seat_destroy(struct sycamore_seat *seat) {
         seat_device_destroy(seat_device);
     }
 
-    seatop_end(seat);
+    seatop_pointer_end(seat);
 
     wl_list_remove(&seat->destroy.link);
     wl_list_remove(&seat->request_set_cursor.link);
@@ -421,7 +421,7 @@ struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wl
     wl_signal_add(&seat->wlr_seat->events.destroy,
                   &seat->destroy);
 
-    seatop_begin_pointer_passthrough(seat);
+    seatop_pointer_begin_no(seat, FULL);
 
     return seat;
 }
