@@ -55,15 +55,15 @@ static void process_pointer_rebase(struct sycamore_seat *seat) {
     pointer_update(seat->cursor, get_current_time_msec());
 }
 
-static const struct sycamore_seatop_impl seatop_impl = {
+static const struct seatop_pointer_impl impl = {
         .pointer_button = process_pointer_button,
         .pointer_motion = process_pointer_motion,
         .pointer_rebase = process_pointer_rebase,
-        .mode = SEATOP_DEFAULT,
+        .mode = SEATOP_POINTER_PASSTHROUGH,
 };
 
-void seatop_begin_default(struct sycamore_seat *seat) {
+void seatop_begin_pointer_passthrough(struct sycamore_seat *seat) {
     seatop_end(seat);
-    seat->seatop_impl = &seatop_impl;
+    seat->seatop_pointer_impl = &impl;
     cursor_rebase(seat->cursor);
 }
