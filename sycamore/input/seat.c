@@ -61,7 +61,8 @@ static void handle_drag_icon_commit(struct wl_listener *listener, void *data) {
     struct sycamore_drag_icon *icon = wl_container_of(listener, icon, commit);
     struct wlr_surface *surface = icon->wlr_drag_icon->surface;
 
-    wlr_scene_node_set_position(&icon->surface_tree->node, surface->sx, surface->sy);
+    struct wlr_scene_node *node = &icon->surface_tree->node;
+    wlr_scene_node_set_position(node, node->x + surface->current.dx, node->y + surface->current.dy);
 }
 
 static void handle_start_drag(struct wl_listener *listener, void *data) {
