@@ -3,6 +3,8 @@
 
 #include <wlr/types/wlr_layer_shell_v1.h>
 
+#define SYCAMORE_LAYER_SHELL_VERSION 4
+
 struct sycamore_layer_shell {
     struct wlr_layer_shell_v1 *wlr_layer_shell;
 
