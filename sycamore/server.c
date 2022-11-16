@@ -34,7 +34,7 @@ bool server_init() {
     server.focused_view.view = NULL;
 
     server.wl_display = wl_display_create();
-    server.backend = wlr_backend_autocreate(server.wl_display);
+    server.backend = wlr_backend_autocreate(server.wl_display, &server.session);
     if (!server.backend) {
         wlr_log(WLR_ERROR, "Unable to create backend");
         return false;

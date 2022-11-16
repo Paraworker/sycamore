@@ -68,11 +68,9 @@ static void terminate_server(struct sycamore_keybinding *keybinding) {
 
 /* action */
 static void switch_vt(struct sycamore_keybinding *keybinding) {
-    struct wlr_session *session = wlr_backend_get_session(server.backend);
-
-    if (session != NULL) {
+    if (server.session) {
         unsigned vt = keybinding->sym - XKB_KEY_XF86Switch_VT_1 + 1;
-        wlr_session_change_vt(session, vt);
+        wlr_session_change_vt(server.session, vt);
     }
 }
 
