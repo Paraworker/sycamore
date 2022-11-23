@@ -18,7 +18,7 @@ static void handle_xdg_shell_view_request_move(struct wl_listener *listener, voi
      * client, to prevent the client from requesting this whenever they want. */
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_move);
     struct sycamore_view *base = &view->base_view;
-    seatop_pointer_begin_move(server.seat, base);
+    seatop_set_pointer_move(server.seat, base);
 }
 
 static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, void *data) {
@@ -30,7 +30,7 @@ static void handle_xdg_shell_view_request_resize(struct wl_listener *listener, v
     struct sycamore_xdg_shell_view *view = wl_container_of(listener, view, request_resize);
     struct sycamore_view *base = &view->base_view;
     struct wlr_xdg_toplevel_resize_event *event = data;
-    seatop_pointer_begin_resize(server.seat, base, event->edges);
+    seatop_set_pointer_resize(server.seat, base, event->edges);
 }
 
 static void handle_xdg_shell_view_request_fullscreen(struct wl_listener *listener, void *data) {

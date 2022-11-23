@@ -52,7 +52,7 @@ void view_map(struct sycamore_view *view,
 
     view_set_focus(view);
 
-    seatop_pointer_rebase(server.seat);
+    pointer_rebase(server.seat);
 }
 
 void view_unmap(struct sycamore_view *view) {
@@ -71,7 +71,7 @@ void view_unmap(struct sycamore_view *view) {
 
     view->mapped = false;
 
-    seatop_pointer_rebase(server.seat);
+    pointer_rebase(server.seat);
 }
 
 void view_destroy(struct sycamore_view *view) {

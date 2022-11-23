@@ -96,7 +96,7 @@ void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor
     box_get_center_coords(&output_box, &center_x, &center_y);
 
     cursor_warp(cursor, center_x, center_y);
-    seatop_pointer_rebase(cursor->seat);
+    pointer_rebase(cursor->seat);
 }
 
 static void output_setup_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {

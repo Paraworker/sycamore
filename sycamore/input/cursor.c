@@ -127,7 +127,7 @@ static void handle_cursor_motion(struct wl_listener *listener, void *data) {
 
     wlr_cursor_move(cursor->wlr_cursor, &event->pointer->base,
                     event->delta_x, event->delta_y);
-    seatop_pointer_motion(cursor->seat, event->time_msec);
+    pointer_motion(cursor->seat, event->time_msec);
 }
 
 static void handle_cursor_motion_absolute(struct wl_listener *listener, void *data) {
@@ -141,7 +141,7 @@ static void handle_cursor_motion_absolute(struct wl_listener *listener, void *da
     struct wlr_pointer_motion_absolute_event *event = data;
 
     wlr_cursor_warp_absolute(cursor->wlr_cursor, &event->pointer->base, event->x, event->y);
-    seatop_pointer_motion(cursor->seat, event->time_msec);
+    pointer_motion(cursor->seat, event->time_msec);
 }
 
 static void handle_cursor_button(struct wl_listener *listener, void *data) {
@@ -155,7 +155,7 @@ static void handle_cursor_button(struct wl_listener *listener, void *data) {
         --(cursor->pressed_button_count);
     }
 
-    seatop_pointer_button(cursor->seat, event);
+    pointer_button(cursor->seat, event);
 }
 
 static void handle_cursor_axis(struct wl_listener *listener, void *data) {
