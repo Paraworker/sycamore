@@ -48,16 +48,26 @@ struct sycamore_cursor {
 
 void cursor_set_hidden(struct sycamore_cursor *cursor);
 
-/* This will avoid setting duplicate image. If image is NULL, hide cursor. */
+/**
+ * @brief Set cursor image
+ *
+ * @note This will avoid setting duplicate image. If image is NULL, hide cursor.
+ */
 void cursor_set_image(struct sycamore_cursor *cursor, const char *image);
 
-/* If surface is NULL, hide cursor. */
+/**
+ * @brief Set cursor image surface
+ *
+ * @note If surface is NULL, hide cursor.
+ */
 void cursor_set_image_surface(struct sycamore_cursor *cursor,
         struct wlr_surface *surface, int32_t hotspot_x, int32_t hotspot_y);
 
 void cursor_warp(struct sycamore_cursor *cursor, double lx, double ly);
 
-/* Warp cursor again and refresh image. */
+/**
+ * @brief Warp cursor again and refresh image
+ */
 void cursor_refresh(struct sycamore_cursor *cursor);
 
 struct sycamore_output *cursor_at_output(struct sycamore_cursor *cursor,

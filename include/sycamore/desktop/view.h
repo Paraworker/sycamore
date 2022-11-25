@@ -20,7 +20,7 @@ enum sycamore_view_type {
 
 struct view_ptr {
     struct sycamore_view *view;
-    struct wl_list link;    //view::ptrs
+    struct wl_list link;    // view::ptrs
 };
 
 struct view_interface {
@@ -38,7 +38,7 @@ struct view_interface {
 
 /* base view */
 struct sycamore_view {
-    enum scene_descriptor_type scene_descriptor;    //must be first
+    enum scene_descriptor_type scene_descriptor;    // must be first
     const struct view_interface *interface;
     struct wlr_surface *wlr_surface;
     enum sycamore_view_type view_type;

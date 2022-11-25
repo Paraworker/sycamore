@@ -50,8 +50,16 @@ struct sycamore_server {
 
 bool server_init();
 
+/**
+ * @brief Start the backend
+ *
+ * @return bool
+ */
 bool server_start();
 
+/**
+ * @brief Run the wayland event loop
+ */
 void server_run();
 
 void server_fini();

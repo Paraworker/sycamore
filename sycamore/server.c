@@ -162,7 +162,6 @@ void server_fini() {
     }
 }
 
-/* Start the backend */
 bool server_start() {
     wlr_log(WLR_INFO, "Starting backend on wayland display '%s'",
             server.socket);
@@ -175,7 +174,6 @@ bool server_start() {
     return true;
 }
 
-/* Run the wayland event loop */
 void server_run() {
     wlr_log(WLR_INFO, "Running Sycamore on WAYLAND_DISPLAY=%s",
             server.socket);
