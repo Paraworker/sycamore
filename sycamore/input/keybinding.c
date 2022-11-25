@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
+#include <wlr/backend/session.h>
 #include <wlr/util/log.h>
 #include "sycamore/input/keybinding.h"
 #include "sycamore/input/seat.h"
