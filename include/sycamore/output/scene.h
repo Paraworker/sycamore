@@ -13,6 +13,7 @@ enum scene_descriptor_type {
     SCENE_DESC_VIEW,
     SCENE_DESC_LAYER,
     SCENE_DESC_POPUP,
+    SCENE_DESC_DRAG_ICON,
 };
 
 struct sycamore_scene {
