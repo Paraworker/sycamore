@@ -217,8 +217,8 @@ struct sycamore_xdg_shell_view *sycamore_xdg_shell_view_create(struct wlr_xdg_to
         return NULL;
     }
 
-    view_init(&view->base_view, toplevel->base->surface,
-              &xdg_shell_view_interface);
+    view_init(&view->base_view, VIEW_TYPE_XDG_SHELL,
+              toplevel->base->surface, &xdg_shell_view_interface);
 
     view->xdg_toplevel = toplevel;
 

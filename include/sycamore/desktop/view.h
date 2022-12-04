@@ -12,7 +12,7 @@
 struct sycamore_view;
 struct sycamore_output;
 
-enum sycamore_view_type {
+enum view_type {
     VIEW_TYPE_UNKNOWN,
     VIEW_TYPE_XDG_SHELL,
     VIEW_TYPE_XWAYLAND,
@@ -41,7 +41,7 @@ struct sycamore_view {
     enum scene_descriptor_type scene_descriptor;    // must be first
     const struct view_interface *interface;
     struct wlr_surface *wlr_surface;
-    enum sycamore_view_type view_type;
+    enum view_type view_type;
     int x, y;
 
     struct wlr_scene_tree *scene_tree;
@@ -72,8 +72,8 @@ struct sycamore_xdg_shell_view {
     struct wl_listener request_minimize;
 };
 
-void view_init(struct sycamore_view *view, struct wlr_surface *surface,
-        const struct view_interface *interface);
+void view_init(struct sycamore_view *view, enum view_type type,
+        struct wlr_surface *surface, const struct view_interface *interface);
 
 void view_map(struct sycamore_view *view,
         struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);
