@@ -73,12 +73,9 @@ struct sycamore_seat_device {
 };
 
 struct sycamore_drag_icon {
+    enum scene_descriptor_type scene_descriptor; // must be first
     struct wlr_drag_icon *wlr_drag_icon;
-
     struct wlr_scene_tree *tree;
-    struct wlr_scene_tree *surface_tree;
-
-    struct wl_listener commit;
     struct wl_listener destroy;
 };
 

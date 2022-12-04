@@ -47,22 +47,10 @@ static void handle_sycamore_drag_destroy(struct wl_listener *listener, void *dat
 static void handle_drag_icon_destroy(struct wl_listener *listener, void *data) {
     struct sycamore_drag_icon *icon = wl_container_of(listener, icon, destroy);
 
+    wl_list_remove(&icon->destroy.link);
     icon->wlr_drag_icon->data = NULL;
 
-    wl_list_remove(&icon->destroy.link);
-    wl_list_remove(&icon->commit.link);
-
-    wlr_scene_node_destroy(&icon->tree->node);
-
     free(icon);
-}
-
-static void handle_drag_icon_commit(struct wl_listener *listener, void *data) {
-    struct sycamore_drag_icon *icon = wl_container_of(listener, icon, commit);
-    struct wlr_surface *surface = icon->wlr_drag_icon->surface;
-
-    struct wlr_scene_node *node = &icon->surface_tree->node;
-    wlr_scene_node_set_position(node, node->x + surface->current.dx, node->y + surface->current.dy);
 }
 
 static void handle_start_drag(struct wl_listener *listener, void *data) {
@@ -84,37 +72,26 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
     struct wlr_drag_icon *wlr_drag_icon = wlr_drag->icon;
     if (wlr_drag_icon) {
         // Create sycamore_drag_icon
-        struct sycamore_drag_icon *icon =
-                calloc(1, sizeof(struct sycamore_drag_icon));
+        struct sycamore_drag_icon *icon = calloc(1, sizeof(struct sycamore_drag_icon));
         if (!icon) {
             wlr_log(WLR_ERROR, "Failed to allocate sycamore_drag_icon");
             return;
         }
 
-        icon->tree = wlr_scene_tree_create(server.scene->drag_icons);
+        icon->tree = wlr_scene_drag_icon_create(server.scene->drag_icons, wlr_drag_icon);
         if (!icon->tree) {
-            wlr_log(WLR_ERROR, "Failed to create drag icon's scene tree");
-            free(icon);
-            return;
-        }
-
-        icon->surface_tree = wlr_scene_subsurface_tree_create(icon->tree, wlr_drag_icon->surface);
-        if (!icon->surface_tree) {
-            wlr_log(WLR_ERROR, "Failed to create drag icon's surface tree");
-            wlr_scene_node_destroy(&icon->tree->node);
+            wlr_log(WLR_ERROR, "Failed to create scene drag icon");
             free(icon);
             return;
         }
 
         icon->tree->node.data = icon;
-
+        icon->scene_descriptor = SCENE_DESC_DRAG_ICON;
         icon->wlr_drag_icon = wlr_drag_icon;
         wlr_drag_icon->data = icon;
 
         icon->destroy.notify = handle_drag_icon_destroy;
         wl_signal_add(&wlr_drag_icon->events.destroy, &icon->destroy);
-        icon->commit.notify = handle_drag_icon_commit;
-        wl_signal_add(&wlr_drag_icon->surface->events.commit, &icon->commit);
 
         seat_drag_icon_update_position(seat, icon);
     }
