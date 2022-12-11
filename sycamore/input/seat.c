@@ -313,6 +313,22 @@ static void handle_seat_destroy(struct wl_listener *listener, void *data) {
     sycamore_seat_destroy(seat);
 }
 
+void seat_pointer_update_focus(struct sycamore_seat *seat, const uint32_t time_msec) {
+    struct sycamore_cursor *cursor = seat->cursor;
+
+    double sx, sy;
+    struct wlr_surface *surface = find_surface_by_node(find_node(server.scene, cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy));
+
+    if (!surface) {
+        wlr_seat_pointer_clear_focus(seat->wlr_seat);
+        cursor_set_image(cursor, "left_ptr");
+        return;
+    }
+
+    wlr_seat_pointer_notify_enter(seat->wlr_seat, surface, sx, sy);
+    wlr_seat_pointer_notify_motion(seat->wlr_seat, time_msec, sx, sy);
+}
+
 void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface) {
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat->wlr_seat);
     if (!keyboard) {

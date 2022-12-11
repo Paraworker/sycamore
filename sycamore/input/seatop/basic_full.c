@@ -4,22 +4,6 @@
 #include "sycamore/server.h"
 #include "sycamore/util/time.h"
 
-static inline void pointer_update_focus(struct sycamore_cursor *cursor, const uint32_t time_msec) {
-    struct wlr_seat *wlr_seat = cursor->seat->wlr_seat;
-    struct wlr_cursor *wlr_cursor = cursor->wlr_cursor;
-
-    double sx, sy;
-    struct wlr_surface *surface = find_surface_by_node(find_node(server.scene, wlr_cursor->x, wlr_cursor->y, &sx, &sy));
-
-    if (surface) {
-        wlr_seat_pointer_notify_enter(wlr_seat, surface, sx, sy);
-        wlr_seat_pointer_notify_motion(wlr_seat, time_msec, sx, sy);
-    } else {
-        wlr_seat_pointer_clear_focus(wlr_seat);
-        cursor_set_image(cursor, "left_ptr");
-    }
-}
-
 static inline void drag_icons_update_position(struct sycamore_seat *seat) {
     struct wlr_scene_node *node;
     wl_list_for_each(node, &server.scene->drag_icons->children, link) {
@@ -47,12 +31,12 @@ static void handle_pointer_button(struct sycamore_seat *seat, struct wlr_pointer
 }
 
 static void handle_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
-    pointer_update_focus(seat->cursor, time_msec);
+    seat_pointer_update_focus(seat, time_msec);
     drag_icons_update_position(seat);
 }
 
 static void handle_pointer_rebase(struct sycamore_seat *seat) {
-    pointer_update_focus(seat->cursor, get_current_time_msec());
+    seat_pointer_update_focus(seat, get_current_time_msec());
 }
 
 static const struct seatop_impl impl = {
@@ -65,5 +49,5 @@ static const struct seatop_impl impl = {
 void seatop_set_basic_full(struct sycamore_seat *seat) {
     seatop_end(seat);
     seat->seatop_impl = &impl;
-    pointer_update_focus(seat->cursor, get_current_time_msec());
+    seat_pointer_update_focus(seat, get_current_time_msec());
 }

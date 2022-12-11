@@ -116,6 +116,8 @@ void seat_device_destroy(struct sycamore_seat_device *seat_device);
 
 void seat_update_capabilities(struct sycamore_seat *seat);
 
+void seat_pointer_update_focus(struct sycamore_seat *seat, uint32_t time_msec);
+
 void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface);
 
 void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon);
