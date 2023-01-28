@@ -73,12 +73,9 @@ struct sycamore_seat_device {
 };
 
 struct sycamore_drag_icon {
+    enum scene_descriptor_type scene_descriptor; // must be first
     struct wlr_drag_icon *wlr_drag_icon;
-
     struct wlr_scene_tree *tree;
-    struct wlr_scene_tree *surface_tree;
-
-    struct wl_listener commit;
     struct wl_listener destroy;
 };
 
@@ -118,6 +115,8 @@ struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, stru
 void seat_device_destroy(struct sycamore_seat_device *seat_device);
 
 void seat_update_capabilities(struct sycamore_seat *seat);
+
+void seat_pointer_update_focus(struct sycamore_seat *seat, uint32_t time_msec);
 
 void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface);
 

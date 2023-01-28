@@ -11,12 +11,12 @@
 #include "sycamore/server.h"
 #include "sycamore/util/box.h"
 
-void view_init(struct sycamore_view *view, struct wlr_surface *surface,
-        const struct view_interface *interface) {
+void view_init(struct sycamore_view *view, enum view_type type,
+        struct wlr_surface *surface, const struct view_interface *interface) {
     view->scene_descriptor = SCENE_DESC_VIEW;
     view->interface = interface;
     view->wlr_surface = surface;
-    view->view_type = VIEW_TYPE_XDG_SHELL;
+    view->view_type = type;
 
     view->mapped = false;
     view->is_fullscreen = false;

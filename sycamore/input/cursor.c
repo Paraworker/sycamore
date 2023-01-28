@@ -51,15 +51,11 @@ void cursor_warp(struct sycamore_cursor *cursor, double lx, double ly) {
     wlr_cursor_warp(cursor->wlr_cursor, NULL, lx, ly);
 }
 
-bool xcursor_init(struct sycamore_cursor *cursor) {
-    /* TODO: Get cursor theme/size from config file
-     * recreate xcursor manager if theme/size changed. */
+bool xcursor_init(struct sycamore_cursor *cursor, const char *theme, uint32_t size) {
     if (cursor->xcursor_manager) {
-        return true;
+        wlr_xcursor_manager_destroy(cursor->xcursor_manager);
+        cursor->xcursor_manager = NULL;
     }
-
-    unsigned size = 24;
-    const char *theme = NULL;
 
     char size_fmt[16];
     snprintf(size_fmt, sizeof(size_fmt), "%u", size);
@@ -94,15 +90,14 @@ void cursor_refresh(struct sycamore_cursor *cursor) {
                                          cursor->image, cursor->wlr_cursor);
 }
 
-void xcursor_reload(struct sycamore_cursor *cursor) {
-    if (!xcursor_init(cursor)) {
+void xcursor_reload(struct sycamore_cursor *cursor, const char *theme, uint32_t size) {
+    if (!xcursor_init(cursor, theme, size)) {
         return;
     }
 
     struct sycamore_output *output;
     wl_list_for_each(output, &server.all_outputs, link) {
-        wlr_xcursor_manager_load(cursor->xcursor_manager,
-                                 output->wlr_output->scale);
+        wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
     }
 
     cursor_refresh(cursor);
@@ -298,7 +293,7 @@ struct sycamore_cursor *sycamore_cursor_create(struct sycamore_seat *seat,
 
     wlr_cursor_attach_output_layout(cursor->wlr_cursor, output_layout);
 
-    if (!xcursor_init(cursor)) {
+    if (!xcursor_init(cursor, NULL, 24)) {
         wlr_cursor_destroy(cursor->wlr_cursor);
         free(cursor);
         return NULL;
