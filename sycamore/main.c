@@ -4,23 +4,41 @@
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
 
+static const char usage[] =
+        "Usage: sycamore [options] [command]\n"
+        "\n"
+        "  -h, --help             Show this help message.\n"
+        "  -s, --startup_cmd      Startup with command.\n"
+        "\n";
+
+static const struct option long_options[] = {
+        {"help", no_argument, NULL, 'h'},
+        {"startup_cmd", required_argument, NULL, 's'},
+        {0, 0, NULL, 0}
+};
+
 int main(int argc, char **argv) {
     wlr_log_init(WLR_DEBUG, NULL);
 
     char *startup_cmd = NULL;
-    int c;
-    while ((c = getopt(argc, argv, "s:h")) != -1) {
+
+    int c, i;
+    while ((c = getopt_long(argc, argv, "s:h", long_options, &i)) != -1) {
         switch (c) {
+            case 'h':
+                printf("%s", usage);
+                exit(EXIT_SUCCESS);
             case 's':
                 startup_cmd = optarg;
                 break;
             default:
-                printf("Usage: %s [-s startup command]\n", argv[0]);
+                printf("%s", usage);
                 return EXIT_SUCCESS;
         }
     }
+
     if (optind < argc) {
-        printf("Usage: %s [-s startup command]\n", argv[0]);
+        printf("%s", usage);
         return EXIT_SUCCESS;
     }
 
