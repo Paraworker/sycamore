@@ -321,7 +321,7 @@ void seat_pointer_update_focus(struct sycamore_seat *seat, const uint32_t time_m
 
     if (!surface) {
         wlr_seat_pointer_clear_focus(seat->wlr_seat);
-        cursor_set_image(cursor, "left_ptr");
+        cursor_set_image(cursor, "default");
         return;
     }
 

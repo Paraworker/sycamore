@@ -83,7 +83,7 @@ void cursor_refresh(struct sycamore_cursor *cursor) {
 
     cursor->image_mode = IMAGE;
     if (!cursor->image) {
-        cursor->image = "left_ptr";
+        cursor->image = "default";
     }
 
     wlr_xcursor_manager_set_cursor_image(cursor->xcursor_manager,
