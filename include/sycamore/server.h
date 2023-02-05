@@ -10,11 +10,13 @@
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
-#include "sycamore/desktop/shell/layer_shell.h"
-#include "sycamore/desktop/shell/xdg_shell.h"
-#include "sycamore/input/keybinding.h"
-#include "sycamore/input/seat.h"
-#include "sycamore/output/scene.h"
+#include "sycamore/desktop/view.h"
+
+struct sycamore_scene;
+struct sycamore_seat;
+struct sycamore_xdg_shell;
+struct sycamore_layer_shell;
+struct sycamore_keybinding_manager;
 
 // The global server instance.
 extern struct sycamore_server server;

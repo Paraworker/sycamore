@@ -3,7 +3,7 @@
 
 #include <wlr/types/wlr_output.h>
 #include "sycamore/input/cursor.h"
-#include "sycamore/desktop/layer.h"
+#include "sycamore/desktop/shell/layer_shell/layer.h"
 
 struct sycamore_output {
     struct wl_list link;

@@ -10,6 +10,7 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/input/cursor.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 

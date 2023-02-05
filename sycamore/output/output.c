@@ -5,7 +5,7 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/log.h>
-#include "sycamore/desktop/layer.h"
+#include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
