@@ -57,12 +57,12 @@ void sycamore_scene_destroy(struct sycamore_scene *scene) {
 }
 
 struct wlr_surface *find_surface_by_node(struct wlr_scene_node *node) {
-    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
+    if (!node || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
 
     struct wlr_scene_surface *scene_surface =
-            wlr_scene_surface_from_buffer(wlr_scene_buffer_from_node(node));
+            wlr_scene_surface_try_from_buffer(wlr_scene_buffer_from_node(node));
     if (!scene_surface) {
         return NULL;
     }
