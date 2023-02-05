@@ -1,5 +1,6 @@
-#include <stdlib.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <wlr/util/log.h>
 #include "sycamore/server.h"

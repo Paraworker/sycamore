@@ -1,12 +1,8 @@
-#include <stdbool.h>
-#include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_scene.h>
-#include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/input/cursor.h"
+#include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 #include "sycamore/util/box.h"

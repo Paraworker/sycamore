@@ -2,10 +2,6 @@
 #define SYCAMORE_VIEW_H
 
 #include <stdbool.h>
-#include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_output.h>
-#include <wlr/types/wlr_scene.h>
-#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/box.h>
 #include "sycamore/output/scene.h"
 
@@ -36,7 +32,7 @@ struct view_interface {
     void (*close)(struct sycamore_view *view);
 };
 
-/* base view */
+// base view
 struct sycamore_view {
     enum scene_descriptor_type scene_descriptor;    // must be first
     const struct view_interface *interface;
@@ -55,21 +51,6 @@ struct sycamore_view {
 
     struct wlr_box maximize_restore;
     struct wlr_box fullscreen_restore;
-};
-
-struct sycamore_xdg_shell_view {
-    struct sycamore_view base_view;
-
-    struct wlr_xdg_toplevel *xdg_toplevel;
-
-    struct wl_listener map;
-    struct wl_listener unmap;
-    struct wl_listener destroy;
-    struct wl_listener request_move;
-    struct wl_listener request_resize;
-    struct wl_listener request_fullscreen;
-    struct wl_listener request_maximize;
-    struct wl_listener request_minimize;
 };
 
 void view_init(struct sycamore_view *view, enum view_type type,

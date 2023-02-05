@@ -3,11 +3,36 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
-#include "sycamore/desktop/layer.h"
+#include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
+
+static void handle_layer_map(struct wl_listener *listener, void *data) {
+    struct sycamore_layer *layer = wl_container_of(listener, layer, map);
+    layer_map(layer);
+}
+
+static void handle_layer_unmap(struct wl_listener *listener, void *data) {
+    struct sycamore_layer *layer = wl_container_of(listener, layer, unmap);
+
+    layer_unmap(layer);
+}
+
+static void handle_layer_destroy(struct wl_listener *listener, void *data) {
+    struct sycamore_layer *layer = wl_container_of(listener, layer, destroy);
+
+    layer->layer_surface = NULL;
+
+    layer_destroy(layer);
+}
+
+static void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
+    struct sycamore_layer *layer = wl_container_of(listener, layer, surface_commit);
+
+    layer_surface_commit(layer);
+}
 
 void layer_map(struct sycamore_layer *layer) {
     if (layer->mapped) {
@@ -133,6 +158,15 @@ struct sycamore_layer *layer_create(struct wlr_layer_surface_v1 *layer_surface) 
     layer->mapped = false;
     layer->linked = false;
     layer->output = layer_surface->output->data;
+
+    layer->map.notify = handle_layer_map;
+    wl_signal_add(&layer_surface->events.map, &layer->map);
+    layer->unmap.notify = handle_layer_unmap;
+    wl_signal_add(&layer_surface->events.unmap, &layer->unmap);
+    layer->destroy.notify = handle_layer_destroy;
+    wl_signal_add(&layer_surface->events.destroy, &layer->destroy);
+    layer->surface_commit.notify = handle_layer_surface_commit;
+    wl_signal_add(&layer_surface->surface->events.commit, &layer->surface_commit);
 
     return layer;
 }
