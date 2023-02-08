@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_SCENE_H
 #define SYCAMORE_SCENE_H
 
-#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
@@ -42,7 +42,7 @@ struct sycamore_scene {
 };
 
 struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
-        struct wlr_presentation *presentation);
+        struct wlr_presentation *presentation, struct wlr_linux_dmabuf_v1 *dmabuf);
 
 void sycamore_scene_destroy(struct sycamore_scene *scene);
 

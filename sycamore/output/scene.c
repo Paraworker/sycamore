@@ -1,15 +1,10 @@
 #include <stdlib.h>
-#include <wlr/types/wlr_compositor.h>
-#include <wlr/types/wlr_output_layout.h>
-#include <wlr/types/wlr_presentation_time.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/view.h"
 #include "sycamore/output/scene.h"
-#include "sycamore/server.h"
 
 struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
-        struct wlr_presentation *presentation) {
+        struct wlr_presentation *presentation, struct wlr_linux_dmabuf_v1 *dmabuf) {
     struct sycamore_scene *scene = calloc(1, sizeof(struct sycamore_scene));
     if (!scene) {
         wlr_log(WLR_ERROR, "Unable to allocate sycamore_scene");
@@ -40,6 +35,7 @@ struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
 
     wlr_scene_attach_output_layout(scene->wlr_scene, layout);
     wlr_scene_set_presentation(scene->wlr_scene, presentation);
+    wlr_scene_set_linux_dmabuf_v1(scene->wlr_scene, dmabuf);
 
     return scene;
 }
