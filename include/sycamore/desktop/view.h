@@ -5,80 +5,81 @@
 #include <wlr/util/box.h>
 #include "sycamore/output/scene.h"
 
-struct sycamore_view;
-struct sycamore_output;
+typedef struct View          View;
+typedef struct ViewInterface ViewInterface;
+typedef struct ViewPtr       ViewPtr;
+typedef enum ViewType        ViewType;
+typedef struct Output        Output;
 
-enum view_type {
+enum ViewType {
     VIEW_TYPE_UNKNOWN,
     VIEW_TYPE_XDG_SHELL,
     VIEW_TYPE_XWAYLAND,
 };
 
-struct view_ptr {
-    struct sycamore_view *view;
+struct ViewPtr {
+    View *view;
     struct wl_list link;    // view::ptrs
 };
 
-struct view_interface {
-    void (*destroy)(struct sycamore_view *view);
-    void (*map)(struct sycamore_view *view);
-    void (*unmap)(struct sycamore_view *view);
-    void (*set_activated)(struct sycamore_view *view, bool activated);
-    void (*set_size)(struct sycamore_view *view, uint32_t width, uint32_t height);
-    void (*set_fullscreen)(struct sycamore_view *view, bool fullscreen);
-    void (*set_maximized)(struct sycamore_view *view, bool maximized);
-    void (*set_resizing)(struct sycamore_view *view, bool resizing);
-    void (*get_geometry)(struct sycamore_view *view, struct wlr_box *box);
-    void (*close)(struct sycamore_view *view);
+struct ViewInterface {
+    void (*destroy)(View *view);
+    void (*map)(View *view);
+    void (*unmap)(View *view);
+    void (*setActivated)(View *view, bool activated);
+    void (*setSize)(View *view, uint32_t width, uint32_t height);
+    void (*setFullscreen)(View *view, bool fullscreen);
+    void (*setMaximized)(View *view, bool maximized);
+    void (*setResizing)(View *view, bool resizing);
+    void (*getGeometry)(View *view, struct wlr_box *box);
+    void (*close)(View *view);
 };
 
 // base view
-struct sycamore_view {
-    enum scene_descriptor_type scene_descriptor;    // must be first
-    const struct view_interface *interface;
-    struct wlr_surface *wlr_surface;
-    enum view_type view_type;
+struct View {
+    SceneDescriptorType sceneDesc;    // must be first
+    const ViewInterface *interface;
+    struct wlr_surface  *wlrSurface;
+    ViewType            type;
     int x, y;
 
-    struct wlr_scene_tree *scene_tree;
+    struct wlr_scene_tree *sceneTree;
 
     struct wl_list link;
     struct wl_list ptrs;
 
     bool mapped;
-    bool is_maximized;
-    bool is_fullscreen;
+    bool isMaximized;
+    bool isFullscreen;
 
-    struct wlr_box maximize_restore;
-    struct wlr_box fullscreen_restore;
+    struct {
+        struct wlr_box maximize;
+        struct wlr_box fullscreen;
+    } restore;
 };
 
-void view_init(struct sycamore_view *view, enum view_type type,
-        struct wlr_surface *surface, const struct view_interface *interface);
+void viewInit(View *view, ViewType type, struct wlr_surface *surface, const ViewInterface *interface);
 
-void view_map(struct sycamore_view *view,
-        struct wlr_output *fullscreen_output, bool maximized, bool fullscreen);
+void viewMap(View *view, struct wlr_output *fullscreenOutput, bool maximized, bool fullscreen);
 
-void view_unmap(struct sycamore_view *view);
+void viewUnmap(View *view);
 
-void view_destroy(struct sycamore_view *view);
+void viewDestroy(View *view);
 
-void view_move_to(struct sycamore_view *view, int x, int y);
+void viewMoveTo(View *view, int x, int y);
 
-struct sycamore_output *view_get_main_output(struct sycamore_view *view);
+Output *viewGetMainOutput(View *view);
 
-void view_set_fullscreen(struct sycamore_view *view,
-        const struct sycamore_output *output, bool fullscreen);
+void viewSetFullscreen(View *view, Output *output, bool fullscreen);
 
-void view_set_maximized(struct sycamore_view *view,
-        const struct sycamore_output *output, bool maximized);
+void viewSetMaximized(View *view, Output *output, bool maximized);
 
-void view_set_focus(struct sycamore_view *view);
+void viewSetFocus(View *view);
 
-void view_set_to_output_center(struct sycamore_view *view, struct sycamore_output *output);
+void viewSetToOutputCenter(View *view, Output *output);
 
-void view_ptr_connect(struct view_ptr *ptr, struct sycamore_view *view);
+void viewPtrConnect(ViewPtr *ptr, View *view);
 
-void view_ptr_disconnect(struct view_ptr *ptr);
+void viewPtrDisconnect(ViewPtr *ptr);
 
 #endif //SYCAMORE_VIEW_H

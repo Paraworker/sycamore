@@ -24,26 +24,26 @@
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
-struct sycamore_server server = {0};
+struct Server server = {0};
 
-bool server_init() {
+bool serverInit() {
     wlr_log(WLR_INFO, "Initializing Wayland server");
 
-    wl_list_init(&server.all_outputs);
-    wl_list_init(&server.mapped_views);
-    server.focused_view.view = NULL;
+    wl_list_init(&server.allOutputs);
+    wl_list_init(&server.mappedViews);
+    server.focusedView.view = NULL;
 
-    server.wl_display = wl_display_create();
-    server.backend = wlr_backend_autocreate(server.wl_display, &server.session);
+    server.wlDisplay = wl_display_create();
+    server.backend = wlr_backend_autocreate(server.wlDisplay, &server.session);
     if (!server.backend) {
         wlr_log(WLR_ERROR, "Unable to create backend");
         return false;
     }
 
-    server.backend_new_input.notify = handle_backend_new_input;
-    wl_signal_add(&server.backend->events.new_input, &server.backend_new_input);
-    server.backend_new_output.notify = handle_backend_new_output;
-    wl_signal_add(&server.backend->events.new_output, &server.backend_new_output);
+    server.backendNewInput.notify = onBackendNewInput;
+    wl_signal_add(&server.backend->events.new_input, &server.backendNewInput);
+    server.backendNewOutput.notify = onBackendNewOutput;
+    wl_signal_add(&server.backend->events.new_output, &server.backendNewOutput);
 
     server.renderer = wlr_renderer_autocreate(server.backend);
     if (!server.renderer) {
@@ -51,7 +51,7 @@ bool server_init() {
         return false;
     }
 
-    wlr_renderer_init_wl_display(server.renderer, server.wl_display);
+    wlr_renderer_init_wl_display(server.renderer, server.wlDisplay);
 
     server.allocator = wlr_allocator_autocreate(server.backend, server.renderer);
     if (!server.allocator) {
@@ -59,67 +59,67 @@ bool server_init() {
         return false;
     }
 
-    server.compositor = wlr_compositor_create(server.wl_display, server.renderer);
+    server.compositor = wlr_compositor_create(server.wlDisplay, server.renderer);
     if (!server.compositor) {
         wlr_log(WLR_ERROR, "Unable to create compositor");
         return false;
     }
 
-    wlr_subcompositor_create(server.wl_display);
+    wlr_subcompositor_create(server.wlDisplay);
 
-    server.output_layout = wlr_output_layout_create();
-    if (!server.output_layout) {
-        wlr_log(WLR_ERROR, "Unable to create output_layout");
+    server.outputLayout = wlr_output_layout_create();
+    if (!server.outputLayout) {
+        wlr_log(WLR_ERROR, "Unable to create outputLayout");
         return false;
     }
 
-    server.presentation = wlr_presentation_create(server.wl_display, server.backend);
+    server.presentation = wlr_presentation_create(server.wlDisplay, server.backend);
     if (!server.presentation) {
         wlr_log(WLR_ERROR, "Unable to create presentation");
         return false;
     }
 
-    server.scene = sycamore_scene_create(server.output_layout, server.presentation);
+    server.scene = sceneCreate(server.outputLayout, server.presentation);
     if (!server.scene) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_scene");
+        wlr_log(WLR_ERROR, "Unable to create Scene");
         return false;
     }
 
-    server.seat = sycamore_seat_create(server.wl_display, server.output_layout);
+    server.seat = seatCreate(server.wlDisplay, server.outputLayout);
     if (!server.seat) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_seat");
+        wlr_log(WLR_ERROR, "Unable to create Seat");
         return false;
     }
 
-    server.xdg_shell = sycamore_xdg_shell_create(server.wl_display);
-    if (!server.xdg_shell) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_xdg_shell");
+    server.xdgShell = xdgShellCreate(server.wlDisplay);
+    if (!server.xdgShell) {
+        wlr_log(WLR_ERROR, "Unable to create XdgShell");
         return false;
     }
 
-    server.layer_shell = sycamore_layer_shell_create(server.wl_display);
-    if (!server.layer_shell) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_layer_shell");
+    server.layerShell = layerShellCreate(server.wlDisplay);
+    if (!server.layerShell) {
+        wlr_log(WLR_ERROR, "Unable to create LayerShell");
         return false;
     }
 
-    server.keybinding_manager = sycamore_keybinding_manager_create();
-    if (!server.keybinding_manager) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_keybinding_manager");
+    server.keybindingManager = keybindingManagerCreate();
+    if (!server.keybindingManager) {
+        wlr_log(WLR_ERROR, "Unable to create KeybindingManager");
         return false;
     }
 
-    wlr_export_dmabuf_manager_v1_create(server.wl_display);
-    wlr_data_device_manager_create(server.wl_display);
-    wlr_data_control_manager_v1_create(server.wl_display);
-    wlr_primary_selection_v1_device_manager_create(server.wl_display);
-    wlr_screencopy_manager_v1_create(server.wl_display);
-    wlr_viewporter_create(server.wl_display);
-    wlr_gamma_control_manager_v1_create(server.wl_display);
-    wlr_xdg_output_manager_v1_create(server.wl_display, server.output_layout);
-    wlr_single_pixel_buffer_manager_v1_create(server.wl_display);
+    wlr_export_dmabuf_manager_v1_create(server.wlDisplay);
+    wlr_data_device_manager_create(server.wlDisplay);
+    wlr_data_control_manager_v1_create(server.wlDisplay);
+    wlr_primary_selection_v1_device_manager_create(server.wlDisplay);
+    wlr_screencopy_manager_v1_create(server.wlDisplay);
+    wlr_viewporter_create(server.wlDisplay);
+    wlr_gamma_control_manager_v1_create(server.wlDisplay);
+    wlr_xdg_output_manager_v1_create(server.wlDisplay, server.outputLayout);
+    wlr_single_pixel_buffer_manager_v1_create(server.wlDisplay);
 
-    server.socket = wl_display_add_socket_auto(server.wl_display);
+    server.socket = wl_display_add_socket_auto(server.wlDisplay);
     if (!server.socket) {
         wlr_log(WLR_ERROR, "Unable to open wayland socket");
         return false;
@@ -128,43 +128,42 @@ bool server_init() {
     return true;
 }
 
-void server_fini() {
+void serverUninit() {
     if (server.backend) {
-        wl_list_remove(&server.backend_new_input.link);
-        wl_list_remove(&server.backend_new_output.link);
+        wl_list_remove(&server.backendNewInput.link);
+        wl_list_remove(&server.backendNewOutput.link);
         wlr_backend_destroy(server.backend);
-        wl_display_destroy_clients(server.wl_display);
-        wl_display_destroy(server.wl_display);
+        wl_display_destroy_clients(server.wlDisplay);
+        wl_display_destroy(server.wlDisplay);
     }
 
-    if (server.output_layout) {
-        wlr_output_layout_destroy(server.output_layout);
+    if (server.outputLayout) {
+        wlr_output_layout_destroy(server.outputLayout);
     }
 
-    if (server.keybinding_manager) {
-        sycamore_keybinding_manager_destroy(server.keybinding_manager);
+    if (server.keybindingManager) {
+        keybindingManagerDestroy(server.keybindingManager);
     }
 
-    if (server.xdg_shell) {
-        sycamore_xdg_shell_destroy(server.xdg_shell);
+    if (server.xdgShell) {
+        xdgShellDestroy(server.xdgShell);
     }
 
-    if (server.layer_shell) {
-        sycamore_layer_shell_destroy(server.layer_shell);
+    if (server.layerShell) {
+        layerShellDestroy(server.layerShell);
     }
 
     if (server.seat) {
-        sycamore_seat_destroy(server.seat);
+        seatDestroy(server.seat);
     }
 
     if (server.scene) {
-        sycamore_scene_destroy(server.scene);
+        sceneDestroy(server.scene);
     }
 }
 
-bool server_start() {
-    wlr_log(WLR_INFO, "Starting backend on wayland display '%s'",
-            server.socket);
+bool serverStart() {
+    wlr_log(WLR_INFO, "Starting backend on WAYLAND_DISPLAY=%s", server.socket);
 
     if (!wlr_backend_start(server.backend)) {
         wlr_log(WLR_ERROR, "Unable to start backend");
@@ -174,9 +173,8 @@ bool server_start() {
     return true;
 }
 
-void server_run() {
-    wlr_log(WLR_INFO, "Running Sycamore on WAYLAND_DISPLAY=%s",
-            server.socket);
+void serverRun() {
+    wlr_log(WLR_INFO, "Running Sycamore on WAYLAND_DISPLAY=%s", server.socket);
 
-    wl_display_run(server.wl_display);
+    wl_display_run(server.wlDisplay);
 }

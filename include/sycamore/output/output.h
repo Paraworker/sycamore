@@ -5,27 +5,29 @@
 #include "sycamore/input/cursor.h"
 #include "sycamore/desktop/shell/layer_shell/layer.h"
 
-struct sycamore_output {
-    struct wl_list link;
-    struct wlr_output *wlr_output;
+typedef struct Output Output;
 
-    struct wl_list layers[LAYERS_ALL];   //sycamore_layer::link
-    struct wlr_box usable_area;
+struct Output {
+    struct wl_list    link;
+    struct wlr_output *wlrOutput;
+
+    struct wl_list layers[LAYERS_ALL];   //Layer::link
+    struct wlr_box usableArea;
 
     struct wl_listener destroy;
     struct wl_listener frame;
-    struct wl_listener request_state;
+    struct wl_listener requestState;
 };
 
 /**
  * @brief Center cursor on this output
  */
-void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor);
+void outputEnsureCursor(Output *output, Cursor *cursor);
 
-void sycamore_output_destroy(struct sycamore_output *output);
+Output *outputCreate(struct wlr_output *wlrOutput);
 
-struct sycamore_output *sycamore_output_create(struct wlr_output *wlr_output);
+void outputDestroy(Output *output);
 
-void handle_backend_new_output(struct wl_listener *listener, void *data);
+void onBackendNewOutput(struct wl_listener *listener, void *data);
 
 #endif //SYCAMORE_OUTPUT_H

@@ -6,65 +6,63 @@
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
-static void handle_new_layer_shell_surface(struct wl_listener *listener, void *data) {
-    struct sycamore_layer_shell *layer_shell =
-            wl_container_of(listener, layer_shell, new_layer_shell_surface);
-    struct wlr_layer_surface_v1 *layer_surface = data;
+static void onNewLayerShellSurface(struct wl_listener *listener, void *data) {
+    LayerShell *layerShell = wl_container_of(listener, layerShell, newLayerShellSurface);
+    struct wlr_layer_surface_v1 *layerSurface = data;
 
-    struct sycamore_layer *layer = layer_create(layer_surface);
+    Layer *layer = layerCreate(layerSurface);
     if (!layer) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_layer");
+        wlr_log(WLR_ERROR, "Unable to create Layer");
         return;
     }
 
-    enum zwlr_layer_shell_v1_layer layer_type = layer_surface->pending.layer;
+    enum zwlr_layer_shell_v1_layer layerType = layerSurface->pending.layer;
 
     // Add to scene graph
-    struct wlr_scene_tree *parent = layer_get_scene_tree(server.scene, layer_type);
-    layer->scene = wlr_scene_layer_surface_v1_create(parent, layer->layer_surface);
+    struct wlr_scene_tree *parent = layerGetSceneTree(server.scene, layerType);
+    layer->scene = wlr_scene_layer_surface_v1_create(parent, layer->layerSurface);
     layer->scene->tree->node.data = layer;
-    layer_surface->surface->data = layer->scene->tree;
+    layerSurface->surface->data = layer->scene->tree;
 
-    struct sycamore_output *output = layer->output;
-    wl_list_insert(&output->layers[layer_type], &layer->link);
+    Output *output = layer->output;
+    wl_list_insert(&output->layers[layerType], &layer->link);
     layer->linked = true;
 
     // Temporarily set the layer's current state to pending
     // So that we can easily arrange it
-    struct wlr_layer_surface_v1_state old_state = layer_surface->current;
-    layer_surface->current = layer_surface->pending;
-    arrange_layers(output);
-    layer_surface->current = old_state;
+    struct wlr_layer_surface_v1_state oldState = layerSurface->current;
+    layerSurface->current = layerSurface->pending;
+    arrangeLayers(output);
+    layerSurface->current = oldState;
 }
 
-struct sycamore_layer_shell *sycamore_layer_shell_create(struct wl_display *display) {
-    struct sycamore_layer_shell *layer_shell =
-            calloc(1, sizeof(struct sycamore_layer_shell));
-    if (!layer_shell) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_layer_shell");
+struct LayerShell *layerShellCreate(struct wl_display *display) {
+    LayerShell *layerShell = calloc(1, sizeof(LayerShell));
+    if (!layerShell) {
+        wlr_log(WLR_ERROR, "Unable to allocate LayerShell");
         return NULL;
     }
 
-    layer_shell->wlr_layer_shell = wlr_layer_shell_v1_create(display, SYCAMORE_LAYER_SHELL_VERSION);
-    if (!layer_shell->wlr_layer_shell) {
-        wlr_log(WLR_ERROR, "Unable to create wlr_layer_shell");
-        free(layer_shell);
+    layerShell->wlrLayerShell = wlr_layer_shell_v1_create(display, SYCAMORE_LAYER_SHELL_VERSION);
+    if (!layerShell->wlrLayerShell) {
+        wlr_log(WLR_ERROR, "Unable to create wlrLayerShell");
+        free(layerShell);
         return NULL;
     }
 
-    layer_shell->new_layer_shell_surface.notify = handle_new_layer_shell_surface;
-    wl_signal_add(&layer_shell->wlr_layer_shell->events.new_surface,
-                  &layer_shell->new_layer_shell_surface);
+    layerShell->newLayerShellSurface.notify = onNewLayerShellSurface;
+    wl_signal_add(&layerShell->wlrLayerShell->events.new_surface,
+                  &layerShell->newLayerShellSurface);
 
-    return layer_shell;
+    return layerShell;
 }
 
-void sycamore_layer_shell_destroy(struct sycamore_layer_shell *layer_shell) {
-    if (!layer_shell) {
+void layerShellDestroy(LayerShell *layerShell) {
+    if (!layerShell) {
         return;
     }
 
-    wl_list_remove(&layer_shell->new_layer_shell_surface.link);
+    wl_list_remove(&layerShell->newLayerShellSurface.link);
 
-    free(layer_shell);
+    free(layerShell);
 }

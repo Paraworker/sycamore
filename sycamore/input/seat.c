@@ -12,20 +12,19 @@
 #include "sycamore/input/seat.h"
 #include "sycamore/server.h"
 
-static void handle_request_start_drag(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(listener, seat, request_start_drag);
+static void onRequestStartDrag(struct wl_listener *listener, void *data) {
+    Seat *seat = wl_container_of(listener, seat, requestStartDrag);
     struct wlr_seat_request_start_drag_event *event = data;
 
-    if (wlr_seat_validate_pointer_grab_serial(seat->wlr_seat,
-                                              event->origin, event->serial)) {
-        wlr_seat_start_pointer_drag(seat->wlr_seat, event->drag, event->serial);
+    if (wlr_seat_validate_pointer_grab_serial(seat->wlrSeat, event->origin, event->serial)) {
+        wlr_seat_start_pointer_drag(seat->wlrSeat, event->drag, event->serial);
         return;
     }
 
     struct wlr_touch_point *point;
-    if (wlr_seat_validate_touch_grab_serial(seat->wlr_seat,
+    if (wlr_seat_validate_touch_grab_serial(seat->wlrSeat,
                                             event->origin, event->serial, &point)) {
-        wlr_seat_start_touch_drag(seat->wlr_seat,
+        wlr_seat_start_touch_drag(seat->wlrSeat,
                                   event->drag, event->serial, point);
         return;
     }
@@ -35,50 +34,50 @@ static void handle_request_start_drag(struct wl_listener *listener, void *data) 
     wlr_data_source_destroy(event->drag->source);
 }
 
-static void handle_sycamore_drag_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_drag *drag = wl_container_of(listener, drag, destroy);
+static void onDragDestroy(struct wl_listener *listener, void *data) {
+    Drag *drag = wl_container_of(listener, drag, destroy);
 
     wl_list_remove(&drag->destroy.link);
-    drag->wlr_drag->data = NULL;
+    drag->wlrDrag->data = NULL;
 
     free(drag);
 }
 
-static void handle_drag_icon_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_drag_icon *icon = wl_container_of(listener, icon, destroy);
+static void onDragIconDestroy(struct wl_listener *listener, void *data) {
+    DragIcon *icon = wl_container_of(listener, icon, destroy);
 
     wl_list_remove(&icon->destroy.link);
-    icon->wlr_drag_icon->data = NULL;
+    icon->wlrDragIcon->data = NULL;
 
     free(icon);
 }
 
-static void handle_start_drag(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(listener, seat, start_drag);
-    struct wlr_drag *wlr_drag = data;
-    struct sycamore_drag *drag = calloc(1, sizeof(struct sycamore_drag));
+static void onStartDrag(struct wl_listener *listener, void *data) {
+    Seat *seat = wl_container_of(listener, seat, startDrag);
+    struct wlr_drag *wlrDrag = data;
+    Drag *drag = calloc(1, sizeof(Drag));
     if (!drag) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_drag");
+        wlr_log(WLR_ERROR, "Unable to allocate Drag");
         return;
     }
 
-    drag->seat = seat;
-    drag->wlr_drag = wlr_drag;
-    wlr_drag->data = drag;
+    drag->seat    = seat;
+    drag->wlrDrag = wlrDrag;
+    wlrDrag->data = drag;
 
-    drag->destroy.notify = handle_sycamore_drag_destroy;
-    wl_signal_add(&wlr_drag->events.destroy, &drag->destroy);
+    drag->destroy.notify = onDragDestroy;
+    wl_signal_add(&wlrDrag->events.destroy, &drag->destroy);
 
-    struct wlr_drag_icon *wlr_drag_icon = wlr_drag->icon;
-    if (wlr_drag_icon) {
-        // Create sycamore_drag_icon
-        struct sycamore_drag_icon *icon = calloc(1, sizeof(struct sycamore_drag_icon));
+    struct wlr_drag_icon *wlrDragIcon = wlrDrag->icon;
+    if (wlrDragIcon) {
+        // Create DragIcon
+        DragIcon *icon = calloc(1, sizeof(DragIcon));
         if (!icon) {
-            wlr_log(WLR_ERROR, "Failed to allocate sycamore_drag_icon");
+            wlr_log(WLR_ERROR, "Failed to allocate DragIcon");
             return;
         }
 
-        icon->tree = wlr_scene_drag_icon_create(server.scene->drag_icons, wlr_drag_icon);
+        icon->tree = wlr_scene_drag_icon_create(server.scene->dragIcons, wlrDragIcon);
         if (!icon->tree) {
             wlr_log(WLR_ERROR, "Failed to create scene drag icon");
             free(icon);
@@ -86,24 +85,24 @@ static void handle_start_drag(struct wl_listener *listener, void *data) {
         }
 
         icon->tree->node.data = icon;
-        icon->scene_descriptor = SCENE_DESC_DRAG_ICON;
-        icon->wlr_drag_icon = wlr_drag_icon;
-        wlr_drag_icon->data = icon;
+        icon->sceneDesc       = SCENE_DESC_DRAG_ICON;
+        icon->wlrDragIcon     = wlrDragIcon;
+        wlrDragIcon->data     = icon;
 
-        icon->destroy.notify = handle_drag_icon_destroy;
-        wl_signal_add(&wlr_drag_icon->events.destroy, &icon->destroy);
+        icon->destroy.notify = onDragIconDestroy;
+        wl_signal_add(&wlrDragIcon->events.destroy, &icon->destroy);
 
-        seat_drag_icon_update_position(seat, icon);
+        seatDragIconUpdatePosition(seat, icon);
     }
 
-    seatop_set_basic_full(seat);
+    seatopSetBasicFull(seat);
 }
 
-void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_drag_icon *icon) {
-    struct wlr_drag_icon *wlr_icon = icon->wlr_drag_icon;
-    struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
+void seatDragIconUpdatePosition(Seat *seat, DragIcon *icon) {
+    struct wlr_drag_icon *wlrIcon = icon->wlrDragIcon;
+    struct wlr_cursor *cursor = seat->cursor->wlrCursor;
 
-    switch (wlr_icon->drag->grab_type) {
+    switch (wlrIcon->drag->grab_type) {
         case WLR_DRAG_GRAB_KEYBOARD:
             return;
         case WLR_DRAG_GRAB_KEYBOARD_POINTER:
@@ -115,52 +114,52 @@ void seat_drag_icon_update_position(struct sycamore_seat *seat, struct sycamore_
     }
 }
 
-static void handle_seat_device_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_seat_device *seat_device = wl_container_of(listener, seat_device, destroy);
-    struct sycamore_seat *seat = seat_device->seat;
+static void onSeatDeviceDestroy(struct wl_listener *listener, void *data) {
+    SeatDevice *seatDevice = wl_container_of(listener, seatDevice, destroy);
+    Seat *seat = seatDevice->seat;
 
-    seat_device_destroy(seat_device);
-    seat_update_capabilities(seat);
+    seatDeviceDestroy(seatDevice);
+    seatUpdateCapabilities(seat);
 }
 
-struct sycamore_seat_device *seat_device_create(struct sycamore_seat *seat, struct wlr_input_device *wlr_device,
-        void *derived_device, derived_seat_device_destroy derived_destroy) {
-    struct sycamore_seat_device *seat_device = calloc(1, sizeof(struct sycamore_seat_device));
-    if (!seat_device) {
+SeatDevice *seatDeviceCreate(Seat *seat, struct wlr_input_device *wlrDevice,
+                             void *derivedDevice, DerivedSeatDeviceDestroy derivedDestroy) {
+    SeatDevice *seatDevice = calloc(1, sizeof(SeatDevice));
+    if (!seatDevice) {
         return NULL;
     }
 
-    seat_device->wlr_device = wlr_device;
-    seat_device->derived_device = derived_device;
-    seat_device->derived_destroy = derived_destroy;
-    seat_device->seat = seat;
+    seatDevice->wlrDevice      = wlrDevice;
+    seatDevice->derivedDevice  = derivedDevice;
+    seatDevice->derivedDestroy = derivedDestroy;
+    seatDevice->seat           = seat;
 
-    seat_device->destroy.notify = handle_seat_device_destroy;
-    wl_signal_add(&wlr_device->events.destroy, &seat_device->destroy);
+    seatDevice->destroy.notify = onSeatDeviceDestroy;
+    wl_signal_add(&wlrDevice->events.destroy, &seatDevice->destroy);
 
-    return seat_device;
+    return seatDevice;
 }
 
-void seat_device_destroy(struct sycamore_seat_device *seat_device) {
-    if (!seat_device) {
+void seatDeviceDestroy(SeatDevice *seatDevice) {
+    if (!seatDevice) {
         return;
     }
 
-    wl_list_remove(&seat_device->destroy.link);
-    wl_list_remove(&seat_device->link);
+    wl_list_remove(&seatDevice->destroy.link);
+    wl_list_remove(&seatDevice->link);
 
-    if (seat_device->derived_destroy) {
-        seat_device->derived_destroy(seat_device);
+    if (seatDevice->derivedDestroy) {
+        seatDevice->derivedDestroy(seatDevice);
     }
 
-    free(seat_device);
+    free(seatDevice);
 }
 
-void seat_update_capabilities(struct sycamore_seat *seat) {
+void seatUpdateCapabilities(Seat *seat) {
     uint32_t caps = 0;
-    struct sycamore_seat_device *seat_device;
-    wl_list_for_each(seat_device, &seat->devices, link) {
-        switch (seat_device->wlr_device->type) {
+    SeatDevice *seatDevice;
+    wl_list_for_each(seatDevice, &seat->devices, link) {
+        switch (seatDevice->wlrDevice->type) {
             case WLR_INPUT_DEVICE_KEYBOARD:
                 caps |= WL_SEAT_CAPABILITY_KEYBOARD;
                 break;
@@ -179,248 +178,239 @@ void seat_update_capabilities(struct sycamore_seat *seat) {
         }
     }
 
-    wlr_seat_set_capabilities(seat->wlr_seat, caps);
+    wlr_seat_set_capabilities(seat->wlrSeat, caps);
 
     // Switch to seatop_basic_pointer_no if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0) {
-        seatop_set_basic_pointer_no(seat);
+        seatopSetBasicPointerNo(seat);
     }
 }
 
-static void seat_configure_keyboard(struct sycamore_seat *seat,
-                                    struct wlr_input_device *device) {
+static void seatConfigureKeyboard(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new keyboard: %s", device->name);
 
-    struct sycamore_keyboard *keyboard =
-            sycamore_keyboard_create(seat, device);
+    Keyboard *keyboard = keyboardCreate(seat, device);
     if (!keyboard) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_keyboard");
+        wlr_log(WLR_ERROR, "Unable to create Keyboard");
         return;
     }
 
-    sycamore_keyboard_configure(keyboard);
-    wlr_seat_set_keyboard(seat->wlr_seat, keyboard->wlr_keyboard);
+    keyboardConfigure(keyboard);
+    wlr_seat_set_keyboard(seat->wlrSeat, keyboard->wlrKeyboard);
     wl_list_insert(&seat->devices, &keyboard->base->link);
 }
 
-static void seat_configure_pointer(struct sycamore_seat *seat,
-                                   struct wlr_input_device *device) {
+static void seatConfigurePointer(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new pointer: %s", device->name);
 
-    struct sycamore_pointer *pointer =
-            sycamore_pointer_create(seat, device);
+    Pointer *pointer = pointerCreate(seat, device);
     if (!pointer) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_pointer");
+        wlr_log(WLR_ERROR, "Unable to create Pointer");
         return;
     }
 
-    wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
+    wlr_cursor_attach_input_device(seat->cursor->wlrCursor, device);
     wl_list_insert(&seat->devices, &pointer->base->link);
 
-    touchpad_set_tap_to_click(device);
-    touchpad_set_natural_scroll(device);
-    touchpad_set_accel_speed(device, 0.3);
+    touchpadSetTapToClick(device);
+    touchpadSetNaturalScroll(device);
+    touchpadSetAccelSpeed(device, 0.3);
 }
 
-static void seat_configure_touch(struct sycamore_seat *seat,
-                                 struct wlr_input_device *device) {
+static void seatConfigureTouch(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new touch: %s", device->name);
     
     /* TODO */
 }
 
-static void seat_configure_tablet_tool(struct sycamore_seat *seat,
-                                       struct wlr_input_device *device) {
+static void seatConfigureTabletTool(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new tablet tool: %s", device->name);
 
-    wlr_cursor_attach_input_device(seat->cursor->wlr_cursor, device);
+    wlr_cursor_attach_input_device(seat->cursor->wlrCursor, device);
     /* TODO */
 }
 
-static void seat_configure_tablet_pad(struct sycamore_seat *seat,
-                                      struct wlr_input_device *device) {
+static void seatConfigureTabletPad(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new tablet pad: %s", device->name);
 
     /* TODO */
 }
 
-static void seat_configure_switch(struct sycamore_seat *seat,
-                                  struct wlr_input_device *device) {
+static void seatConfigureSwitch(Seat *seat, struct wlr_input_device *device) {
     wlr_log(WLR_DEBUG, "new switch: %s", device->name);
 
     /* TODO */
 }
 
-static void (*seat_configure_device[])(struct sycamore_seat *seat, struct wlr_input_device *device) = {
-        seat_configure_keyboard,
-        seat_configure_pointer,
-        seat_configure_touch,
-        seat_configure_tablet_tool,
-        seat_configure_tablet_pad,
-        seat_configure_switch,
+static void (*seatConfigureDevice[])(Seat *seat, struct wlr_input_device *device) = {
+        seatConfigureKeyboard,
+        seatConfigurePointer,
+        seatConfigureTouch,
+        seatConfigureTabletTool,
+        seatConfigureTabletPad,
+        seatConfigureSwitch,
 };
 
-void handle_backend_new_input(struct wl_listener *listener, void *data) {
+void onBackendNewInput(struct wl_listener *listener, void *data) {
     /* This event is raised by the backend when a new input device becomes
      * available. */
     struct wlr_input_device *device = data;
-    struct sycamore_seat *seat = server.seat;
+    Seat *seat = server.seat;
 
-    seat_configure_device[device->type](seat, device);
+    seatConfigureDevice[device->type](seat, device);
 
-    seat_update_capabilities(seat);
+    seatUpdateCapabilities(seat);
 }
 
-static void handle_seat_request_set_cursor(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(listener, seat, request_set_cursor);
+static void onSeatRequestSetCursor(struct wl_listener *listener, void *data) {
+    Seat *seat = wl_container_of(listener, seat, requestSetCursor);
     struct wlr_seat_pointer_request_set_cursor_event *event = data;
 
-    struct wlr_seat_client *focused_client = seat->wlr_seat->pointer_state.focused_client;
-    if (focused_client != event->seat_client) {
+    struct wlr_seat_client *focusedClient = seat->wlrSeat->pointer_state.focused_client;
+    if (focusedClient != event->seat_client) {
         return;
     }
 
-    cursor_set_image_surface(seat->cursor, event->surface,
-                             event->hotspot_x, event->hotspot_y);
+    cursorSetImageSurface(seat->cursor, event->surface,
+                          event->hotspot_x, event->hotspot_y);
 }
 
-static void handle_seat_request_set_selection(struct wl_listener *listener, void *data) {
+static void onSeatRequestSetSelection(struct wl_listener *listener, void *data) {
     /* This event is raised by the seat when a client wants to set the selection,
      * usually when the user copies something. wlroots allows compositors to
-     * ignore such requests if they so choose, but in sycamore we always honor
+     * ignore such requests if they so choose, but we always honor
      */
-    struct sycamore_seat *seat = wl_container_of(
-            listener, seat, request_set_selection);
+    Seat *seat = wl_container_of(listener, seat, requestSetSelection);
     struct wlr_seat_request_set_selection_event *event = data;
 
-    wlr_seat_set_selection(seat->wlr_seat, event->source, event->serial);
+    wlr_seat_set_selection(seat->wlrSeat, event->source, event->serial);
 }
 
-static void handle_seat_request_set_primary_selection(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(
-            listener, seat, request_set_primary_selection);
+static void onSeatRequestSetPrimarySelection(struct wl_listener *listener, void *data) {
+    Seat *seat = wl_container_of(listener, seat, requestSetPrimarySelection);
     struct wlr_seat_request_set_primary_selection_event *event = data;
 
-    wlr_seat_set_primary_selection(seat->wlr_seat, event->source, event->serial);
+    wlr_seat_set_primary_selection(seat->wlrSeat, event->source, event->serial);
 }
 
-static void handle_seat_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_seat *seat = wl_container_of(listener, seat, destroy);
+static void onSeatDestroy(struct wl_listener *listener, void *data) {
+    Seat *seat = wl_container_of(listener, seat, destroy);
 
-    seat->wlr_seat = NULL;
-    server.seat = NULL;
+    seat->wlrSeat = NULL;
+    server.seat   = NULL;
 
-    sycamore_seat_destroy(seat);
+    seatDestroy(seat);
 }
 
-void seat_pointer_update_focus(struct sycamore_seat *seat, const uint32_t time_msec) {
-    struct sycamore_cursor *cursor = seat->cursor;
+void seatPointerUpdateFocus(Seat *seat, uint32_t timeMsec) {
+    Cursor *cursor = seat->cursor;
 
     double sx, sy;
-    struct wlr_surface *surface = find_surface_by_node(find_node(server.scene, cursor->wlr_cursor->x, cursor->wlr_cursor->y, &sx, &sy));
+    struct wlr_surface *surface = findSurfaceByNode(
+            findNode(server.scene, cursor->wlrCursor->x, cursor->wlrCursor->y, &sx, &sy));
 
     if (!surface) {
-        wlr_seat_pointer_clear_focus(seat->wlr_seat);
-        cursor_set_image(cursor, "default");
+        wlr_seat_pointer_clear_focus(seat->wlrSeat);
+        cursorSetImage(cursor, "default");
         return;
     }
 
-    wlr_seat_pointer_notify_enter(seat->wlr_seat, surface, sx, sy);
-    wlr_seat_pointer_notify_motion(seat->wlr_seat, time_msec, sx, sy);
+    wlr_seat_pointer_notify_enter(seat->wlrSeat, surface, sx, sy);
+    wlr_seat_pointer_notify_motion(seat->wlrSeat, timeMsec, sx, sy);
 }
 
-void seat_set_keyboard_focus(struct sycamore_seat *seat, struct wlr_surface *surface) {
-    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat->wlr_seat);
+void seatSetKeyboardFocus(Seat *seat, struct wlr_surface *surface) {
+    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat->wlrSeat);
     if (!keyboard) {
-        wlr_seat_keyboard_notify_enter(seat->wlr_seat, surface, NULL, 0, NULL);
+        wlr_seat_keyboard_notify_enter(seat->wlrSeat, surface, NULL, 0, NULL);
         return;
     }
 
-    wlr_seat_keyboard_notify_enter(seat->wlr_seat, surface,
+    wlr_seat_keyboard_notify_enter(seat->wlrSeat, surface,
                                    keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-void sycamore_seat_destroy(struct sycamore_seat *seat) {
+void seatDestroy(Seat *seat) {
     if (!seat) {
         return;
     }
 
-    struct sycamore_seat_device *seat_device, *next;
-    wl_list_for_each_safe(seat_device, next, &seat->devices, link) {
-        seat_device_destroy(seat_device);
+    SeatDevice *seatDevice, *next;
+    wl_list_for_each_safe(seatDevice, next, &seat->devices, link) {
+        seatDeviceDestroy(seatDevice);
     }
 
-    seatop_end(seat);
+    seatopEnd(seat);
 
     wl_list_remove(&seat->destroy.link);
-    wl_list_remove(&seat->request_set_cursor.link);
-    wl_list_remove(&seat->request_set_selection.link);
-    wl_list_remove(&seat->request_set_primary_selection.link);
-    wl_list_remove(&seat->request_start_drag.link);
-    wl_list_remove(&seat->start_drag.link);
+    wl_list_remove(&seat->requestSetCursor.link);
+    wl_list_remove(&seat->requestSetSelection.link);
+    wl_list_remove(&seat->requestSetPrimarySelection.link);
+    wl_list_remove(&seat->requestStartDrag.link);
+    wl_list_remove(&seat->startDrag.link);
 
     if (seat->cursor) {
-        sycamore_cursor_destroy(seat->cursor);
+        cursorDestroy(seat->cursor);
     }
 
-    if (seat->wlr_seat) {
-        wlr_seat_destroy(seat->wlr_seat);
+    if (seat->wlrSeat) {
+        wlr_seat_destroy(seat->wlrSeat);
     }
 
     free(seat);
 }
 
-struct sycamore_seat *sycamore_seat_create(struct wl_display *display, struct wlr_output_layout *layout) {
-    struct sycamore_seat *seat = calloc(1, sizeof(struct sycamore_seat));
+Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout) {
+    Seat *seat = calloc(1, sizeof(Seat));
     if (!seat) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_seat");
+        wlr_log(WLR_ERROR, "Unable to allocate Seat");
         return NULL;
     }
 
-    seat->seatop_impl = NULL;
-    seat->focused_layer = NULL;
+    seat->seatopImpl   = NULL;
+    seat->focusedLayer = NULL;
     wl_list_init(&seat->devices);
 
-    seat->wlr_seat = wlr_seat_create(display, "seat0");
-    if (!seat->wlr_seat) {
-        wlr_log(WLR_ERROR, "Unable to create wlr_seat");
+    seat->wlrSeat = wlr_seat_create(display, "seat0");
+    if (!seat->wlrSeat) {
+        wlr_log(WLR_ERROR, "Unable to create wlrSeat");
         free(seat);
         return NULL;
     }
 
-    seat->cursor = sycamore_cursor_create(seat, display, layout);
+    seat->cursor = cursorCreate(seat, display, layout);
     if (!seat->cursor) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_cursor");
-        wlr_seat_destroy(seat->wlr_seat);
+        wlr_log(WLR_ERROR, "Unable to create Cursor");
+        wlr_seat_destroy(seat->wlrSeat);
         free(seat);
         return NULL;
     }
 
-    seat->request_set_cursor.notify = handle_seat_request_set_cursor;
-    wl_signal_add(&seat->wlr_seat->events.request_set_cursor,
-                  &seat->request_set_cursor);
-    seat->request_set_selection.notify = handle_seat_request_set_selection;
-    wl_signal_add(&seat->wlr_seat->events.request_set_selection,
-                  &seat->request_set_selection);
-    seat->request_set_primary_selection.notify = handle_seat_request_set_primary_selection;
-    wl_signal_add(&seat->wlr_seat->events.request_set_primary_selection,
-                  &seat->request_set_primary_selection);
-    seat->request_start_drag.notify = handle_request_start_drag;
-    wl_signal_add(&seat->wlr_seat->events.request_start_drag,
-                  &seat->request_start_drag);
-    seat->start_drag.notify = handle_start_drag;
-    wl_signal_add(&seat->wlr_seat->events.start_drag,
-                  &seat->start_drag);
-    seat->destroy.notify = handle_seat_destroy;
-    wl_signal_add(&seat->wlr_seat->events.destroy,
+    seat->requestSetCursor.notify = onSeatRequestSetCursor;
+    wl_signal_add(&seat->wlrSeat->events.request_set_cursor,
+                  &seat->requestSetCursor);
+    seat->requestSetSelection.notify = onSeatRequestSetSelection;
+    wl_signal_add(&seat->wlrSeat->events.request_set_selection,
+                  &seat->requestSetSelection);
+    seat->requestSetPrimarySelection.notify = onSeatRequestSetPrimarySelection;
+    wl_signal_add(&seat->wlrSeat->events.request_set_primary_selection,
+                  &seat->requestSetPrimarySelection);
+    seat->requestStartDrag.notify = onRequestStartDrag;
+    wl_signal_add(&seat->wlrSeat->events.request_start_drag,
+                  &seat->requestStartDrag);
+    seat->startDrag.notify = onStartDrag;
+    wl_signal_add(&seat->wlrSeat->events.start_drag,
+                  &seat->startDrag);
+    seat->destroy.notify = onSeatDestroy;
+    wl_signal_add(&seat->wlrSeat->events.destroy,
                   &seat->destroy);
 
-    seatop_set_basic_pointer_no(seat);
+    seatopSetBasicPointerNo(seat);
 
     return seat;
 }
 
-bool seatop_pointer_interactive_mode_check(struct sycamore_seat *seat, struct sycamore_view *view, enum seatop_mode mode) {
+bool seatopPointerInteractiveModeCheck(Seat *seat, View *view, SeatopMode mode) {
     /* This fuction is used for checking whether an
      * 'pointer interactive' seatop mode should begin. including:
      *
@@ -429,17 +419,17 @@ bool seatop_pointer_interactive_mode_check(struct sycamore_seat *seat, struct sy
      */
 
     // Don't renter.
-    if (seat->seatop_impl->mode == mode) {
+    if (seat->seatopImpl->mode == mode) {
         return false;
     }
 
-    // Deny pointer_move/pointer_resize from maximized/fullscreen view.
-    if (view->is_maximized || view->is_fullscreen) {
+    // Deny pointerMove/pointerResize from maximized/fullscreen view.
+    if (view->isMaximized || view->isFullscreen) {
         return false;
     }
 
-    // Deny pointer_move/pointer_resize from unfocused view or there is no focused view.
-    if (view != server.focused_view.view) {
+    // Deny pointerMove/pointerResize from unfocused view or there is no focused view.
+    if (view != server.focusedView.view) {
         return false;
     }
 

@@ -6,11 +6,12 @@
 
 #define LAYERS_ALL 4
 
-struct sycamore_output;
+typedef struct Layer  Layer;
+typedef struct Output Output;
 
-struct sycamore_layer {
-    enum scene_descriptor_type scene_descriptor;    //must be first
-    struct wlr_layer_surface_v1 *layer_surface;
+struct Layer {
+    SceneDescriptorType sceneDesc;    //must be first
+    struct wlr_layer_surface_v1 *layerSurface;
     struct wlr_scene_layer_surface_v1 *scene;
 
     bool mapped;
@@ -21,24 +22,21 @@ struct sycamore_layer {
     struct wl_listener destroy;
     struct wl_listener map;
     struct wl_listener unmap;
-    struct wl_listener surface_commit;
+    struct wl_listener surfaceCommit;
 
-    struct sycamore_output *output;
+    Output *output;
 };
 
-void layer_map(struct sycamore_layer *layer);
+void layerMap(Layer *layer);
 
-void layer_unmap(struct sycamore_layer *layer);
+void layerUnmap(Layer *layer);
 
-void layer_surface_commit(struct sycamore_layer *layer);
+Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface);
 
-struct sycamore_layer *layer_create(struct wlr_layer_surface_v1 *layer_surface);
+void layerDestroy(Layer *layer);
 
-void layer_destroy(struct sycamore_layer *layer);
+void arrangeLayers(Output *output);
 
-void arrange_layers(struct sycamore_output *output);
-
-struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *scene,
-        enum zwlr_layer_shell_v1_layer type);
+struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type);
 
 #endif //SYCAMORE_LAYER_H

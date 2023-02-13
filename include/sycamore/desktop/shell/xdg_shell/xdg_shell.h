@@ -5,13 +5,15 @@
 
 #define SYCAMORE_XDG_SHELL_VERSION 3
 
-struct sycamore_xdg_shell {
-    struct wlr_xdg_shell *wlr_xdg_shell;
-    struct wl_listener new_xdg_shell_surface;
+typedef struct XdgShell XdgShell;
+
+struct XdgShell {
+    struct wlr_xdg_shell *wlrXdgShell;
+    struct wl_listener newXdgShellSurface;
 };
 
-struct sycamore_xdg_shell *sycamore_xdg_shell_create(struct wl_display *display);
+XdgShell *xdgShellCreate(struct wl_display *display);
 
-void sycamore_xdg_shell_destroy(struct sycamore_xdg_shell *xdg_shell);
+void xdgShellDestroy(XdgShell *xdgShell);
 
 #endif //SYCAMORE_XDG_SHELL_H

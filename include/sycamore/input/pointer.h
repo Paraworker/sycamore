@@ -4,14 +4,15 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
 
-struct sycamore_seat;
+typedef struct Pointer    Pointer;
+typedef struct Seat       Seat;
+typedef struct SeatDevice SeatDevice;
 
-struct sycamore_pointer {
-    struct sycamore_seat_device *base;
-    struct wlr_pointer *wlr_pointer;
+struct Pointer {
+    SeatDevice         *base;
+    struct wlr_pointer *wlrPointer;
 };
 
-struct sycamore_pointer *sycamore_pointer_create(struct sycamore_seat *seat,
-        struct wlr_input_device *wlr_device);
+Pointer *pointerCreate(Seat *seat, struct wlr_input_device *wlrDevice);
 
 #endif //SYCAMORE_POINTER_H
