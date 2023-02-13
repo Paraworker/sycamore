@@ -9,95 +9,89 @@
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 
-static void handle_layer_map(struct wl_listener *listener, void *data) {
-    struct sycamore_layer *layer = wl_container_of(listener, layer, map);
-    layer_map(layer);
+static void onLayerMap(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, map);
+    layerMap(layer);
 }
 
-static void handle_layer_unmap(struct wl_listener *listener, void *data) {
-    struct sycamore_layer *layer = wl_container_of(listener, layer, unmap);
-
-    layer_unmap(layer);
+static void onLayerUnmap(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, unmap);
+    layerUnmap(layer);
 }
 
-static void handle_layer_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_layer *layer = wl_container_of(listener, layer, destroy);
+static void onLayerDestroy(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, destroy);
 
-    layer->layer_surface = NULL;
+    layer->layerSurface = NULL;
 
-    layer_destroy(layer);
+    layerDestroy(layer);
 }
 
-static void handle_layer_surface_commit(struct wl_listener *listener, void *data) {
-    struct sycamore_layer *layer = wl_container_of(listener, layer, surface_commit);
+static void onLayerSurfaceCommit(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, surfaceCommit);
 
-    layer_surface_commit(layer);
+    struct wlr_layer_surface_v1 *layerSurface = layer->layerSurface;
+    Output *output = layer->output;
+    uint32_t committed = layerSurface->current.committed;
+
+    if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
+        enum zwlr_layer_shell_v1_layer layerType = layerSurface->current.layer;
+        struct wlr_scene_tree *sceneTree = layerGetSceneTree(server.scene, layerType);
+        wlr_scene_node_reparent(&layer->scene->tree->node, sceneTree);
+        wl_list_remove(&layer->link);
+        wl_list_insert(&output->layers[layerType], &layer->link);
+    }
+
+    if (committed || layerSurface->mapped != layer->mapped) {
+        layer->mapped = layerSurface->mapped;
+        arrangeLayers(output);
+    }
 }
 
-void layer_map(struct sycamore_layer *layer) {
+void layerMap(Layer *layer) {
     if (layer->mapped) {
         return;
     }
 
-    struct wlr_layer_surface_v1 *layer_surface = layer->layer_surface;
-    struct sycamore_seat *seat = server.seat;
+    struct wlr_layer_surface_v1 *layerSurface = layer->layerSurface;
+    Seat *seat = server.seat;
 
-    // focus on new layer_surface
-    if (layer_surface->current.keyboard_interactive &&
-        (layer_surface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY ||
-         layer_surface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_TOP)) {
-        seat_set_keyboard_focus(seat, layer_surface->surface);
-        seat->focused_layer = layer;
+    // focus on new layerSurface
+    if (layerSurface->current.keyboard_interactive &&
+        (layerSurface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY ||
+         layerSurface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_TOP)) {
+        seatSetKeyboardFocus(seat, layerSurface->surface);
+        seat->focusedLayer = layer;
 
-        arrange_layers(layer->output);
+        arrangeLayers(layer->output);
     }
 
     layer->mapped = true;
 
-    pointer_rebase(seat);
+    seatopPointerRebase(seat);
 }
 
-void layer_unmap(struct sycamore_layer *layer) {
+void layerUnmap(Layer *layer) {
     if (!layer->mapped) {
         return;
     }
 
-    struct sycamore_seat *seat = server.seat;
+    Seat *seat = server.seat;
 
-    if (seat->focused_layer == layer) {
-        seat->focused_layer = NULL;
-        struct sycamore_view *view = server.focused_view.view;
+    if (seat->focusedLayer == layer) {
+        seat->focusedLayer = NULL;
+        View *view = server.focusedView.view;
         if (view) {
-            seat_set_keyboard_focus(seat, view->wlr_surface);
+            seatSetKeyboardFocus(seat, view->wlrSurface);
         }
     }
 
     layer->mapped = false;
 
-    pointer_rebase(seat);
+    seatopPointerRebase(seat);
 }
 
-void layer_surface_commit(struct sycamore_layer *layer) {
-    struct wlr_layer_surface_v1 *layer_surface = layer->layer_surface;
-    struct sycamore_output *output = layer->output;
-    uint32_t committed = layer_surface->current.committed;
-
-    if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
-        enum zwlr_layer_shell_v1_layer layer_type = layer_surface->current.layer;
-        struct wlr_scene_tree *scene_tree = layer_get_scene_tree(server.scene, layer_type);
-        wlr_scene_node_reparent(&layer->scene->tree->node, scene_tree);
-        wl_list_remove(&layer->link);
-        wl_list_insert(&output->layers[layer_type], &layer->link);
-    }
-
-    if (committed || layer_surface->mapped != layer->mapped) {
-        layer->mapped = layer_surface->mapped;
-        arrange_layers(output);
-    }
-}
-
-struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *scene,
-        enum zwlr_layer_shell_v1_layer type) {
+struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type) {
     switch (type) {
         case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
             return scene->shell.background;
@@ -112,87 +106,87 @@ struct wlr_scene_tree *layer_get_scene_tree(struct sycamore_scene *scene,
     }
 }
 
-void arrange_surface(struct sycamore_output *output, struct wlr_box *full_area,
-                     struct wlr_box *usable_area, enum zwlr_layer_shell_v1_layer type) {
-    struct sycamore_layer *layer;
+void arrange_surface(Output *output, struct wlr_box *fullArea,
+        struct wlr_box *usableArea, enum zwlr_layer_shell_v1_layer type) {
+    Layer *layer;
     wl_list_for_each(layer, &output->layers[type], link) {
-        wlr_scene_layer_surface_v1_configure(layer->scene, full_area, usable_area);
+        wlr_scene_layer_surface_v1_configure(layer->scene, fullArea, usableArea);
     }
 }
 
-void arrange_layers(struct sycamore_output *output) {
-    struct wlr_box full_area;
-    wlr_output_layout_get_box(server.output_layout,
-                              output->wlr_output, &full_area);
-    struct wlr_box usable_area = full_area;
+void arrangeLayers(Output *output) {
+    struct wlr_box fullArea;
+    wlr_output_layout_get_box(server.outputLayout,
+                              output->wlrOutput, &fullArea);
+    struct wlr_box usableArea = fullArea;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
-        arrange_surface(output, &full_area, &usable_area, i);
+        arrange_surface(output, &fullArea, &usableArea, i);
     }
 
-    output->usable_area = usable_area;
+    output->usableArea = usableArea;
 }
 
-struct sycamore_layer *layer_create(struct wlr_layer_surface_v1 *layer_surface) {
-    struct sycamore_layer *layer = calloc(1, sizeof(struct sycamore_layer));
+Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface) {
+    Layer *layer = calloc(1, sizeof(Layer));
     if (!layer) {
         wlr_log(WLR_ERROR, "Unable to allocate layer");
         return NULL;
     }
 
     /* Allocate an output for this layer. */
-    if (!layer_surface->output) {
-        struct wl_list *all_outputs = &server.all_outputs;
-        if (wl_list_empty(all_outputs)) {
-            wlr_log(WLR_ERROR, "No output for layer_surface");
+    if (!layerSurface->output) {
+        struct wl_list *allOutputs = &server.allOutputs;
+        if (wl_list_empty(allOutputs)) {
+            wlr_log(WLR_ERROR, "No output for layerSurface");
             free(layer);
             return NULL;
         }
 
-        struct sycamore_output *output = wl_container_of(all_outputs->next, output, link);
-        layer_surface->output = output->wlr_output;
+        Output *output = wl_container_of(allOutputs->next, output, link);
+        layerSurface->output = output->wlrOutput;
     }
 
-    layer->scene_descriptor = SCENE_DESC_LAYER;
-    layer->layer_surface = layer_surface;
-    layer->mapped = false;
-    layer->linked = false;
-    layer->output = layer_surface->output->data;
+    layer->sceneDesc    = SCENE_DESC_LAYER;
+    layer->layerSurface = layerSurface;
+    layer->mapped       = false;
+    layer->linked       = false;
+    layer->output       = layerSurface->output->data;
 
-    layer->map.notify = handle_layer_map;
-    wl_signal_add(&layer_surface->events.map, &layer->map);
-    layer->unmap.notify = handle_layer_unmap;
-    wl_signal_add(&layer_surface->events.unmap, &layer->unmap);
-    layer->destroy.notify = handle_layer_destroy;
-    wl_signal_add(&layer_surface->events.destroy, &layer->destroy);
-    layer->surface_commit.notify = handle_layer_surface_commit;
-    wl_signal_add(&layer_surface->surface->events.commit, &layer->surface_commit);
+    layer->map.notify = onLayerMap;
+    wl_signal_add(&layerSurface->events.map, &layer->map);
+    layer->unmap.notify = onLayerUnmap;
+    wl_signal_add(&layerSurface->events.unmap, &layer->unmap);
+    layer->destroy.notify = onLayerDestroy;
+    wl_signal_add(&layerSurface->events.destroy, &layer->destroy);
+    layer->surfaceCommit.notify = onLayerSurfaceCommit;
+    wl_signal_add(&layerSurface->surface->events.commit, &layer->surfaceCommit);
 
     return layer;
 }
 
-void layer_destroy(struct sycamore_layer *layer) {
+void layerDestroy(Layer *layer) {
     if (!layer) {
         return;
     }
 
     if (layer->mapped) {
-        layer_unmap(layer);
+        layerUnmap(layer);
     }
 
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
-    wl_list_remove(&layer->surface_commit.link);
+    wl_list_remove(&layer->surfaceCommit.link);
 
     if (layer->linked) {
         wl_list_remove(&layer->link);
         layer->linked = false;
-        arrange_layers(layer->output);
+        arrangeLayers(layer->output);
     }
 
-    if (layer->layer_surface) {
-        wlr_layer_surface_v1_destroy(layer->layer_surface);
+    if (layer->layerSurface) {
+        wlr_layer_surface_v1_destroy(layer->layerSurface);
     }
 
     free(layer);

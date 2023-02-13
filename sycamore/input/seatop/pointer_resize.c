@@ -1,16 +1,15 @@
 #include "sycamore/desktop/view.h"
 #include "sycamore/input/seat.h"
 
-static void handle_pointer_button(struct sycamore_seat *seat,
-        struct wlr_pointer_button_event *event) {
-    if (seat->cursor->pressed_button_count == 0) {
+static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *event) {
+    if (seat->cursor->pressedButtonCount == 0) {
         // If there is no button being pressed
         // we back to basic_full.
-        seatop_set_basic_full(seat);
+        seatopSetBasicFull(seat);
     }
 }
 
-static void handle_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
+static void handlePointerMotion(Seat *seat, uint32_t timeMsec) {
     /* Resizing the grabbed view can be a little bit complicated, because we
      * could be resizing from any corner or edge. This not only resizes the view
      * on one or two axes, but can also move the view if you resize from the top
@@ -19,96 +18,97 @@ static void handle_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec
      * Note that I took some shortcuts here. In a more fleshed-out compositor,
      * you'd wait for the client to prepare a buffer at the new size, then
      * commit any movement that was prepared. */
-    struct seatop_pointer_resize_data *data = &(seat->seatop_data.pointer_resize);
-    struct wlr_cursor *cursor = seat->cursor->wlr_cursor;
-    struct sycamore_view *view = data->view_ptr.view;
+    SeatopPointerResizeData *data = &(seat->seatopData.pointerResize);
+    struct wlr_cursor *cursor = seat->cursor->wlrCursor;
+    View *view = data->viewPtr.view;
     if (!view) {
         return;
     }
 
-    double border_x = cursor->x - data->dx;
-    double border_y = cursor->y - data->dy;
-    int new_left = data->grab_geobox.x;
-    int new_right = data->grab_geobox.x + data->grab_geobox.width;
-    int new_top = data->grab_geobox.y;
-    int new_bottom = data->grab_geobox.y + data->grab_geobox.height;
+    double borderX = cursor->x - data->dx;
+    double borderY = cursor->y - data->dy;
+
+    int newLeft   = data->grabGeobox.x;
+    int newRight  = data->grabGeobox.x + data->grabGeobox.width;
+    int newTop    = data->grabGeobox.y;
+    int newBottom = data->grabGeobox.y + data->grabGeobox.height;
 
     if (data->edges & WLR_EDGE_TOP) {
-        new_top = border_y;
-        if (new_top >= new_bottom) {
-            new_top = new_bottom - 1;
+        newTop = borderY;
+        if (newTop >= newBottom) {
+            newTop = newBottom - 1;
         }
     } else if (data->edges & WLR_EDGE_BOTTOM) {
-        new_bottom = border_y;
-        if (new_bottom <= new_top) {
-            new_bottom = new_top + 1;
+        newBottom = borderY;
+        if (newBottom <= newTop) {
+            newBottom = newTop + 1;
         }
     }
     if (data->edges & WLR_EDGE_LEFT) {
-        new_left = border_x;
-        if (new_left >= new_right) {
-            new_left = new_right - 1;
+        newLeft = borderX;
+        if (newLeft >= newRight) {
+            newLeft = newRight - 1;
         }
     } else if (data->edges & WLR_EDGE_RIGHT) {
-        new_right = border_x;
-        if (new_right <= new_left) {
-            new_right = new_left + 1;
+        newRight = borderX;
+        if (newRight <= newLeft) {
+            newRight = newLeft + 1;
         }
     }
 
-    struct wlr_box geo_box;
-    view->interface->get_geometry(view, &geo_box);
+    struct wlr_box geoBox;
+    view->interface->getGeometry(view, &geoBox);
 
-    view_move_to(view, new_left - geo_box.x, new_top - geo_box.y);
-    view->interface->set_size(view, new_right - new_left, new_bottom - new_top);
+    viewMoveTo(view, newLeft - geoBox.x, newTop - geoBox.y);
+    view->interface->setSize(view, newRight - newLeft, newBottom - newTop);
 }
 
-static void handle_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_resize_data *data = &(seat->seatop_data.pointer_resize);
-    if (data->view_ptr.view) {
-        data->view_ptr.view->interface->set_resizing(data->view_ptr.view, false);
-        view_ptr_disconnect(&data->view_ptr);
+static void handleEnd(Seat *seat) {
+    SeatopPointerResizeData *data = &(seat->seatopData.pointerResize);
+    if (data->viewPtr.view) {
+        data->viewPtr.view->interface->setResizing(data->viewPtr.view, false);
+        viewPtrDisconnect(&data->viewPtr);
     }
 }
 
-static const struct seatop_impl impl = {
-        .pointer_button = handle_pointer_button,
-        .pointer_motion = handle_pointer_motion,
-        .end = handle_end,
-        .mode = POINTER_RESIZE,
+static const SeatopImpl impl = {
+        .pointerButton = handlePointerButton,
+        .pointerMotion = handlePointerMotion,
+        .end           = handleEnd,
+        .mode          = POINTER_RESIZE,
 };
 
-void seatop_set_pointer_resize(struct sycamore_seat *seat, struct sycamore_view *view, uint32_t edges) {
-    if (!seatop_pointer_interactive_mode_check(seat, view, POINTER_RESIZE)) {
+void seatopSetPointerResize(Seat *seat, View *view, uint32_t edges) {
+    if (!seatopPointerInteractiveModeCheck(seat, view, POINTER_RESIZE)) {
         return;
     }
 
-    seatop_end(seat);
+    seatopEnd(seat);
 
-    struct seatop_pointer_resize_data *data = &(seat->seatop_data.pointer_resize);
+    SeatopPointerResizeData *data = &(seat->seatopData.pointerResize);
 
-    view_ptr_connect(&data->view_ptr, view);
+    viewPtrConnect(&data->viewPtr, view);
 
-    struct wlr_box geo_box;
-    view->interface->get_geometry(view, &geo_box);
+    struct wlr_box geoBox;
+    view->interface->getGeometry(view, &geoBox);
 
-    double border_x = (view->x + geo_box.x) +
-                      ((edges & WLR_EDGE_RIGHT) ? geo_box.width : 0);
-    double border_y = (view->y + geo_box.y) +
-                      ((edges & WLR_EDGE_BOTTOM) ? geo_box.height : 0);
-    data->dx = seat->cursor->wlr_cursor->x - border_x;
-    data->dy = seat->cursor->wlr_cursor->y - border_y;
+    double borderX = (view->x + geoBox.x) +
+                     ((edges & WLR_EDGE_RIGHT) ? geoBox.width : 0);
+    double borderY = (view->y + geoBox.y) +
+                     ((edges & WLR_EDGE_BOTTOM) ? geoBox.height : 0);
+    data->dx = seat->cursor->wlrCursor->x - borderX;
+    data->dy = seat->cursor->wlrCursor->y - borderY;
 
-    data->grab_geobox = geo_box;
-    data->grab_geobox.x += view->x;
-    data->grab_geobox.y += view->y;
+    data->grabGeobox = geoBox;
+    data->grabGeobox.x += view->x;
+    data->grabGeobox.y += view->y;
 
     data->edges = edges;
 
-    seat->seatop_impl = &impl;
+    seat->seatopImpl = &impl;
 
-    view->interface->set_resizing(view, true);
+    view->interface->setResizing(view, true);
 
-    wlr_seat_pointer_notify_clear_focus(seat->wlr_seat);
-    cursor_set_image(seat->cursor, wlr_xcursor_get_resize_name(edges));
+    wlr_seat_pointer_notify_clear_focus(seat->wlrSeat);
+    cursorSetImage(seat->cursor, wlr_xcursor_get_resize_name(edges));
 }

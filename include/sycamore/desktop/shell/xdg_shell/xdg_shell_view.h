@@ -3,21 +3,23 @@
 
 #include "sycamore/desktop/view.h"
 
-struct xdg_shell_view {
-    struct sycamore_view base_view;
+typedef struct XdgShellView XdgShellView;
 
-    struct wlr_xdg_toplevel *xdg_toplevel;
+struct XdgShellView {
+    View baseView;
+
+    struct wlr_xdg_toplevel *xdgToplevel;
 
     struct wl_listener map;
     struct wl_listener unmap;
     struct wl_listener destroy;
-    struct wl_listener request_move;
-    struct wl_listener request_resize;
-    struct wl_listener request_fullscreen;
-    struct wl_listener request_maximize;
-    struct wl_listener request_minimize;
+    struct wl_listener requestMove;
+    struct wl_listener requestResize;
+    struct wl_listener requestFullscreen;
+    struct wl_listener requestMaximize;
+    struct wl_listener requestMinimize;
 };
 
-struct xdg_shell_view *xdg_shell_view_create(struct wlr_xdg_toplevel *toplevel);
+XdgShellView *xdgShellViewCreate(struct wlr_xdg_toplevel *toplevel);
 
 #endif //SYCAMORE_XDG_SHELL_VIEW_H

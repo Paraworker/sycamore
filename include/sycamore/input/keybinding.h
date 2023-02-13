@@ -4,37 +4,38 @@
 #include <wayland-util.h>
 #include <xkbcommon/xkbcommon.h>
 
-struct sycamore_keybinding;
+typedef struct Keybinding              Keybinding;
+typedef struct KeybindingManager       KeybindingManager;
+typedef struct KeybindingModifiersNode KeybindingModifiersNode;
 
-typedef void (*keybinding_action)(struct sycamore_keybinding *keybinding);
+typedef void (*KeybindingAction)(Keybinding *keybinding);
 
-struct sycamore_keybinding_manager {
-    struct wl_list modifiers_nodes;
+struct KeybindingManager {
+    struct wl_list modifiersNodes;
 };
 
-struct keybinding_modifiers_node {
+struct KeybindingModifiersNode {
     struct wl_list link;
     struct wl_list keybindings;
-    uint32_t modifiers;
+    uint32_t       modifiers;
 
-    struct sycamore_keybinding_manager *manager;
+    KeybindingManager *manager;
 };
 
-struct sycamore_keybinding {
+struct Keybinding {
     struct wl_list link;
-    uint32_t modifiers;
-    xkb_keysym_t sym;
+    uint32_t       modifiers;
+    xkb_keysym_t   sym;
 
-    keybinding_action action;
+    KeybindingAction action;
 
-    struct keybinding_modifiers_node *modifiers_node;
+    KeybindingModifiersNode *modifiersNode;
 };
 
-struct sycamore_keybinding_manager *sycamore_keybinding_manager_create();
+KeybindingManager *keybindingManagerCreate();
 
-void sycamore_keybinding_manager_destroy(struct sycamore_keybinding_manager *manager);
+void keybindingManagerDestroy(KeybindingManager *manager);
 
-bool handle_keybinding(struct sycamore_keybinding_manager *manager,
-        uint32_t modifiers, xkb_keysym_t sym);
+bool handleKeybinding(KeybindingManager *manager, uint32_t modifiers, xkb_keysym_t sym);
 
 #endif //SYCAMORE_KEYBINDING_H

@@ -1,55 +1,55 @@
 #include "sycamore/input/seat.h"
 
-static void handle_surface_destroy(struct wl_listener *listener, void *data) {
-    struct seatop_pointer_down_data *d = wl_container_of(listener, d, surface_destroy);
-    seatop_set_basic_full(d->seat);
+static void onSurfaceDestroy(struct wl_listener *listener, void *data) {
+    SeatopPointerDownData *d = wl_container_of(listener, d, surfaceDestroy);
+    seatopSetBasicFull(d->seat);
 }
 
-static void handle_pointer_button(struct sycamore_seat *seat, struct wlr_pointer_button_event *event) {
-    wlr_seat_pointer_notify_button(seat->wlr_seat, event->time_msec,
+static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *event) {
+    wlr_seat_pointer_notify_button(seat->wlrSeat, event->time_msec,
                                    event->button, event->state);
 
-    if (seat->cursor->pressed_button_count == 0) {
-        seatop_set_basic_full(seat);
+    if (seat->cursor->pressedButtonCount == 0) {
+        seatopSetBasicFull(seat);
     }
 }
 
-static void handle_pointer_motion(struct sycamore_seat *seat, uint32_t time_msec) {
-    struct seatop_pointer_down_data *data = &(seat->seatop_data.pointer_down);
+static void handlePointerMotion(Seat *seat, uint32_t timeMsec) {
+    SeatopPointerDownData *data = &(seat->seatopData.pointerDown);
 
-    double sx = data->dx + seat->cursor->wlr_cursor->x;
-    double sy = data->dy + seat->cursor->wlr_cursor->y;
+    double sx = data->dx + seat->cursor->wlrCursor->x;
+    double sy = data->dy + seat->cursor->wlrCursor->y;
 
-    wlr_seat_pointer_notify_motion(seat->wlr_seat, time_msec, sx, sy);
+    wlr_seat_pointer_notify_motion(seat->wlrSeat, timeMsec, sx, sy);
 }
 
-static void handle_end(struct sycamore_seat *seat) {
-    struct seatop_pointer_down_data *data = &(seat->seatop_data.pointer_down);
-    wl_list_remove(&data->surface_destroy.link);
+static void handleEnd(Seat *seat) {
+    SeatopPointerDownData *data = &(seat->seatopData.pointerDown);
+    wl_list_remove(&data->surfaceDestroy.link);
 }
 
-static const struct seatop_impl impl = {
-        .pointer_button = handle_pointer_button,
-        .pointer_motion = handle_pointer_motion,
-        .end = handle_end,
-        .mode = POINTER_DOWN,
+static const SeatopImpl impl = {
+        .pointerButton = handlePointerButton,
+        .pointerMotion = handlePointerMotion,
+        .end           = handleEnd,
+        .mode          = POINTER_DOWN,
 };
 
-void seatop_set_pointer_down(struct sycamore_seat *seat, struct wlr_surface *surface, double sx, double sy) {
+void seatopSetPointerDown(Seat *seat, struct wlr_surface *surface, double sx, double sy) {
     if (!surface) {
         return;
     }
 
-    seatop_end(seat);
+    seatopEnd(seat);
 
-    struct seatop_pointer_down_data *data = &(seat->seatop_data.pointer_down);
+    SeatopPointerDownData *data = &(seat->seatopData.pointerDown);
 
     data->surface = surface;
-    wl_signal_add(&surface->events.destroy, &data->surface_destroy);
-    data->surface_destroy.notify = handle_surface_destroy;
-    data->dx = sx - seat->cursor->wlr_cursor->x;
-    data->dy = sy - seat->cursor->wlr_cursor->y;
+    wl_signal_add(&surface->events.destroy, &data->surfaceDestroy);
+    data->surfaceDestroy.notify = onSurfaceDestroy;
+    data->dx = sx - seat->cursor->wlrCursor->x;
+    data->dy = sy - seat->cursor->wlrCursor->y;
     data->seat = seat;
 
-    seat->seatop_impl = &impl;
+    seat->seatopImpl = &impl;
 }

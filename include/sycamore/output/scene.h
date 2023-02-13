@@ -6,9 +6,11 @@
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
 
-struct sycamore_view;
+typedef struct Scene             Scene;
+typedef enum SceneDescriptorType SceneDescriptorType;
+typedef struct View              View;
 
-enum scene_descriptor_type {
+enum SceneDescriptorType {
     SCENE_DESC_ROOT,
     SCENE_DESC_VIEW,
     SCENE_DESC_LAYER,
@@ -16,9 +18,9 @@ enum scene_descriptor_type {
     SCENE_DESC_DRAG_ICON,
 };
 
-struct sycamore_scene {
-    enum scene_descriptor_type scene_descriptor; // must be first
-    struct wlr_scene *wlr_scene;
+struct Scene {
+    SceneDescriptorType sceneDesc; // must be first
+    struct wlr_scene *wlrScene;
 
     // tree structure:
     // - root
@@ -28,7 +30,7 @@ struct sycamore_scene {
     // 	   - view
     // 	   - top
     //     - overlay
-    // 	 - drag_icons
+    // 	 - dragIcons
     struct {
         struct wlr_scene_tree *root;
         struct wlr_scene_tree *background;
@@ -38,19 +40,18 @@ struct sycamore_scene {
         struct wlr_scene_tree *overlay;
     } shell;
 
-    struct wlr_scene_tree *drag_icons;
+    struct wlr_scene_tree *dragIcons;
 };
 
-struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
-        struct wlr_presentation *presentation);
+Scene *sceneCreate(struct wlr_output_layout *layout, struct wlr_presentation *presentation);
 
-void sycamore_scene_destroy(struct sycamore_scene *scene);
+void sceneDestroy(Scene *scene);
 
-#define find_node(scene, lx, ly, sx, sy) \
+#define findNode(scene, lx, ly, sx, sy) \
         wlr_scene_node_at(&scene->shell.root->node, lx, ly, sx, sy)
 
-struct wlr_surface *find_surface_by_node(struct wlr_scene_node *node);
+struct wlr_surface *findSurfaceByNode(struct wlr_scene_node *node);
 
-struct sycamore_view *find_view_by_node(struct wlr_scene_node *node);
+View *findViewByNode(struct wlr_scene_node *node);
 
 #endif //SYCAMORE_SCENE_H

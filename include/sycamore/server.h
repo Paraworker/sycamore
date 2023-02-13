@@ -12,58 +12,60 @@
 #include <wlr/types/wlr_presentation_time.h>
 #include "sycamore/desktop/view.h"
 
-struct sycamore_scene;
-struct sycamore_seat;
-struct sycamore_xdg_shell;
-struct sycamore_layer_shell;
-struct sycamore_keybinding_manager;
+typedef struct Scene             Scene;
+typedef struct Seat              Seat;
+typedef struct XdgShell          XdgShell;
+typedef struct LayerShell        LayerShell;
+typedef struct KeybindingManager KeybindingManager;
+
+typedef struct Server            Server;
 
 // The global server instance.
-extern struct sycamore_server server;
+extern Server server;
 
-struct sycamore_server {
-    struct wl_display *wl_display;
+struct Server {
+    struct wl_display    *wlDisplay;
 
-    struct wlr_backend *backend;
-    struct wlr_session *session;
-    struct wlr_renderer *renderer;
+    struct wlr_backend   *backend;
+    struct wlr_session   *session;
+    struct wlr_renderer  *renderer;
     struct wlr_allocator *allocator;
 
-    struct wlr_compositor *compositor;
-    struct wlr_output_layout *output_layout;
-    struct wlr_presentation *presentation;
+    struct wlr_compositor    *compositor;
+    struct wlr_output_layout *outputLayout;
+    struct wlr_presentation  *presentation;
 
-    struct sycamore_scene *scene;
-    struct sycamore_seat *seat;
-    struct sycamore_xdg_shell *xdg_shell;
-    struct sycamore_layer_shell *layer_shell;
-    struct sycamore_keybinding_manager *keybinding_manager;
+    Scene             *scene;
+    Seat              *seat;
+    XdgShell          *xdgShell;
+    LayerShell        *layerShell;
+    KeybindingManager *keybindingManager;
 
-    struct wl_listener backend_new_input;
-    struct wl_listener backend_new_output;
-    struct wl_listener output_layout_change;
+    struct wl_listener backendNewInput;
+    struct wl_listener backendNewOutput;
+    struct wl_listener outputLayoutChange;
 
-    struct wl_list all_outputs;
-    struct wl_list mapped_views;
-    struct view_ptr focused_view;
+    struct wl_list allOutputs;
+    struct wl_list mappedViews;
+    struct ViewPtr focusedView;
 
     const char *socket;
 };
 
-bool server_init();
+bool serverInit();
 
 /**
  * @brief Start the backend
  *
  * @return bool
  */
-bool server_start();
+bool serverStart();
 
 /**
  * @brief Run the wayland event loop
  */
-void server_run();
+void serverRun();
 
-void server_fini();
+void serverUnint();
 
 #endif //SYCAMORE_SERVER_H

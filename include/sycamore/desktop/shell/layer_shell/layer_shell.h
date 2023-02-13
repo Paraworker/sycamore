@@ -5,13 +5,15 @@
 
 #define SYCAMORE_LAYER_SHELL_VERSION 4
 
-struct sycamore_layer_shell {
-    struct wlr_layer_shell_v1 *wlr_layer_shell;
-    struct wl_listener new_layer_shell_surface;
+typedef struct LayerShell LayerShell;
+
+struct LayerShell {
+    struct wlr_layer_shell_v1 *wlrLayerShell;
+    struct wl_listener newLayerShellSurface;
 };
 
-struct sycamore_layer_shell *sycamore_layer_shell_create(struct wl_display *display);
+LayerShell *layerShellCreate(struct wl_display *display);
 
-void sycamore_layer_shell_destroy(struct sycamore_layer_shell *layer_shell);
+void layerShellDestroy(LayerShell *layerShell);
 
 #endif //SYCAMORE_LAYER_SHELL_H
