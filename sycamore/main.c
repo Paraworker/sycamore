@@ -72,12 +72,12 @@ int main(int argc, char **argv) {
             execl("/bin/sh", "/bin/sh", "-c", startupCmd, (void *)NULL);
         }
     }
-    
+
     loadBackground();
     loadBar();
-    
+
     serverRun();
-    
+
     serverUninit();
     return EXIT_SUCCESS;
 }
