@@ -1,16 +1,17 @@
-#include <stdlib.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <wlr/util/log.h>
 #include "sycamore/server.h"
 
-void load_background() {
+void loadBackground() {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "swaybg -m fill -i /home/ha/Pictures/wallpaper.jpg", (void *)NULL);
     }
 }
 
-void load_bar() {
+void loadBar() {
     if (fork() == 0) {
         execl("/bin/sh", "/bin/sh", "-c", "waybar", (void *)NULL);
     }
@@ -23,7 +24,7 @@ static const char usage[] =
         "  -s, --startup_cmd      Startup with command.\n"
         "\n";
 
-static const struct option long_options[] = {
+static const struct option longOptions[] = {
         {"help", no_argument, NULL, 'h'},
         {"startup_cmd", required_argument, NULL, 's'},
         {0, 0, NULL, 0}
@@ -32,16 +33,16 @@ static const struct option long_options[] = {
 int main(int argc, char **argv) {
     wlr_log_init(WLR_DEBUG, NULL);
 
-    char *startup_cmd = NULL;
+    char *startupCmd = NULL;
 
     int c, i;
-    while ((c = getopt_long(argc, argv, "s:h", long_options, &i)) != -1) {
+    while ((c = getopt_long(argc, argv, "s:h", longOptions, &i)) != -1) {
         switch (c) {
             case 'h':
                 printf("%s", usage);
                 exit(EXIT_SUCCESS);
             case 's':
-                startup_cmd = optarg;
+                startupCmd = optarg;
                 break;
             default:
                 printf("%s", usage);
@@ -54,29 +55,29 @@ int main(int argc, char **argv) {
         return EXIT_SUCCESS;
     }
 
-    if (!server_init()) {
-        server_fini();
+    if (!serverInit()) {
+        serverUnint();
         exit(EXIT_FAILURE);
     }
 
     setenv("WAYLAND_DISPLAY", server.socket, true);
 
-    if (!server_start()) {
-        server_fini();
+    if (!serverStart()) {
+        serverUnint();
         exit(EXIT_FAILURE);
     }
 
-    if (startup_cmd) {
+    if (startupCmd) {
         if (fork() == 0) {
-            execl("/bin/sh", "/bin/sh", "-c", startup_cmd, (void *)NULL);
+            execl("/bin/sh", "/bin/sh", "-c", startupCmd, (void *)NULL);
         }
     }
+    
+    loadBackground();
+    loadBar();
+    
+    serverRun();
 
-    load_background();
-    load_bar();
-
-    server_run();
-
-    server_fini();
+    serverUnint();
     return EXIT_SUCCESS;
 }

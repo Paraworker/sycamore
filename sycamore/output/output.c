@@ -5,153 +5,152 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/util/log.h>
-#include "sycamore/desktop/layer.h"
+#include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 #include "sycamore/util/box.h"
 
-static void handle_output_frame(struct wl_listener *listener, void *data) {
+static void onOutputFrame(struct wl_listener *listener, void *data) {
     /* This function is called every time an output is ready to display a frame,
      * generally at the output's refresh rate (e.g. 60Hz). */
-    struct sycamore_output *output = wl_container_of(listener, output, frame);
+    Output *output = wl_container_of(listener, output, frame);
 
-    struct wlr_scene_output *scene_output =
-            wlr_scene_get_scene_output(server.scene->wlr_scene, output->wlr_output);
+    struct wlr_scene_output *sceneOutput =
+            wlr_scene_get_scene_output(server.scene->wlrScene, output->wlrOutput);
 
     /* Render the scene if needed and commit the output */
-    wlr_scene_output_commit(scene_output);
+    wlr_scene_output_commit(sceneOutput);
 
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
-    wlr_scene_output_send_frame_done(scene_output, &now);
+    wlr_scene_output_send_frame_done(sceneOutput, &now);
 }
 
-static void handle_output_request_state(struct wl_listener *listener, void *data) {
-    struct sycamore_output *output = wl_container_of(listener, output, request_state);
+static void onOutputRequestState(struct wl_listener *listener, void *data) {
+    Output *output = wl_container_of(listener, output, requestState);
     const struct wlr_output_event_request_state *event = data;
 
-    wlr_output_commit_state(output->wlr_output, event->state);
+    wlr_output_commit_state(output->wlrOutput, event->state);
 }
 
-static void handle_output_destroy(struct wl_listener *listener, void *data) {
-    struct sycamore_output *output = wl_container_of(listener, output, destroy);
+static void onOutputDestroy(struct wl_listener *listener, void *data) {
+    Output *output = wl_container_of(listener, output, destroy);
 
-    output->wlr_output = NULL;
+    output->wlrOutput = NULL;
 
-    sycamore_output_destroy(output);
+    outputDestroy(output);
 }
 
-struct sycamore_output *sycamore_output_create(struct wlr_output *wlr_output) {
-    struct sycamore_output *output = calloc(1, sizeof(struct sycamore_output));
+Output *outputCreate(struct wlr_output *wlrOutput) {
+    Output *output = calloc(1, sizeof(Output));
     if (!output) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_output");
+        wlr_log(WLR_ERROR, "Unable to allocate Output");
         return NULL;
     }
 
-    output->wlr_output = wlr_output;
+    output->wlrOutput = wlrOutput;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
         wl_list_init(&output->layers[i]);
     }
 
-    output->frame.notify = handle_output_frame;
-    wl_signal_add(&wlr_output->events.frame, &output->frame);
-    output->request_state.notify = handle_output_request_state;
-    wl_signal_add(&wlr_output->events.request_state, &output->request_state);
-    output->destroy.notify = handle_output_destroy;
-    wl_signal_add(&wlr_output->events.destroy, &output->destroy);
+    output->frame.notify = onOutputFrame;
+    wl_signal_add(&wlrOutput->events.frame, &output->frame);
+    output->requestState.notify = onOutputRequestState;
+    wl_signal_add(&wlrOutput->events.request_state, &output->requestState);
+    output->destroy.notify = onOutputDestroy;
+    wl_signal_add(&wlrOutput->events.destroy, &output->destroy);
 
     return output;
 }
 
-struct wlr_output_mode *output_max_mode(struct wlr_output *output) {
+struct wlr_output_mode *outputMaxMode(struct wlr_output *output) {
     if (!output || wl_list_empty(&output->modes)) {
         return NULL;
     }
 
-    int32_t max_refresh = 0, max_resolution = 0;
-    struct wlr_output_mode *mode, *max_mode;
+    uint32_t maxRefresh = 0, maxResolution = 0;
+    struct wlr_output_mode *mode, *maxMode;
     wl_list_for_each(mode, &output->modes, link) {
         int32_t resolution = mode->width * mode->height;
-        if (resolution > max_resolution) {
-            max_resolution = resolution;
-            max_refresh = mode->refresh;
-            max_mode = mode;
-        } else if (resolution == max_resolution && mode->refresh > max_refresh) {
-            max_refresh = mode->refresh;
-            max_mode = mode;
+        if (resolution > maxResolution) {
+            maxResolution = resolution;
+            maxRefresh = mode->refresh;
+            maxMode = mode;
+        } else if (resolution == maxResolution && mode->refresh > maxRefresh) {
+            maxRefresh = mode->refresh;
+            maxMode = mode;
         }
     }
 
-    return max_mode;
+    return maxMode;
 }
 
-void output_ensure_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
+void outputEnsureCursor(Output *output, Cursor *cursor) {
     if (!cursor) {
         return;
     }
 
-    struct wlr_box output_box;
-    wlr_output_layout_get_box(server.output_layout, output->wlr_output, &output_box);
-    if (wlr_box_empty(&output_box)) {
-        wlr_log(WLR_ERROR, "output_box is empty.");
+    struct wlr_box outputBox;
+    wlr_output_layout_get_box(server.outputLayout, output->wlrOutput, &outputBox);
+    if (wlr_box_empty(&outputBox)) {
+        wlr_log(WLR_ERROR, "outputBox is empty.");
         return;
     }
 
-    int32_t center_x = 0, center_y = 0;
-    box_get_center_coords(&output_box, &center_x, &center_y);
+    int32_t centerX = 0, centerY = 0;
+    boxGetCenterCoords(&outputBox, &centerX, &centerY);
 
-    cursor_warp(cursor, center_x, center_y);
-    pointer_rebase(cursor->seat);
+    cursorWarp(cursor, centerX, centerY);
+    seatopPointerRebase(cursor->seat);
 }
 
-static void output_setup_cursor(struct sycamore_output *output, struct sycamore_cursor *cursor) {
+static void outputSetupCursor(Output *output, Cursor *cursor) {
     /* Setup cursor for a new output */
-    wlr_xcursor_manager_load(cursor->xcursor_manager, output->wlr_output->scale);
+    wlr_xcursor_manager_load(cursor->xcursorManager, output->wlrOutput->scale);
 
-    if (wl_list_length(&server.all_outputs) == 1) {
+    if (wl_list_length(&server.allOutputs) == 1) {
         // If this is the only output, center cursor.
-        output_ensure_cursor(output, cursor);
+        outputEnsureCursor(output, cursor);
     } else {
-        cursor_refresh(cursor);
+        cursorRefresh(cursor);
     }
 }
 
-void sycamore_output_destroy(struct sycamore_output *output) {
+void outputDestroy(Output *output) {
     if (!output) {
         return;
     }
 
     wl_list_remove(&output->destroy.link);
-    wl_list_remove(&output->request_state.link);
+    wl_list_remove(&output->requestState.link);
     wl_list_remove(&output->frame.link);
     wl_list_remove(&output->link);
 
-    for (int i = 0; i < LAYERS_ALL; ++i) {
-        struct sycamore_layer *layer, *next;
+    for (size_t i = 0; i < LAYERS_ALL; ++i) {
+        Layer *layer, *next;
         wl_list_for_each_safe(layer, next, &output->layers[i], link) {
             wl_list_remove(&layer->link);
             layer->linked = false;
         }
     }
 
-    if (output->wlr_output) {
-        wlr_output_destroy(output->wlr_output);
+    if (output->wlrOutput) {
+        wlr_output_destroy(output->wlrOutput);
     }
 
     free(output);
 }
 
-void handle_backend_new_output(struct wl_listener *listener, void *data) {
-    struct wlr_output *wlr_output = data;
-    wlr_log(WLR_DEBUG, "new output: %s", wlr_output->name);
+void onBackendNewOutput(struct wl_listener *listener, void *data) {
+    struct wlr_output *wlrOutput = data;
+    wlr_log(WLR_DEBUG, "new output: %s", wlrOutput->name);
 
     /* Configures the output created by the backend to use our allocator
      * and our renderer. Must be done once, before commiting the output */
-    if (!wlr_output_init_render(wlr_output, server.allocator,
-                                server.renderer)) {
+    if (!wlr_output_init_render(wlrOutput, server.allocator, server.renderer)) {
         wlr_log(WLR_ERROR, "Unable to init output render");
         return;
     }
@@ -161,27 +160,27 @@ void handle_backend_new_output(struct wl_listener *listener, void *data) {
      * refresh rate), and each monitor supports only a specific set of modes. We
      * just pick the monitor's preferred mode, a more sophisticated compositor
      * would let the user configure it. */
-    if (!wl_list_empty(&wlr_output->modes)) {
-        struct wlr_output_mode *mode = wlr_output_preferred_mode(wlr_output);
-        wlr_output_set_mode(wlr_output, mode);
-        wlr_output_enable(wlr_output, true);
-        if (!wlr_output_commit(wlr_output)) {
+    if (!wl_list_empty(&wlrOutput->modes)) {
+        struct wlr_output_mode *mode = wlr_output_preferred_mode(wlrOutput);
+        wlr_output_set_mode(wlrOutput, mode);
+        wlr_output_enable(wlrOutput, true);
+        if (!wlr_output_commit(wlrOutput)) {
             return;
         }
     }
 
-    struct sycamore_output *output = sycamore_output_create(wlr_output);
+    Output *output = outputCreate(wlrOutput);
     if (!output) {
-        wlr_log(WLR_ERROR, "Unable to create sycamore_output");
+        wlr_log(WLR_ERROR, "Unable to create Output");
         return;
     }
 
-    wlr_output->data = output;
+    wlrOutput->data = output;
 
-    wlr_output_layout_add_auto(server.output_layout, wlr_output);
+    wlr_output_layout_add_auto(server.outputLayout, wlrOutput);
 
-    wlr_output_layout_get_box(server.output_layout, wlr_output, &output->usable_area);
-    wl_list_insert(&server.all_outputs, &output->link);
+    wlr_output_layout_get_box(server.outputLayout, wlrOutput, &output->usableArea);
+    wl_list_insert(&server.allOutputs, &output->link);
 
-    output_setup_cursor(output, server.seat->cursor);
+    outputSetupCursor(output, server.seat->cursor);
 }

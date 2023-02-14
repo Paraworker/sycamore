@@ -5,17 +5,18 @@
 #include <wlr/types/wlr_keyboard.h>
 #include "sycamore/input/seat.h"
 
-struct sycamore_keyboard {
-    struct sycamore_seat_device *base;
-    struct wlr_keyboard *wlr_keyboard;
+typedef struct Keyboard Keyboard;
+
+struct Keyboard {
+    SeatDevice          *base;
+    struct wlr_keyboard *wlrKeyboard;
 
     struct wl_listener modifiers;
     struct wl_listener key;
 };
 
-struct sycamore_keyboard *sycamore_keyboard_create(struct sycamore_seat *seat,
-        struct wlr_input_device *wlr_device);
+Keyboard *keyboardCreate(Seat *seat, struct wlr_input_device *wlrDevice);
 
-void sycamore_keyboard_configure(struct sycamore_keyboard *keyboard);
+void keyboardConfigure(Keyboard *keyboard);
 
 #endif //SYCAMORE_KEYBOARD_H

@@ -8,69 +8,68 @@
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 
-struct sycamore_scene *sycamore_scene_create(struct wlr_output_layout *layout,
-        struct wlr_presentation *presentation) {
-    struct sycamore_scene *scene = calloc(1, sizeof(struct sycamore_scene));
+Scene *sceneCreate(struct wlr_output_layout *layout, struct wlr_presentation *presentation) {
+    Scene *scene = calloc(1, sizeof(Scene));
     if (!scene) {
-        wlr_log(WLR_ERROR, "Unable to allocate sycamore_scene");
+        wlr_log(WLR_ERROR, "Unable to allocate Scene");
         return NULL;
     }
 
-    scene->wlr_scene = wlr_scene_create();
-    if (!scene->wlr_scene) {
-        wlr_log(WLR_ERROR, "Unable to create wlr_scene");
+    scene->wlrScene = wlr_scene_create();
+    if (!scene->wlrScene) {
+        wlr_log(WLR_ERROR, "Unable to create wlrScene");
         free(scene);
         return NULL;
     }
 
-    scene->scene_descriptor = SCENE_DESC_ROOT;
-    scene->wlr_scene->tree.node.data = scene;
+    scene->sceneDesc = SCENE_DESC_ROOT;
+    scene->wlrScene->tree.node.data = scene;
 
     // Create trees
-    scene->shell.root = wlr_scene_tree_create(&scene->wlr_scene->tree);
-    struct wlr_scene_tree *shell_root = scene->shell.root;
+    scene->shell.root = wlr_scene_tree_create(&scene->wlrScene->tree);
+    struct wlr_scene_tree *shellRoot = scene->shell.root;
 
-    scene->shell.background = wlr_scene_tree_create(shell_root);
-    scene->shell.bottom = wlr_scene_tree_create(shell_root);
-    scene->shell.view = wlr_scene_tree_create(shell_root);
-    scene->shell.top = wlr_scene_tree_create(shell_root);
-    scene->shell.overlay = wlr_scene_tree_create(shell_root);
+    scene->shell.background = wlr_scene_tree_create(shellRoot);
+    scene->shell.bottom     = wlr_scene_tree_create(shellRoot);
+    scene->shell.view       = wlr_scene_tree_create(shellRoot);
+    scene->shell.top        = wlr_scene_tree_create(shellRoot);
+    scene->shell.overlay    = wlr_scene_tree_create(shellRoot);
 
-    scene->drag_icons = wlr_scene_tree_create(&scene->wlr_scene->tree);
+    scene->dragIcons = wlr_scene_tree_create(&scene->wlrScene->tree);
 
-    wlr_scene_attach_output_layout(scene->wlr_scene, layout);
-    wlr_scene_set_presentation(scene->wlr_scene, presentation);
+    wlr_scene_attach_output_layout(scene->wlrScene, layout);
+    wlr_scene_set_presentation(scene->wlrScene, presentation);
 
     return scene;
 }
 
-void sycamore_scene_destroy(struct sycamore_scene *scene) {
+void sceneDestroy(Scene *scene) {
     if (!scene) {
         return;
     }
 
-    if (scene->wlr_scene) {
-        wlr_scene_node_destroy(&scene->wlr_scene->tree.node);
+    if (scene->wlrScene) {
+        wlr_scene_node_destroy(&scene->wlrScene->tree.node);
     }
 
     free(scene);
 }
 
-struct wlr_surface *find_surface_by_node(struct wlr_scene_node *node) {
-    if (node == NULL || node->type != WLR_SCENE_NODE_BUFFER) {
+struct wlr_surface *findSurfaceByNode(struct wlr_scene_node *node) {
+    if (!node || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
 
-    struct wlr_scene_surface *scene_surface =
-            wlr_scene_surface_from_buffer(wlr_scene_buffer_from_node(node));
-    if (!scene_surface) {
+    struct wlr_scene_surface *sceneSurface =
+            wlr_scene_surface_try_from_buffer(wlr_scene_buffer_from_node(node));
+    if (!sceneSurface) {
         return NULL;
     }
 
-    return scene_surface->surface;
+    return sceneSurface->surface;
 }
 
-struct sycamore_view *find_view_by_node(struct wlr_scene_node *node) {
+View *findViewByNode(struct wlr_scene_node *node) {
     if (!node) {
         return NULL;
     }
@@ -88,8 +87,8 @@ struct sycamore_view *find_view_by_node(struct wlr_scene_node *node) {
         tree = tree->node.parent;
     }
 
-    enum scene_descriptor_type *descriptor_type = tree->node.data;
-    if (*descriptor_type != SCENE_DESC_VIEW) {
+    SceneDescriptorType *descriptorType = tree->node.data;
+    if (*descriptorType != SCENE_DESC_VIEW) {
         return NULL;
     }
 
