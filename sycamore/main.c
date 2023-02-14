@@ -56,14 +56,14 @@ int main(int argc, char **argv) {
     }
 
     if (!serverInit()) {
-        serverUnint();
+        serverUninit();
         exit(EXIT_FAILURE);
     }
 
     setenv("WAYLAND_DISPLAY", server.socket, true);
 
     if (!serverStart()) {
-        serverUnint();
+        serverUninit();
         exit(EXIT_FAILURE);
     }
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
     loadBar();
     
     serverRun();
-
-    serverUnint();
+    
+    serverUninit();
     return EXIT_SUCCESS;
 }

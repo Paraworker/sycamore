@@ -66,6 +66,6 @@ bool serverStart();
  */
 void serverRun();
 
-void serverUnint();
+void serverUninit();
 
 #endif //SYCAMORE_SERVER_H

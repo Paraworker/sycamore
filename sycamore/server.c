@@ -128,7 +128,7 @@ bool serverInit() {
     return true;
 }
 
-void serverUnint() {
+void serverUninit() {
     if (server.backend) {
         wl_list_remove(&server.backendNewInput.link);
         wl_list_remove(&server.backendNewOutput.link);
