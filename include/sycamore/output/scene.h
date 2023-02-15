@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_SCENE_H
 #define SYCAMORE_SCENE_H
 
-#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_scene.h>
@@ -43,7 +43,8 @@ struct Scene {
     struct wlr_scene_tree *dragIcons;
 };
 
-Scene *sceneCreate(struct wlr_output_layout *layout, struct wlr_presentation *presentation);
+Scene *sceneCreate(struct wlr_output_layout *layout,
+        struct wlr_presentation *presentation, struct wlr_linux_dmabuf_v1 *dmabuf);
 
 void sceneDestroy(Scene *scene);
 

@@ -8,6 +8,7 @@
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include "sycamore/desktop/view.h"
@@ -31,9 +32,10 @@ struct Server {
     struct wlr_renderer  *renderer;
     struct wlr_allocator *allocator;
 
-    struct wlr_compositor    *compositor;
-    struct wlr_output_layout *outputLayout;
-    struct wlr_presentation  *presentation;
+    struct wlr_compositor       *compositor;
+    struct wlr_linux_dmabuf_v1  *dmabuf;
+    struct wlr_output_layout    *outputLayout;
+    struct wlr_presentation     *presentation;
 
     Scene             *scene;
     Seat              *seat;

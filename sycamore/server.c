@@ -6,6 +6,7 @@
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_drm.h>
 #include <wlr/types/wlr_export_dmabuf_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_output_layout.h>
@@ -51,7 +52,13 @@ bool serverInit() {
         return false;
     }
 
-    wlr_renderer_init_wl_display(server.renderer, server.wlDisplay);
+    wlr_renderer_init_wl_shm(server.renderer, server.wlDisplay);
+
+    if (wlr_renderer_get_dmabuf_texture_formats(server.renderer) != NULL) {
+        wlr_drm_create(server.wlDisplay, server.renderer);
+        server.dmabuf = wlr_linux_dmabuf_v1_create_with_renderer(
+                server.wlDisplay, 4, server.renderer);
+    }
 
     server.allocator = wlr_allocator_autocreate(server.backend, server.renderer);
     if (!server.allocator) {
@@ -79,7 +86,7 @@ bool serverInit() {
         return false;
     }
 
-    server.scene = sceneCreate(server.outputLayout, server.presentation);
+    server.scene = sceneCreate(server.outputLayout, server.presentation, server.dmabuf);
     if (!server.scene) {
         wlr_log(WLR_ERROR, "Unable to create Scene");
         return false;
