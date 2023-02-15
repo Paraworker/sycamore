@@ -1,20 +1,15 @@
 #ifndef SYCAMORE_SEAT_H
 #define SYCAMORE_SEAT_H
 
-#include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_seat.h>
 #include "sycamore/desktop/view.h"
-#include "sycamore/input/cursor.h"
 
+typedef struct Cursor     Cursor;
 typedef struct Drag       Drag;
 typedef struct DragIcon   DragIcon;
 typedef struct Layer      Layer;
 typedef struct Seat       Seat;
-
-typedef struct SeatDevice SeatDevice;
-typedef struct Keyboard   Keyboard;
-typedef struct Pointer    Pointer;
 
 typedef struct SeatopImpl SeatopImpl;
 typedef enum SeatopMode   SeatopMode;
@@ -23,9 +18,6 @@ typedef union SeatopData               SeatopData;
 typedef struct SeatopPointerDownData   SeatopPointerDownData;
 typedef struct SeatopPointerMoveData   SeatopPointerMoveData;
 typedef struct SeatopPointerResizeData SeatopPointerResizeData;
-
-
-typedef void (*DerivedSeatDeviceDestroy)(SeatDevice *seatDevice);
 
 enum SeatopMode {
     BLANK,
@@ -69,23 +61,6 @@ struct SeatopImpl {
     enum SeatopMode mode;
 };
 
-struct SeatDevice {
-    struct wl_list link; // Seat::devices
-    struct wlr_input_device *wlrDevice;
-
-    union {
-        void     *derivedDevice;
-        Pointer  *pointer;
-        Keyboard *keyboard;
-    };
-
-    DerivedSeatDeviceDestroy derivedDestroy;
-
-    struct wl_listener destroy;
-
-    Seat *seat;
-};
-
 struct DragIcon {
     SceneDescriptorType   sceneDesc; // must be first
     struct wlr_drag_icon  *wlrDragIcon;
@@ -122,11 +97,6 @@ void onBackendNewInput(struct wl_listener *listener, void *data);
 Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout);
 
 void seatDestroy(Seat *seat);
-
-SeatDevice *seatDeviceCreate(Seat *seat, struct wlr_input_device *wlrDevice,
-        void *derivedDevice, DerivedSeatDeviceDestroy derivedDestroy);
-
-void seatDeviceDestroy(SeatDevice *seatDevice);
 
 void seatUpdateCapabilities(Seat *seat);
 

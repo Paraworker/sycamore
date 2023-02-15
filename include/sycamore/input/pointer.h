@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_POINTER_H
 #define SYCAMORE_POINTER_H
 
-#include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
 
 typedef struct Pointer    Pointer;

@@ -1,3 +1,4 @@
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 
 static void onSurfaceDestroy(struct wl_listener *listener, void *data) {

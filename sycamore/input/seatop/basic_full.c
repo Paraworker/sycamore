@@ -1,4 +1,5 @@
 #include "sycamore/desktop/view.h"
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/scene.h"
 #include "sycamore/server.h"

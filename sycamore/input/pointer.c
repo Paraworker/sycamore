@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <wlr/util/log.h>
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/pointer.h"
 #include "sycamore/input/seat.h"
+#include "sycamore/input/seat_device.h"
 
 static void pointerDestroy(SeatDevice *seatDevice) {
     if (!seatDevice) {

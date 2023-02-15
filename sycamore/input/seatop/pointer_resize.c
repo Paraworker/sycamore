@@ -1,4 +1,5 @@
 #include "sycamore/desktop/view.h"
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 
 static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *event) {

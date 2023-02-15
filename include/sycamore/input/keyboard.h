@@ -1,11 +1,11 @@
 #ifndef SYCAMORE_KEYBOARD_H
 #define SYCAMORE_KEYBOARD_H
 
-#include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_keyboard.h>
-#include "sycamore/input/seat.h"
 
-typedef struct Keyboard Keyboard;
+typedef struct Keyboard   Keyboard;
+typedef struct Seat       Seat;
+typedef struct SeatDevice SeatDevice;
 
 struct Keyboard {
     SeatDevice          *base;
