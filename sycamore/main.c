@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
     }
 
     setenv("WAYLAND_DISPLAY", server.socket, true);
+    setenv("XDG_CURRENT_DESKTOP", "Sycamore", true);
 
     if (!serverStart()) {
         serverUninit();
