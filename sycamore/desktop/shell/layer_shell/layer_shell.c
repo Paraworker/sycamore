@@ -23,7 +23,6 @@ static void onNewLayerShellSurface(struct wl_listener *listener, void *data) {
     // Add to scene graph
     layer->scene = wlr_scene_layer_surface_v1_create(sceneGetLayerTree(server.scene, layerType), layer->layerSurface);
     layer->scene->tree->node.data = layer;
-    layerSurface->surface->data = layer->scene->tree;
 
     Output *output = layer->output;
     wl_list_insert(&output->layers[layerType], &layer->link);

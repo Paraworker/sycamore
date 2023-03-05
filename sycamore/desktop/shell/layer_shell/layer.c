@@ -2,6 +2,7 @@
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
+#include "sycamore/desktop/popup.h"
 #include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/output/output.h"
@@ -18,12 +19,18 @@ static void onLayerUnmap(struct wl_listener *listener, void *data) {
     layerUnmap(layer);
 }
 
-static void onLayerDestroy(struct wl_listener *listener, void *data) {
-    Layer *layer = wl_container_of(listener, layer, destroy);
+static void onLayerNewPopup(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, newPopup);
+    struct wlr_xdg_popup *wlrPopup = data;
 
-    layer->layerSurface = nullptr;
+    Popup *popup = popupCreate(wlrPopup, server.scene->shell.popup, layer);
+    if (!popup) {
+        wlr_log(WLR_ERROR, "Unable to create popup");
+        return;
+    }
 
-    layerDestroy(layer);
+    struct wlr_scene_node *ownerNode = &layer->scene->tree->node;
+    wlr_scene_node_set_position(&popup->sceneTree->node, ownerNode->x, ownerNode->y);
 }
 
 static void onLayerSurfaceCommit(struct wl_listener *listener, void *data) {
@@ -44,6 +51,14 @@ static void onLayerSurfaceCommit(struct wl_listener *listener, void *data) {
         layer->mapped = layerSurface->surface->mapped;
         arrangeLayers(output);
     }
+}
+
+static void onLayerDestroy(struct wl_listener *listener, void *data) {
+    Layer *layer = wl_container_of(listener, layer, destroy);
+
+    layer->layerSurface = nullptr;
+
+    layerDestroy(layer);
 }
 
 void layerMap(Layer *layer) {
@@ -137,10 +152,12 @@ Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface) {
     wl_signal_add(&layerSurface->surface->events.map, &layer->map);
     layer->unmap.notify = onLayerUnmap;
     wl_signal_add(&layerSurface->surface->events.unmap, &layer->unmap);
-    layer->destroy.notify = onLayerDestroy;
-    wl_signal_add(&layerSurface->events.destroy, &layer->destroy);
+    layer->newPopup.notify = onLayerNewPopup;
+    wl_signal_add(&layerSurface->events.new_popup, &layer->newPopup);
     layer->surfaceCommit.notify = onLayerSurfaceCommit;
     wl_signal_add(&layerSurface->surface->events.commit, &layer->surfaceCommit);
+    layer->destroy.notify = onLayerDestroy;
+    wl_signal_add(&layerSurface->events.destroy, &layer->destroy);
 
     return layer;
 }
@@ -157,6 +174,7 @@ void layerDestroy(Layer *layer) {
     wl_list_remove(&layer->destroy.link);
     wl_list_remove(&layer->map.link);
     wl_list_remove(&layer->unmap.link);
+    wl_list_remove(&layer->newPopup.link);
     wl_list_remove(&layer->surfaceCommit.link);
 
     if (layer->linked) {

@@ -18,10 +18,11 @@ struct Layer {
     bool           linked;
     bool           mapped;
 
-    struct wl_listener destroy;
     struct wl_listener map;
     struct wl_listener unmap;
+    struct wl_listener newPopup;
     struct wl_listener surfaceCommit;
+    struct wl_listener destroy;
 
     Output *output;
 };
