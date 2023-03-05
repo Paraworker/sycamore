@@ -13,6 +13,7 @@ struct XdgShellView {
     struct wl_listener map;
     struct wl_listener unmap;
     struct wl_listener destroy;
+    struct wl_listener newPopup;
     struct wl_listener requestMove;
     struct wl_listener requestResize;
     struct wl_listener requestFullscreen;

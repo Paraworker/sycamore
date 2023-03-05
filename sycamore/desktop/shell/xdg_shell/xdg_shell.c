@@ -16,39 +16,28 @@ static void onNewXdgShellSurface(struct wl_listener *listener, void *data) {
         return;
     }
 
+    // xdgSurface is popup
     if (xdgSurface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
-        struct wlr_scene_tree *parentTree = xdgSurface->popup->parent->data;
-        if (!parentTree) {
-            wlr_log(WLR_ERROR, "xdg_popup: parent tree is NULL");
-            return;
-        }
-
-        xdgSurface->surface->data = wlr_scene_xdg_surface_create(parentTree, xdgSurface);
+        wlr_log(WLR_DEBUG, "New popup");
         return;
     }
 
     // xdgSurface is toplevel
-    struct wlr_xdg_toplevel *toplevel = xdgSurface->toplevel;
-
-    XdgShellView *view = xdgShellViewCreate(toplevel);
+    XdgShellView *view = xdgShellViewCreate(xdgSurface->toplevel);
     if (!view) {
-        wlr_log(WLR_ERROR, "Unable to create XdgShellView");
+        wlr_log(WLR_ERROR, "Unable to create xdgShellView");
         return;
     }
 
-    // Add to scene graph
-    view->baseView.sceneTree = wlr_scene_xdg_surface_create(
-            server.scene->shell.view, xdgSurface);
-
-    struct wlr_scene_tree *sceneTree = view->baseView.sceneTree;
-    sceneTree->node.data = &view->baseView;
-    xdgSurface->surface->data = sceneTree;
+    // Add to scene
+    view->baseView.sceneTree = wlr_scene_xdg_surface_create(server.scene->shell.view, xdgSurface);
+    view->baseView.sceneTree->node.data = &view->baseView;
 }
 
 XdgShell *xdgShellCreate(struct wl_display *display) {
     XdgShell *xdgShell = calloc(1, sizeof(XdgShell));
     if (!xdgShell) {
-        wlr_log(WLR_ERROR, "Unable to allocate XdgShell");
+        wlr_log(WLR_ERROR, "Unable to allocate xdgShell");
         return nullptr;
     }
 

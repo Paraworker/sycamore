@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
+#include "sycamore/desktop/popup.h"
 #include "sycamore/desktop/shell/xdg_shell/xdg_shell_view.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/server.h"
@@ -92,6 +93,20 @@ static void onXdgShellViewUnmap(struct wl_listener *listener, void *data) {
     viewUnmap(&view->baseView);
 }
 
+static void onXdgShellViewNewPopup(struct wl_listener *listener, void *data) {
+    XdgShellView *view = wl_container_of(listener, view, newPopup);
+    struct wlr_xdg_popup *wlrPopup = data;
+
+    Popup *popup = popupCreate(wlrPopup, server.scene->shell.popup, &view->baseView);
+    if (!popup) {
+        wlr_log(WLR_ERROR, "Unable to create popup");
+        return;
+    }
+
+    struct wlr_scene_node *ownerNode = &popup->view->sceneTree->node;
+    wlr_scene_node_set_position(&popup->sceneTree->node, ownerNode->x, ownerNode->y);
+}
+
 // view interface
 static void xdgShellViewDestroy(View *view) {
     XdgShellView *xdgShellView = wl_container_of(view, xdgShellView, baseView);
@@ -108,6 +123,9 @@ static void xdgShellViewMap(View *view) {
     XdgShellView *xdgShellView = wl_container_of(view, xdgShellView, baseView);
     struct wlr_xdg_toplevel *toplevel = xdgShellView->xdgToplevel;
 
+    xdgShellView->newPopup.notify = onXdgShellViewNewPopup;
+    wl_signal_add(&toplevel->base->events.new_popup,
+                  &xdgShellView->newPopup);
     xdgShellView->requestMove.notify = onXdgShellViewRequestMove;
     wl_signal_add(&toplevel->events.request_move,
                   &xdgShellView->requestMove);
@@ -129,6 +147,7 @@ static void xdgShellViewMap(View *view) {
 static void xdgShellViewUnmap(View *view) {
     XdgShellView *xdgShellView = wl_container_of(view, xdgShellView, baseView);
 
+    wl_list_remove(&xdgShellView->newPopup.link);
     wl_list_remove(&xdgShellView->requestMove.link);
     wl_list_remove(&xdgShellView->requestResize.link);
     wl_list_remove(&xdgShellView->requestFullscreen.link);
