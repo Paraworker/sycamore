@@ -31,6 +31,7 @@ struct Scene {
     // 	   - view
     // 	   - top
     //     - overlay
+    //     - popup
     // 	 - dragIcons
     struct {
         struct wlr_scene_tree *root;
@@ -39,6 +40,7 @@ struct Scene {
         struct wlr_scene_tree *view;
         struct wlr_scene_tree *top;
         struct wlr_scene_tree *overlay;
+        struct wlr_scene_tree *popup;
     } shell;
 
     struct wlr_scene_tree *dragIcons;

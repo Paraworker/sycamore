@@ -30,6 +30,7 @@ Scene *sceneCreate(struct wlr_output_layout *layout,
     scene->shell.view       = wlr_scene_tree_create(shellRoot);
     scene->shell.top        = wlr_scene_tree_create(shellRoot);
     scene->shell.overlay    = wlr_scene_tree_create(shellRoot);
+    scene->shell.popup      = wlr_scene_tree_create(shellRoot);
 
     scene->dragIcons = wlr_scene_tree_create(&scene->wlrScene->tree);
 
