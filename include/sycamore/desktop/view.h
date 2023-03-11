@@ -68,7 +68,7 @@ void viewDestroy(View *view);
 
 void viewMoveTo(View *view, int x, int y);
 
-Output *viewGetMainOutput(View *view);
+Output *viewGetOutput(View *view);
 
 void viewSetFullscreen(View *view, Output *output, bool fullscreen);
 

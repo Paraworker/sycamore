@@ -39,7 +39,7 @@ static void onXdgShellViewRequestFullscreen(struct wl_listener *listener, void *
         if (fullscreenOutput && fullscreenOutput->data) {
             output = fullscreenOutput->data;
         } else {
-            output = viewGetMainOutput(base);
+            output = viewGetOutput(base);
         }
     }
 
@@ -53,7 +53,7 @@ static void onXdgShellViewRequestMaximize(struct wl_listener *listener, void *da
     Output *output = NULL;
 
     if (maximized) {
-        output = viewGetMainOutput(base);
+        output = viewGetOutput(base);
     }
 
     viewSetMaximized(base, output, maximized);

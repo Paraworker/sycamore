@@ -83,7 +83,7 @@ void viewMoveTo(View *view, int x, int y) {
     wlr_scene_node_set_position(&view->sceneTree->node, x, y);
 }
 
-Output *viewGetMainOutput(View *view) {
+Output *viewGetOutput(View *view) {
     struct wlr_surface *surface = view->wlrSurface;
 
     struct wl_list *surfaceOutputs = &surface->current_outputs;
