@@ -71,7 +71,7 @@ void cursorWarp(Cursor *cursor, double lx, double ly);
  */
 void cursorRefresh(Cursor *cursor);
 
-Output *cursorAtOutput(Cursor *cursor, struct wlr_output_layout *layout);
+Output *cursorAtOutput(Cursor *cursor);
 
 void xcursorReload(Cursor *cursor, const char *theme, uint32_t size);
 

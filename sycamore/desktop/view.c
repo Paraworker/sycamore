@@ -25,7 +25,7 @@ void viewMap(View *view, struct wlr_output *fullscreenOutput, bool maximized, bo
         return;
     }
 
-    Output *output = cursorAtOutput(server.seat->cursor, server.outputLayout);
+    Output *output = cursorAtOutput(server.seat->cursor);
 
     viewSetToOutputCenter(view, output);
 

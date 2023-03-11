@@ -104,9 +104,9 @@ void xcursorReload(Cursor *cursor, const char *theme, uint32_t size) {
     cursorRefresh(cursor);
 }
 
-Output *cursorAtOutput(Cursor *cursor, struct wlr_output_layout *layout) {
-    struct wlr_cursor *wlr_cursor = cursor->wlrCursor;
-    struct wlr_output *output = wlr_output_layout_output_at(layout, wlr_cursor->x, wlr_cursor->y);
+Output *cursorAtOutput(Cursor *cursor) {
+    struct wlr_cursor *wlrCursor = cursor->wlrCursor;
+    struct wlr_output *output = wlr_output_layout_output_at(server.outputLayout, wlrCursor->x, wlrCursor->y);
     if (!output) {
         return NULL;
     }
