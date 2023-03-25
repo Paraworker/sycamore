@@ -52,5 +52,5 @@ void seatopSetPointerMove(Seat *seat, View *view) {
     seat->seatopImpl = &impl;
 
     wlr_seat_pointer_notify_clear_focus(seat->wlrSeat);
-    cursorSetImage(seat->cursor, "grabbing");
+    cursorSetImage(seat->cursor, "grab");
 }
