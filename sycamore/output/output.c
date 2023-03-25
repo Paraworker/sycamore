@@ -51,6 +51,7 @@ Output *outputCreate(struct wlr_output *wlrOutput) {
     }
 
     output->wlrOutput = wlrOutput;
+    wlrOutput->data   = output;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
         wl_list_init(&output->layers[i]);
@@ -175,11 +176,10 @@ void onBackendNewOutput(struct wl_listener *listener, void *data) {
         return;
     }
 
-    wlrOutput->data = output;
-
     wlr_output_layout_add_auto(server.outputLayout, wlrOutput);
 
     wlr_output_layout_get_box(server.outputLayout, wlrOutput, &output->usableArea);
+
     wl_list_insert(&server.allOutputs, &output->link);
 
     outputSetupCursor(output, server.seat->cursor);
