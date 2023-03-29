@@ -76,13 +76,6 @@ void viewDestroy(View *view) {
     view->interface->destroy(view);
 }
 
-void viewMoveTo(View *view, int x, int y) {
-    view->x = x;
-    view->y = y;
-
-    wlr_scene_node_set_position(&view->sceneTree->node, x, y);
-}
-
 Output *viewGetOutput(View *view) {
     struct wlr_surface *surface = view->wlrSurface;
 
@@ -143,7 +136,7 @@ void viewSetFullscreen(View *view, Output *output, bool fullscreen) {
 
         struct wlr_box *restore = &view->restore.fullscreen;
         view->interface->setSize(view, restore->width, restore->height);
-        viewMoveTo(view, restore->x, restore->y);
+        VIEW_MOVE_TO(view, restore->x, restore->y);
         view->isFullscreen = fullscreen;
         view->interface->setFullscreen(view, fullscreen);
         return;
@@ -158,8 +151,8 @@ void viewSetFullscreen(View *view, Output *output, bool fullscreen) {
     wlr_output_layout_get_box(server.outputLayout,
                               output->wlrOutput, &fullBox);
 
-    view->restore.fullscreen.x = view->x;
-    view->restore.fullscreen.y = view->y;
+    view->restore.fullscreen.x = VIEW_X(view);
+    view->restore.fullscreen.y = VIEW_Y(view);
     struct wlr_box windowBox;
     view->interface->getGeometry(view, &windowBox);
     view->restore.fullscreen.width = windowBox.width;
@@ -167,7 +160,7 @@ void viewSetFullscreen(View *view, Output *output, bool fullscreen) {
 
     wlr_scene_node_set_enabled(&server.scene->shell.top->node, false);
 
-    viewMoveTo(view, fullBox.x, fullBox.y);
+    VIEW_MOVE_TO(view, fullBox.x, fullBox.y);
     view->interface->setSize(view, fullBox.width, fullBox.height);
     view->isFullscreen = fullscreen;
     view->interface->setFullscreen(view, fullscreen);
@@ -182,10 +175,10 @@ void viewSetMaximized(View *view, Output *output, bool maximized) {
         /* Restore from maximized mode */
         struct wlr_box *restore = &view->restore.maximize;
 
-        view->interface->setSize(view, restore->width, restore->height);
-        viewMoveTo(view, restore->x, restore->y);
-        view->isMaximized = maximized;
         view->interface->setMaximized(view, maximized);
+        view->interface->setSize(view, restore->width, restore->height);
+        VIEW_MOVE_TO(view, restore->x, restore->y);
+        view->isMaximized = maximized;
         return;
     }
 
@@ -196,14 +189,14 @@ void viewSetMaximized(View *view, Output *output, bool maximized) {
 
     struct wlr_box maxBox = output->usableArea;
 
-    view->restore.maximize.x = view->x;
-    view->restore.maximize.y = view->y;
+    view->restore.maximize.x = VIEW_X(view);
+    view->restore.maximize.y = VIEW_Y(view);
     struct wlr_box windowBox;
     view->interface->getGeometry(view, &windowBox);
     view->restore.maximize.width = windowBox.width;
     view->restore.maximize.height = windowBox.height;
 
-    viewMoveTo(view, maxBox.x, maxBox.y);
+    VIEW_MOVE_TO(view, maxBox.x, maxBox.y);
     view->interface->setSize(view, maxBox.width, maxBox.height);
     view->isMaximized = maximized;
     view->interface->setMaximized(view, maximized);
@@ -235,7 +228,7 @@ void viewSetToOutputCenter(View *view, Output *output) {
         viewBox.y = outputBox.y;
     }
 
-    viewMoveTo(view, viewBox.x, viewBox.y);
+    VIEW_MOVE_TO(view, viewBox.x, viewBox.y);
 }
 
 void viewPtrConnect(ViewPtr *ptr, View *view) {

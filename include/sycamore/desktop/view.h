@@ -41,7 +41,6 @@ struct View {
     const ViewInterface *interface;
     struct wlr_surface  *wlrSurface;
     ViewType            type;
-    int x, y;
 
     struct wlr_scene_tree *sceneTree;
 
@@ -66,8 +65,6 @@ void viewUnmap(View *view);
 
 void viewDestroy(View *view);
 
-void viewMoveTo(View *view, int x, int y);
-
 Output *viewGetOutput(View *view);
 
 void viewSetFullscreen(View *view, Output *output, bool fullscreen);
@@ -81,5 +78,10 @@ void viewSetToOutputCenter(View *view, Output *output);
 void viewPtrConnect(ViewPtr *ptr, View *view);
 
 void viewPtrDisconnect(ViewPtr *ptr);
+
+#define VIEW_MOVE_TO(view, x, y) wlr_scene_node_set_position(&view->sceneTree->node, x, y)
+
+#define VIEW_X(view) view->sceneTree->node.x
+#define VIEW_Y(view) view->sceneTree->node.y
 
 #endif //SYCAMORE_VIEW_H

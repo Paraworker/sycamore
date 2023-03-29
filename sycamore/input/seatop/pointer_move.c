@@ -19,7 +19,7 @@ static void handlePointerMotion(Seat *seat, uint32_t timeMsec) {
         return;
     }
 
-    viewMoveTo(view, cursor->x - data->dx, cursor->y - data->dy);
+    VIEW_MOVE_TO(view, cursor->x - data->dx, cursor->y - data->dy);
 }
 
 static void handleEnd(Seat *seat) {
@@ -46,8 +46,8 @@ void seatopSetPointerMove(Seat *seat, View *view) {
     SeatopPointerMoveData *data = &(seat->seatopData.pointerMove);
 
     viewPtrConnect(&data->viewPtr, view);
-    data->dx = seat->cursor->wlrCursor->x - view->x;
-    data->dy = seat->cursor->wlrCursor->y - view->y;
+    data->dx = seat->cursor->wlrCursor->x - VIEW_X(view);
+    data->dy = seat->cursor->wlrCursor->y - VIEW_Y(view);
 
     seat->seatopImpl = &impl;
 

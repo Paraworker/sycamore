@@ -60,7 +60,7 @@ static void handlePointerMotion(Seat *seat, uint32_t timeMsec) {
     struct wlr_box geoBox;
     view->interface->getGeometry(view, &geoBox);
 
-    viewMoveTo(view, newLeft - geoBox.x, newTop - geoBox.y);
+    VIEW_MOVE_TO(view, newLeft - geoBox.x, newTop - geoBox.y);
     view->interface->setSize(view, newRight - newLeft, newBottom - newTop);
 }
 
@@ -93,16 +93,16 @@ void seatopSetPointerResize(Seat *seat, View *view, uint32_t edges) {
     struct wlr_box geoBox;
     view->interface->getGeometry(view, &geoBox);
 
-    double borderX = (view->x + geoBox.x) +
+    double borderX = (VIEW_X(view) + geoBox.x) +
                      ((edges & WLR_EDGE_RIGHT) ? geoBox.width : 0);
-    double borderY = (view->y + geoBox.y) +
+    double borderY = (VIEW_Y(view) + geoBox.y) +
                      ((edges & WLR_EDGE_BOTTOM) ? geoBox.height : 0);
     data->dx = seat->cursor->wlrCursor->x - borderX;
     data->dy = seat->cursor->wlrCursor->y - borderY;
 
     data->grabGeobox = geoBox;
-    data->grabGeobox.x += view->x;
-    data->grabGeobox.y += view->y;
+    data->grabGeobox.x += VIEW_X(view);
+    data->grabGeobox.y += VIEW_Y(view);
 
     data->edges = edges;
 
