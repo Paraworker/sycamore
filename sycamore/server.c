@@ -25,7 +25,7 @@
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
-struct Server server = {0};
+Server server = {0};
 
 bool serverInit() {
     wlr_log(WLR_INFO, "Initializing Wayland server");
