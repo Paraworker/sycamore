@@ -31,32 +31,34 @@ static void onXdgShellViewRequestResize(struct wl_listener *listener, void *data
 static void onXdgShellViewRequestFullscreen(struct wl_listener *listener, void *data) {
     XdgShellView *view = wl_container_of(listener, view, requestFullscreen);
     View *base = &view->baseView;
-    bool fullscreen = view->xdgToplevel->requested.fullscreen;
-    Output *output = NULL;
 
-    if (fullscreen) {
-        struct wlr_output *fullscreenOutput = view->xdgToplevel->requested.fullscreen_output;
-        if (fullscreenOutput && fullscreenOutput->data) {
-            output = fullscreenOutput->data;
-        } else {
-            output = viewGetOutput(base);
-        }
+    struct wlr_xdg_toplevel_requested *requested = &view->xdgToplevel->requested;
+
+    if (!requested->fullscreen) {
+        viewSetFullscreen(base, NULL, false);
+        return;
     }
 
-    viewSetFullscreen(base, output, fullscreen);
+    // If there is an output provided, try to satisfy it
+    struct wlr_output *output = requested->fullscreen_output;
+    if (output && output->data) {
+        viewSetFullscreen(base, output->data, true);
+        return;
+    }
+
+    viewSetFullscreen(base, viewGetOutput(base), true);
 }
 
 static void onXdgShellViewRequestMaximize(struct wl_listener *listener, void *data) {
     XdgShellView *view = wl_container_of(listener, view, requestMaximize);
     View *base = &view->baseView;
-    bool maximized = view->xdgToplevel->requested.maximized;
-    Output *output = NULL;
 
-    if (maximized) {
-        output = viewGetOutput(base);
+    if (!view->xdgToplevel->requested.maximized) {
+        viewSetMaximized(base, NULL, false);
+        return;
     }
 
-    viewSetMaximized(base, output, maximized);
+    viewSetMaximized(base, viewGetOutput(base), true);
 }
 
 static void onXdgShellViewRequestMinimize(struct wl_listener *listener, void *data) {
