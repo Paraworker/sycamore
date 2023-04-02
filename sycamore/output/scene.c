@@ -52,7 +52,7 @@ void sceneDestroy(Scene *scene) {
     free(scene);
 }
 
-struct wlr_surface *findSurfaceByNode(struct wlr_scene_node *node) {
+struct wlr_surface *getSurfaceFromNode(struct wlr_scene_node *node) {
     if (!node || node->type != WLR_SCENE_NODE_BUFFER) {
         return NULL;
     }
@@ -66,7 +66,7 @@ struct wlr_surface *findSurfaceByNode(struct wlr_scene_node *node) {
     return sceneSurface->surface;
 }
 
-View *findViewByNode(struct wlr_scene_node *node) {
+View *getViewFromNode(struct wlr_scene_node *node) {
     if (!node) {
         return NULL;
     }
@@ -84,8 +84,7 @@ View *findViewByNode(struct wlr_scene_node *node) {
         tree = tree->node.parent;
     }
 
-    SceneDescriptorType *descriptorType = tree->node.data;
-    if (*descriptorType != SCENE_DESC_VIEW) {
+    if (*(SceneDescriptorType*)(tree->node.data) != SCENE_DESC_VIEW) {
         return NULL;
     }
 

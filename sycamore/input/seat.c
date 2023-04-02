@@ -265,8 +265,8 @@ void seatPointerUpdateFocus(Seat *seat, uint32_t timeMsec) {
     Cursor *cursor = seat->cursor;
 
     double sx, sy;
-    struct wlr_surface *surface = findSurfaceByNode(
-            findNode(server.scene, cursor->wlrCursor->x, cursor->wlrCursor->y, &sx, &sy));
+    struct wlr_surface *surface =
+            getSurfaceFromNode(FIND_NODE(cursor->wlrCursor->x, cursor->wlrCursor->y, &sx, &sy));
 
     if (!surface) {
         wlr_seat_pointer_clear_focus(seat->wlrSeat);

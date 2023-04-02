@@ -23,7 +23,7 @@ static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *eve
 
     // If pressed on a view, focus it.
     double sx, sy;
-    viewSetFocus(findViewByNode(findNode(server.scene, cursor->x, cursor->y, &sx, &sy)));
+    viewSetFocus(getViewFromNode(FIND_NODE(cursor->x, cursor->y, &sx, &sy)));
 
     // Switch to seatop_pointer_down if seat has a focused surface.
     seatopSetPointerDown(seat, state->focused_surface, state->sx, state->sy);

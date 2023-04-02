@@ -48,11 +48,10 @@ Scene *sceneCreate(struct wlr_output_layout *layout,
 
 void sceneDestroy(Scene *scene);
 
-#define findNode(scene, lx, ly, sx, sy) \
-        wlr_scene_node_at(&scene->shell.root->node, lx, ly, sx, sy)
+#define FIND_NODE(lx, ly, sx, sy) wlr_scene_node_at(&server.scene->shell.root->node, lx, ly, sx, sy)
 
-struct wlr_surface *findSurfaceByNode(struct wlr_scene_node *node);
+struct wlr_surface *getSurfaceFromNode(struct wlr_scene_node *node);
 
-View *findViewByNode(struct wlr_scene_node *node);
+View *getViewFromNode(struct wlr_scene_node *node);
 
 #endif //SYCAMORE_SCENE_H
