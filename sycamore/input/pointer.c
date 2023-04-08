@@ -32,5 +32,7 @@ Pointer *pointerCreate(Seat *seat, struct wlr_input_device *wlrDevice) {
 
     pointer->wlrPointer = wlr_pointer_from_input_device(wlrDevice);
 
+    wlr_cursor_attach_input_device(seat->cursor->wlrCursor, wlrDevice);
+
     return pointer;
 }

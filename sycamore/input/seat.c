@@ -168,7 +168,6 @@ static void seatConfigurePointer(Seat *seat, struct wlr_input_device *device) {
         return;
     }
 
-    wlr_cursor_attach_input_device(seat->cursor->wlrCursor, device);
     wl_list_insert(&seat->devices, &pointer->base->link);
 
     touchpadSetTapToClick(device);
