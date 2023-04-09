@@ -5,8 +5,8 @@
 static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *event) {
     if (seat->cursor->pressedButtonCount == 0) {
         // If there is no button being pressed
-        // we back to basic_full.
-        seatopSetBasicFull(seat);
+        // we back to default.
+        seatopSetDefault(seat);
     }
 }
 

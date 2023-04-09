@@ -20,9 +20,7 @@ typedef struct SeatopPointerMoveData   SeatopPointerMoveData;
 typedef struct SeatopPointerResizeData SeatopPointerResizeData;
 
 enum SeatopMode {
-    BLANK,
-    BASIC_FULL,
-    BASIC_POINTER_NO,
+    DEFAULT,
     POINTER_DOWN,
     POINTER_MOVE,
     POINTER_RESIZE,
@@ -56,6 +54,15 @@ union SeatopData {
 struct SeatopImpl {
     void (*pointerButton)(Seat *seat, struct wlr_pointer_button_event *event);
     void (*pointerMotion)(Seat *seat, uint32_t timeMsec);
+    void (*pointerAxis)(Seat *seat, struct wlr_pointer_axis_event *event);
+    void (*pointerSwipeBegin)(Seat *seat, struct wlr_pointer_swipe_begin_event *event);
+    void (*pointerSwipeUpdate)(Seat *seat, struct wlr_pointer_swipe_update_event *event);
+    void (*pointerSwipeEnd)(Seat *seat, struct wlr_pointer_swipe_end_event *event);
+    void (*pointerPinchBegin)(Seat *seat, struct wlr_pointer_pinch_begin_event *event);
+    void (*pointerPinchUpdate)(Seat *seat, struct wlr_pointer_pinch_update_event *event);
+    void (*pointerPinchEnd)(Seat *seat, struct wlr_pointer_pinch_end_event *event);
+    void (*pointerHoldBegin)(Seat *seat, struct wlr_pointer_hold_begin_event *event);
+    void (*pointerHoldEnd)(Seat *seat, struct wlr_pointer_hold_end_event *event);
     void (*pointerRebase)(Seat *seat);
     void (*end)(Seat *seat);
     enum SeatopMode mode;
@@ -118,6 +125,60 @@ static inline void seatopPointerMotion(Seat *seat, uint32_t time_msec) {
     }
 }
 
+static inline void seatopPointerAxis(Seat *seat, struct wlr_pointer_axis_event *event) {
+    if (seat->seatopImpl->pointerAxis) {
+        seat->seatopImpl->pointerAxis(seat, event);
+    }
+}
+
+static inline void seatopPointerSwipeBegin(Seat *seat, struct wlr_pointer_swipe_begin_event *event) {
+    if (seat->seatopImpl->pointerSwipeBegin) {
+        seat->seatopImpl->pointerSwipeBegin(seat, event);
+    }
+}
+
+static inline void seatopPointerSwipeUpdate(Seat *seat, struct wlr_pointer_swipe_update_event *event) {
+    if (seat->seatopImpl->pointerSwipeUpdate) {
+        seat->seatopImpl->pointerSwipeUpdate(seat, event);
+    }
+}
+
+static inline void seatopPointerSwipeEnd(Seat *seat, struct wlr_pointer_swipe_end_event *event) {
+    if (seat->seatopImpl->pointerSwipeEnd) {
+        seat->seatopImpl->pointerSwipeEnd(seat, event);
+    }
+}
+
+static inline void seatopPointerPinchBegin(Seat *seat, struct wlr_pointer_pinch_begin_event *event) {
+    if (seat->seatopImpl->pointerPinchBegin) {
+        seat->seatopImpl->pointerPinchBegin(seat, event);
+    }
+}
+
+static inline void seatopPointerPinchUpdate(Seat *seat, struct wlr_pointer_pinch_update_event *event) {
+    if (seat->seatopImpl->pointerPinchUpdate) {
+        seat->seatopImpl->pointerPinchUpdate(seat, event);
+    }
+}
+
+static inline void seatopPointerPinchEnd(Seat *seat, struct wlr_pointer_pinch_end_event *event) {
+    if (seat->seatopImpl->pointerPinchEnd) {
+        seat->seatopImpl->pointerPinchEnd(seat, event);
+    }
+}
+
+static inline void seatopPointerHoldBegin(Seat *seat, struct wlr_pointer_hold_begin_event *event) {
+    if (seat->seatopImpl->pointerHoldBegin) {
+        seat->seatopImpl->pointerHoldBegin(seat, event);
+    }
+}
+
+static inline void seatopPointerHoldEnd(Seat *seat, struct wlr_pointer_hold_end_event *event) {
+    if (seat->seatopImpl->pointerHoldEnd) {
+        seat->seatopImpl->pointerHoldEnd(seat, event);
+    }
+}
+
 static inline void seatopPointerRebase(Seat *seat) {
     if (seat->seatopImpl->pointerRebase) {
         seat->seatopImpl->pointerRebase(seat);
@@ -132,11 +193,7 @@ static inline void seatopEnd(Seat *seat) {
     seat->seatopImpl = NULL;
 }
 
-void seatopSetBlank(Seat *seat);
-
-void seatopSetBasicFull(Seat *seat);
-
-void seatopSetBasicPointerNo(Seat *seat);
+void seatopSetDefault(Seat *seat);
 
 void seatopSetPointerDown(Seat *seat, struct wlr_surface *surface, double sx, double sy);
 

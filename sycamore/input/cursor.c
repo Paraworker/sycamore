@@ -14,6 +14,11 @@
 #include "sycamore/output/output.h"
 #include "sycamore/server.h"
 
+static inline void hideCursor(Cursor *cursor) {
+    cursor->image = NULL;
+    wlr_cursor_set_image(cursor->wlrCursor, NULL, 0, 0, 0, 0, 0, 0);
+}
+
 static bool xcursorInit(Cursor *cursor, const char *theme, uint32_t size) {
     if (cursor->xcursorManager) {
         wlr_xcursor_manager_destroy(cursor->xcursorManager);
@@ -37,60 +42,6 @@ static bool xcursorInit(Cursor *cursor, const char *theme, uint32_t size) {
     return true;
 }
 
-void cursorSetHidden(Cursor *cursor) {
-    cursor->imageMode = HIDDEN;
-    cursor->image     = NULL;
-    wlr_cursor_set_image(cursor->wlrCursor, NULL, 0, 0, 0, 0, 0, 0);
-}
-
-void cursorSetImage(Cursor *cursor, const char *image) {
-    if (!image) {
-        cursorSetHidden(cursor);
-        return;
-    }
-
-    if (cursor->image && strcmp(cursor->image, image) == 0) {
-        return;
-    }
-
-    cursor->imageMode = IMAGE;
-    cursor->image     = image;
-    wlr_xcursor_manager_set_cursor_image(cursor->xcursorManager,
-                                         image, cursor->wlrCursor);
-}
-
-void cursorSetImageSurface(Cursor *cursor, struct wlr_surface *surface,
-                           int32_t hotspotX, int32_t hotspotY) {
-    if (!surface) {
-        cursorSetHidden(cursor);
-        return;
-    }
-
-    cursor->imageMode = SURFACE;
-    cursor->image     = NULL;
-    wlr_cursor_set_surface(cursor->wlrCursor, surface, hotspotX, hotspotY);
-}
-
-void cursorWarp(Cursor *cursor, double lx, double ly) {
-    wlr_cursor_warp(cursor->wlrCursor, NULL, lx, ly);
-}
-
-void cursorRefresh(Cursor *cursor) {
-    cursorWarp(cursor, cursor->wlrCursor->x, cursor->wlrCursor->y);
-
-    if (cursor->imageMode == HIDDEN) {
-        return;
-    }
-
-    cursor->imageMode = IMAGE;
-    if (!cursor->image) {
-        cursor->image = "default";
-    }
-
-    wlr_xcursor_manager_set_cursor_image(cursor->xcursorManager,
-                                         cursor->image, cursor->wlrCursor);
-}
-
 void xcursorReload(Cursor *cursor, const char *theme, uint32_t size) {
     if (!xcursorInit(cursor, theme, size)) {
         return;
@@ -104,6 +55,83 @@ void xcursorReload(Cursor *cursor, const char *theme, uint32_t size) {
     cursorRefresh(cursor);
 }
 
+void cursorDisable(Cursor *cursor) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    cursor->enabled = false;
+
+    hideCursor(cursor);
+    wlr_seat_pointer_notify_clear_focus(cursor->seat->wlrSeat);
+}
+
+void cursorEnable(Cursor *cursor) {
+    if (cursor->enabled) {
+        return;
+    }
+
+    cursor->enabled = true;
+
+    seatopPointerRebase(cursor->seat);
+}
+
+void cursorSetImage(Cursor *cursor, const char *image) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    if (!image) {
+        hideCursor(cursor);
+        return;
+    }
+
+    // Avoid setting duplicate image
+    if (cursor->image && strcmp(cursor->image, image) == 0) {
+        return;
+    }
+
+    cursor->image = image;
+
+    wlr_xcursor_manager_set_cursor_image(cursor->xcursorManager, image, cursor->wlrCursor);
+}
+
+void cursorSetSurface(Cursor *cursor, struct wlr_surface *surface, int32_t hotspotX, int32_t hotspotY) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    cursor->image = NULL;
+
+    wlr_cursor_set_surface(cursor->wlrCursor, surface, hotspotX, hotspotY);
+}
+
+void cursorRefresh(Cursor *cursor) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    cursorWarp(cursor, cursor->wlrCursor->x, cursor->wlrCursor->y);
+
+    if (!cursor->image) {
+        cursor->image = "default";
+    }
+
+    wlr_xcursor_manager_set_cursor_image(cursor->xcursorManager, cursor->image, cursor->wlrCursor);
+}
+
+void cursorRebase(Cursor *cursor) {
+    if (!cursor->enabled) {
+        return;
+    }
+
+    seatopPointerRebase(cursor->seat);
+}
+
+void cursorWarp(Cursor *cursor, double lx, double ly) {
+    wlr_cursor_warp(cursor->wlrCursor, NULL, lx, ly);
+}
+
 Output *cursorAtOutput(Cursor *cursor) {
     struct wlr_cursor *wlrCursor = cursor->wlrCursor;
     struct wlr_output *output = wlr_output_layout_output_at(server.outputLayout, wlrCursor->x, wlrCursor->y);
@@ -114,34 +142,33 @@ Output *cursorAtOutput(Cursor *cursor) {
     return output->data;
 }
 
-static void onCursorMotion(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits a _relative_
-     * pointer motion event (i.e. a delta) */
-    Cursor *cursor = wl_container_of(listener, cursor, cursorMotion);
-    struct wlr_pointer_motion_event *event = data;
+static void onFrame(struct wl_listener *listener, void *data) {
+    Cursor *cursor = wl_container_of(listener, cursor, frame);
+    wlr_seat_pointer_notify_frame(cursor->seat->wlrSeat);
+}
 
-    wlr_cursor_move(cursor->wlrCursor, &event->pointer->base,
-                    event->delta_x, event->delta_y);
+static void onMotion(struct wl_listener *listener, void *data) {
+    Cursor *cursor = wl_container_of(listener, cursor, motion);
+    cursorEnable(cursor);
+
+    struct wlr_pointer_motion_event *event = data;
+    wlr_cursor_move(cursor->wlrCursor, &event->pointer->base, event->delta_x, event->delta_y);
     seatopPointerMotion(cursor->seat, event->time_msec);
 }
 
-static void onCursorMotionAbsolute(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits an _absolute_
-     * motion event, from 0..1 on each axis. This happens, for example, when
-     * wlroots is running under a Wayland window rather than KMS+DRM, and you
-     * move the mouse over the window. You could enter the window from any edge,
-     * so we have to warp the mouse there. There is also some hardware which
-     * emits these events. */
-    Cursor *cursor = wl_container_of(listener, cursor, cursorMotionAbsolute);
-    struct wlr_pointer_motion_absolute_event *event = data;
+static void onMotionAbsolute(struct wl_listener *listener, void *data) {
+    Cursor *cursor = wl_container_of(listener, cursor, motionAbsolute);
+    cursorEnable(cursor);
 
+    struct wlr_pointer_motion_absolute_event *event = data;
     wlr_cursor_warp_absolute(cursor->wlrCursor, &event->pointer->base, event->x, event->y);
     seatopPointerMotion(cursor->seat, event->time_msec);
 }
 
-static void onCursorButton(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits a button event. */
-    Cursor *cursor = wl_container_of(listener, cursor, cursorButton);
+static void onButton(struct wl_listener *listener, void *data) {
+    Cursor *cursor = wl_container_of(listener, cursor, button);
+    cursorEnable(cursor);
+
     struct wlr_pointer_button_event *event = data;
 
     if (event->state == WLR_BUTTON_PRESSED) {
@@ -153,91 +180,67 @@ static void onCursorButton(struct wl_listener *listener, void *data) {
     seatopPointerButton(cursor->seat, event);
 }
 
-static void onCursorAxis(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits an axis event,
-     * for example when you move the scroll wheel. */
-    Cursor *cursor = wl_container_of(listener, cursor, cursorAxis);
-    struct wlr_pointer_axis_event *event = data;
+static void onAxis(struct wl_listener *listener, void *data) {
+    Cursor *cursor = wl_container_of(listener, cursor, axis);
+    cursorEnable(cursor);
 
-    /* Notify the client with pointer focus of the axis event. */
-    wlr_seat_pointer_notify_axis(cursor->seat->wlrSeat,
-                                 event->time_msec, event->orientation, event->delta,
-                                 event->delta_discrete, event->source);
-}
-
-static void onCursorFrame(struct wl_listener *listener, void *data) {
-    /* This event is forwarded by the cursor when a pointer emits an frame
-     * event. Frame events are sent after regular pointer events to group
-     * multiple events together. For instance, two axis events may happen at the
-     * same time, in which case a frame event won't be sent in between. */
-    Cursor *cursor = wl_container_of(listener, cursor, cursorFrame);
-    /* Notify the client with pointer focus of the frame event. */
-    wlr_seat_pointer_notify_frame(cursor->seat->wlrSeat);
+    seatopPointerAxis(cursor->seat, data);
 }
 
 static void onSwipeBegin(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, swipeBegin);
-    struct wlr_pointer_swipe_begin_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_swipe_begin(cursor->gestures, cursor->seat->wlrSeat,
-                                             event->time_msec, event->fingers);
+    seatopPointerSwipeBegin(cursor->seat, data);
 }
 
 static void onSwipeUpdate(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, swipeUpdate);
-    struct wlr_pointer_swipe_update_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_swipe_update(cursor->gestures, cursor->seat->wlrSeat,
-                                              event->time_msec, event->dx, event->dy);
+    seatopPointerSwipeUpdate(cursor->seat, data);
 }
 
 static void onSwipeEnd(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, swipeEnd);
-    struct wlr_pointer_swipe_end_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_swipe_end(cursor->gestures, cursor->seat->wlrSeat,
-                                           event->time_msec, event->cancelled);
+    seatopPointerSwipeEnd(cursor->seat, data);
 }
 
 static void onPinchBegin(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, pinchBegin);
-    struct wlr_pointer_pinch_begin_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_pinch_begin(cursor->gestures, cursor->seat->wlrSeat,
-                                             event->time_msec, event->fingers);
+    seatopPointerPinchBegin(cursor->seat, data);
 }
 
 static void onPinchUpdate(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, pinchUpdate);
-    struct wlr_pointer_pinch_update_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_pinch_update(cursor->gestures, cursor->seat->wlrSeat,
-                                              event->time_msec, event->dx, event->dy,
-                                              event->scale, event->rotation);
+    seatopPointerPinchUpdate(cursor->seat, data);
 }
 
 static void onPinchEnd(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, pinchEnd);
-    struct wlr_pointer_pinch_end_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_pinch_end(cursor->gestures, cursor->seat->wlrSeat,
-                                           event->time_msec, event->cancelled);
+    seatopPointerPinchEnd(cursor->seat, data);
 }
 
 static void onHoldBegin(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, holdBegin);
-    struct wlr_pointer_hold_begin_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_hold_begin(cursor->gestures, cursor->seat->wlrSeat,
-                                            event->time_msec, event->fingers);
+    seatopPointerHoldBegin(cursor->seat, data);
 }
 
 static void onHoldEnd(struct wl_listener *listener, void *data) {
     Cursor *cursor = wl_container_of(listener, cursor, holdEnd);
-    struct wlr_pointer_hold_end_event *event = data;
+    cursorEnable(cursor);
 
-    wlr_pointer_gestures_v1_send_hold_end(cursor->gestures, cursor->seat->wlrSeat,
-                                          event->time_msec, event->cancelled);
+    seatopPointerHoldEnd(cursor->seat, data);
 }
 
 void cursorDestroy(Cursor *cursor) {
@@ -245,11 +248,12 @@ void cursorDestroy(Cursor *cursor) {
         return;
     }
 
-    wl_list_remove(&cursor->cursorMotion.link);
-    wl_list_remove(&cursor->cursorMotionAbsolute.link);
-    wl_list_remove(&cursor->cursorButton.link);
-    wl_list_remove(&cursor->cursorAxis.link);
-    wl_list_remove(&cursor->cursorFrame.link);
+    wl_list_remove(&cursor->frame.link);
+
+    wl_list_remove(&cursor->motion.link);
+    wl_list_remove(&cursor->motionAbsolute.link);
+    wl_list_remove(&cursor->button.link);
+    wl_list_remove(&cursor->axis.link);
 
     wl_list_remove(&cursor->swipeBegin.link);
     wl_list_remove(&cursor->swipeUpdate.link);
@@ -278,7 +282,7 @@ Cursor *cursorCreate(Seat *seat, struct wl_display *display, struct wlr_output_l
         return NULL;
     }
 
-    cursor->imageMode          = HIDDEN;
+    cursor->enabled            = false;
     cursor->image              = NULL;
     cursor->xcursorManager     = NULL;
     cursor->pressedButtonCount = 0;
@@ -306,16 +310,17 @@ Cursor *cursorCreate(Seat *seat, struct wl_display *display, struct wlr_output_l
         return NULL;
     }
 
-    cursor->cursorMotion.notify = onCursorMotion;
-    wl_signal_add(&cursor->wlrCursor->events.motion, &cursor->cursorMotion);
-    cursor->cursorMotionAbsolute.notify = onCursorMotionAbsolute;
-    wl_signal_add(&cursor->wlrCursor->events.motion_absolute, &cursor->cursorMotionAbsolute);
-    cursor->cursorButton.notify = onCursorButton;
-    wl_signal_add(&cursor->wlrCursor->events.button, &cursor->cursorButton);
-    cursor->cursorAxis.notify = onCursorAxis;
-    wl_signal_add(&cursor->wlrCursor->events.axis, &cursor->cursorAxis);
-    cursor->cursorFrame.notify = onCursorFrame;
-    wl_signal_add(&cursor->wlrCursor->events.frame, &cursor->cursorFrame);
+    cursor->frame.notify = onFrame;
+    wl_signal_add(&cursor->wlrCursor->events.frame, &cursor->frame);
+
+    cursor->motion.notify = onMotion;
+    wl_signal_add(&cursor->wlrCursor->events.motion, &cursor->motion);
+    cursor->motionAbsolute.notify = onMotionAbsolute;
+    wl_signal_add(&cursor->wlrCursor->events.motion_absolute, &cursor->motionAbsolute);
+    cursor->button.notify = onButton;
+    wl_signal_add(&cursor->wlrCursor->events.button, &cursor->button);
+    cursor->axis.notify = onAxis;
+    wl_signal_add(&cursor->wlrCursor->events.axis, &cursor->axis);
 
     cursor->swipeBegin.notify = onSwipeBegin;
     wl_signal_add(&cursor->wlrCursor->events.swipe_begin, &cursor->swipeBegin);

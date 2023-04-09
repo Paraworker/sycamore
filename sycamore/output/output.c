@@ -105,7 +105,7 @@ void outputEnsureCursor(Output *output, Cursor *cursor) {
     boxGetCenterCoords(&outputBox, &centerX, &centerY);
 
     cursorWarp(cursor, centerX, centerY);
-    seatopPointerRebase(cursor->seat);
+    cursorRebase(cursor);
 }
 
 static void outputSetupCursor(Output *output, Cursor *cursor) {

@@ -46,7 +46,7 @@ void viewMap(View *view, struct wlr_output *fullscreenOutput, bool maximized, bo
 
     viewSetFocus(view);
 
-    seatopPointerRebase(server.seat);
+    cursorRebase(server.seat->cursor);
 }
 
 void viewUnmap(View *view) {
@@ -65,7 +65,7 @@ void viewUnmap(View *view) {
 
     view->mapped = false;
 
-    seatopPointerRebase(server.seat);
+    cursorRebase(server.seat->cursor);
 }
 
 void viewDestroy(View *view) {

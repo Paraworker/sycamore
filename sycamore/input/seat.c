@@ -95,7 +95,7 @@ static void onStartDrag(struct wl_listener *listener, void *data) {
         seatDragIconUpdatePosition(seat, icon);
     }
 
-    seatopSetBasicFull(seat);
+    seatopSetDefault(seat);
 }
 
 void seatDragIconUpdatePosition(Seat *seat, DragIcon *icon) {
@@ -139,9 +139,9 @@ void seatUpdateCapabilities(Seat *seat) {
 
     wlr_seat_set_capabilities(seat->wlrSeat, caps);
 
-    // Switch to seatop_basic_pointer_no if seat doesn't have pointer capability.
+    // Disable cursor if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0) {
-        seatopSetBasicPointerNo(seat);
+        cursorDisable(seat->cursor);
     }
 }
 
@@ -229,8 +229,7 @@ static void onSeatRequestSetCursor(struct wl_listener *listener, void *data) {
         return;
     }
 
-    cursorSetImageSurface(seat->cursor, event->surface,
-                          event->hotspot_x, event->hotspot_y);
+    cursorSetSurface(seat->cursor, event->surface, event->hotspot_x, event->hotspot_y);
 }
 
 static void onSeatRequestSetSelection(struct wl_listener *listener, void *data) {
@@ -363,7 +362,7 @@ Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout) {
     wl_signal_add(&seat->wlrSeat->events.destroy,
                   &seat->destroy);
 
-    seatopSetBasicPointerNo(seat);
+    seatopSetDefault(seat);
 
     return seat;
 }

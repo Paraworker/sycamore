@@ -68,7 +68,7 @@ void layerMap(Layer *layer) {
 
     layer->mapped = true;
 
-    seatopPointerRebase(seat);
+    cursorRebase(seat->cursor);
 }
 
 void layerUnmap(Layer *layer) {
@@ -88,7 +88,7 @@ void layerUnmap(Layer *layer) {
 
     layer->mapped = false;
 
-    seatopPointerRebase(seat);
+    cursorRebase(seat->cursor);
 }
 
 struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type) {

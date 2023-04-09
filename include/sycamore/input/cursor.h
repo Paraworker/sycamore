@@ -2,39 +2,32 @@
 #define SYCAMORE_CURSOR_H
 
 #include <stdbool.h>
-#include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_pointer_gestures_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 
-typedef struct Cursor        Cursor;
-typedef enum CursorImageMode CursorImageMode;
-typedef struct Output        Output;
-typedef struct Seat          Seat;
-
-enum CursorImageMode {
-    HIDDEN,
-    IMAGE,
-    SURFACE,
-};
+typedef struct Cursor Cursor;
+typedef struct Output Output;
+typedef struct Seat   Seat;
 
 struct Cursor {
     struct wlr_cursor              *wlrCursor;
     struct wlr_xcursor_manager     *xcursorManager;
     struct wlr_pointer_gestures_v1 *gestures;
 
-    CursorImageMode imageMode;
-    const char      *image; // image name for IMAGE mode
+    bool       enabled;
+    const char *image;
 
     size_t pressedButtonCount;
 
-    struct wl_listener cursorMotion;
-    struct wl_listener cursorMotionAbsolute;
-    struct wl_listener cursorButton;
-    struct wl_listener cursorAxis;
-    struct wl_listener cursorFrame;
+    struct wl_listener frame;
+
+    struct wl_listener motion;
+    struct wl_listener motionAbsolute;
+    struct wl_listener button;
+    struct wl_listener axis;
 
     struct wl_listener swipeBegin;
     struct wl_listener swipeUpdate;
@@ -48,28 +41,28 @@ struct Cursor {
     Seat *seat;
 };
 
-void cursorSetHidden(Cursor *cursor);
+void cursorDisable(Cursor *cursor);
+
+void cursorEnable(Cursor *cursor);
 
 /**
  * @brief Set cursor image
  *
- * @note This will avoid setting duplicate image. If image is NULL, hide cursor.
+ * @note Pass image NULL will hide cursor
  */
 void cursorSetImage(Cursor *cursor, const char *image);
 
 /**
  * @brief Set cursor image surface
  *
- * @note If surface is NULL, hide cursor.
  */
-void cursorSetImageSurface(Cursor *cursor, struct wlr_surface *surface, int32_t hotspotX, int32_t hotspotY);
+void cursorSetSurface(Cursor *cursor, struct wlr_surface *surface, int32_t hotspotX, int32_t hotspotY);
+
+void cursorRefresh(Cursor *cursor);
+
+void cursorRebase(Cursor *cursor);
 
 void cursorWarp(Cursor *cursor, double lx, double ly);
-
-/**
- * @brief Warp cursor again and refresh image
- */
-void cursorRefresh(Cursor *cursor);
 
 Output *cursorAtOutput(Cursor *cursor);
 

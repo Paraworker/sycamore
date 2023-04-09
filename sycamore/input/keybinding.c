@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <wlr/backend/session.h>
 #include <wlr/util/log.h>
+#include "sycamore/input/cursor.h"
 #include "sycamore/input/keybinding.h"
 #include "sycamore/input/seat.h"
 #include "sycamore/desktop/view.h"
@@ -59,7 +60,7 @@ static void cycleView(Keybinding *keybinding) {
 
     View *nextView = wl_container_of(server.mappedViews.prev, nextView, link);
     viewSetFocus(nextView);
-    seatopPointerRebase(server.seat);
+    cursorRebase(server.seat->cursor);
 }
 
 // action

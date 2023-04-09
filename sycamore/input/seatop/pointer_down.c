@@ -1,9 +1,10 @@
+#include <wlr/types/wlr_compositor.h>
 #include "sycamore/input/cursor.h"
 #include "sycamore/input/seat.h"
 
 static void onSurfaceDestroy(struct wl_listener *listener, void *data) {
     SeatopPointerDownData *d = wl_container_of(listener, d, surfaceDestroy);
-    seatopSetBasicFull(d->seat);
+    seatopSetDefault(d->seat);
 }
 
 static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *event) {
@@ -11,7 +12,7 @@ static void handlePointerButton(Seat *seat, struct wlr_pointer_button_event *eve
                                    event->button, event->state);
 
     if (seat->cursor->pressedButtonCount == 0) {
-        seatopSetBasicFull(seat);
+        seatopSetDefault(seat);
     }
 }
 
