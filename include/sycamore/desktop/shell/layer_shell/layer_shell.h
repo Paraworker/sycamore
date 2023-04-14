@@ -3,8 +3,6 @@
 
 #include <wlr/types/wlr_layer_shell_v1.h>
 
-#define SYCAMORE_LAYER_SHELL_VERSION 4
-
 typedef struct LayerShell LayerShell;
 
 struct LayerShell {

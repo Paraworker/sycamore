@@ -17,6 +17,7 @@
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/util/log.h>
+#include "sycamore/defines.h"
 #include "sycamore/desktop/shell/layer_shell/layer_shell.h"
 #include "sycamore/desktop/shell/xdg_shell/xdg_shell.h"
 #include "sycamore/input/keybinding.h"
@@ -66,7 +67,7 @@ bool serverInit() {
         return false;
     }
 
-    server.compositor = wlr_compositor_create(server.wlDisplay, server.renderer);
+    server.compositor = wlr_compositor_create(server.wlDisplay, COMPOSITOR_VERSION, server.renderer);
     if (!server.compositor) {
         wlr_log(WLR_ERROR, "Unable to create compositor");
         return false;

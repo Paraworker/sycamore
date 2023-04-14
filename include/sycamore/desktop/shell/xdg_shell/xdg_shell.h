@@ -3,8 +3,6 @@
 
 #include <wlr/types/wlr_xdg_shell.h>
 
-#define SYCAMORE_XDG_SHELL_VERSION 3
-
 typedef struct XdgShell XdgShell;
 
 struct XdgShell {

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/log.h>
+#include "sycamore/defines.h"
 #include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/desktop/shell/layer_shell/layer_shell.h"
 #include "sycamore/output/output.h"
@@ -43,7 +44,7 @@ struct LayerShell *layerShellCreate(struct wl_display *display) {
         return NULL;
     }
 
-    layerShell->wlrLayerShell = wlr_layer_shell_v1_create(display, SYCAMORE_LAYER_SHELL_VERSION);
+    layerShell->wlrLayerShell = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
     if (!layerShell->wlrLayerShell) {
         wlr_log(WLR_ERROR, "Unable to create wlrLayerShell");
         free(layerShell);

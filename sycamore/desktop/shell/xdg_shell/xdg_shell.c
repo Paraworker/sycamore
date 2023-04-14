@@ -2,6 +2,7 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
+#include "sycamore/defines.h"
 #include "sycamore/desktop/shell/xdg_shell/xdg_shell.h"
 #include "sycamore/desktop/shell/xdg_shell/xdg_shell_view.h"
 #include "sycamore/server.h"
@@ -51,7 +52,7 @@ XdgShell *xdgShellCreate(struct wl_display *display) {
         return NULL;
     }
 
-    xdgShell->wlrXdgShell = wlr_xdg_shell_create(display, SYCAMORE_XDG_SHELL_VERSION);
+    xdgShell->wlrXdgShell = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
     if (!xdgShell->wlrXdgShell) {
         wlr_log(WLR_ERROR, "Unable to create wlrXdgShell");
         free(xdgShell);
