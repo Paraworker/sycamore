@@ -117,9 +117,8 @@ void viewSetFocus(View *view) {
     /* Activate the new view */
     view->interface->setActivated(view, true);
 
-    Seat *seat = server.seat;
-    if (!seat->focusedLayer) {
-        seatSetKeyboardFocus(seat, view->wlrSurface);
+    if (!server.focusedLayer) {
+        seatSetKeyboardFocus(server.seat, view->wlrSurface);
     }
 
     viewPtrConnect(&server.focusedView, view);

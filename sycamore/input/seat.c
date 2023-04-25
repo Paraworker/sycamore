@@ -325,7 +325,6 @@ Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout) {
     }
 
     seat->seatopImpl   = NULL;
-    seat->focusedLayer = NULL;
     wl_list_init(&seat->devices);
 
     seat->wlrSeat = wlr_seat_create(display, "seat0");

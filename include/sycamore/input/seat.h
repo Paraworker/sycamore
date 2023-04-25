@@ -8,7 +8,6 @@
 typedef struct Cursor     Cursor;
 typedef struct Drag       Drag;
 typedef struct DragIcon   DragIcon;
-typedef struct Layer      Layer;
 typedef struct Seat       Seat;
 
 typedef struct SeatopImpl SeatopImpl;
@@ -88,8 +87,6 @@ struct Seat {
 
     const SeatopImpl *seatopImpl;
     SeatopData       seatopData;
-
-    Layer            *focusedLayer;
 
     struct wl_listener requestSetCursor;
     struct wl_listener requestSetSelection;

@@ -34,6 +34,7 @@ bool serverInit() {
     wl_list_init(&server.allOutputs);
     wl_list_init(&server.mappedViews);
     server.focusedView.view = NULL;
+    server.focusedLayer     = NULL;
 
     server.wlDisplay = wl_display_create();
     server.backend = wlr_backend_autocreate(server.wlDisplay, &server.session);

@@ -16,6 +16,7 @@
 typedef struct Scene             Scene;
 typedef struct Seat              Seat;
 typedef struct XdgShell          XdgShell;
+typedef struct Layer             Layer;
 typedef struct LayerShell        LayerShell;
 typedef struct KeybindingManager KeybindingManager;
 
@@ -49,7 +50,9 @@ struct Server {
 
     struct wl_list allOutputs;
     struct wl_list mappedViews;
-    struct ViewPtr focusedView;
+
+    ViewPtr focusedView;
+    Layer   *focusedLayer;
 
     const char *socket;
 };

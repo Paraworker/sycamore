@@ -54,21 +54,20 @@ void layerMap(Layer *layer) {
     }
 
     struct wlr_layer_surface_v1 *layerSurface = layer->layerSurface;
-    Seat *seat = server.seat;
 
     // focus on new layerSurface
     if (layerSurface->current.keyboard_interactive &&
         (layerSurface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY ||
          layerSurface->current.layer == ZWLR_LAYER_SHELL_V1_LAYER_TOP)) {
-        seatSetKeyboardFocus(seat, layerSurface->surface);
-        seat->focusedLayer = layer;
+        seatSetKeyboardFocus(server.seat, layerSurface->surface);
+        server.focusedLayer = layer;
 
         arrangeLayers(layer->output);
     }
 
     layer->mapped = true;
 
-    cursorRebase(seat->cursor);
+    cursorRebase(server.seat->cursor);
 }
 
 void layerUnmap(Layer *layer) {
@@ -76,19 +75,17 @@ void layerUnmap(Layer *layer) {
         return;
     }
 
-    Seat *seat = server.seat;
-
-    if (seat->focusedLayer == layer) {
-        seat->focusedLayer = NULL;
+    if (server.focusedLayer == layer) {
+        server.focusedLayer = NULL;
         View *view = server.focusedView.view;
         if (view) {
-            seatSetKeyboardFocus(seat, view->wlrSurface);
+            seatSetKeyboardFocus(server.seat, view->wlrSurface);
         }
     }
 
     layer->mapped = false;
 
-    cursorRebase(seat->cursor);
+    cursorRebase(server.seat->cursor);
 }
 
 struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type) {
