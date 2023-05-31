@@ -75,7 +75,7 @@ View *getViewFromNode(struct wlr_scene_node *node) {
     if (node->type == WLR_SCENE_NODE_BUFFER) {
         tree = node->parent;
     } else if (node->type == WLR_SCENE_NODE_TREE) {
-        tree = wl_container_of(node, tree, node);
+        tree = wlr_scene_tree_from_node(node);
     } else {
         return NULL;
     }
