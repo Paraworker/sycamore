@@ -38,7 +38,7 @@ static void onDragDestroy(struct wl_listener *listener, void *data) {
     Drag *drag = wl_container_of(listener, drag, destroy);
 
     wl_list_remove(&drag->destroy.link);
-    drag->wlrDrag->data = NULL;
+    drag->wlrDrag->data = nullptr;
 
     free(drag);
 }
@@ -47,7 +47,7 @@ static void onDragIconDestroy(struct wl_listener *listener, void *data) {
     DragIcon *icon = wl_container_of(listener, icon, destroy);
 
     wl_list_remove(&icon->destroy.link);
-    icon->wlrDragIcon->data = NULL;
+    icon->wlrDragIcon->data = nullptr;
 
     free(icon);
 }
@@ -253,8 +253,8 @@ static void onSeatRequestSetPrimarySelection(struct wl_listener *listener, void 
 static void onSeatDestroy(struct wl_listener *listener, void *data) {
     Seat *seat = wl_container_of(listener, seat, destroy);
 
-    seat->wlrSeat = NULL;
-    server.seat   = NULL;
+    seat->wlrSeat = nullptr;
+    server.seat   = nullptr;
 
     seatDestroy(seat);
 }
@@ -279,7 +279,7 @@ void seatPointerUpdateFocus(Seat *seat, uint32_t timeMsec) {
 void seatSetKeyboardFocus(Seat *seat, struct wlr_surface *surface) {
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat->wlrSeat);
     if (!keyboard) {
-        wlr_seat_keyboard_notify_enter(seat->wlrSeat, surface, NULL, 0, NULL);
+        wlr_seat_keyboard_notify_enter(seat->wlrSeat, surface, nullptr, 0, nullptr);
         return;
     }
 
@@ -321,17 +321,17 @@ Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout) {
     Seat *seat = calloc(1, sizeof(Seat));
     if (!seat) {
         wlr_log(WLR_ERROR, "Unable to allocate Seat");
-        return NULL;
+        return nullptr;
     }
 
-    seat->seatopImpl   = NULL;
+    seat->seatopImpl = nullptr;
     wl_list_init(&seat->devices);
 
     seat->wlrSeat = wlr_seat_create(display, "seat0");
     if (!seat->wlrSeat) {
         wlr_log(WLR_ERROR, "Unable to create wlrSeat");
         free(seat);
-        return NULL;
+        return nullptr;
     }
 
     seat->cursor = cursorCreate(seat, display, layout);
@@ -339,7 +339,7 @@ Seat *seatCreate(struct wl_display *display, struct wlr_output_layout *layout) {
         wlr_log(WLR_ERROR, "Unable to create Cursor");
         wlr_seat_destroy(seat->wlrSeat);
         free(seat);
-        return NULL;
+        return nullptr;
     }
 
     seat->requestSetCursor.notify = onSeatRequestSetCursor;

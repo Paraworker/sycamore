@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_CURSOR_H
 #define SYCAMORE_CURSOR_H
 
-#include <stdbool.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_pointer.h>

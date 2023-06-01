@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_VIEW_H
 #define SYCAMORE_VIEW_H
 
-#include <stdbool.h>
 #include <wlr/util/box.h>
 #include "sycamore/output/scene.h"
 

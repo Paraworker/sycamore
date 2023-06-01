@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 #include <wlr/types/wlr_scene.h>
@@ -38,7 +37,7 @@ static void onOutputRequestState(struct wl_listener *listener, void *data) {
 static void onOutputDestroy(struct wl_listener *listener, void *data) {
     Output *output = wl_container_of(listener, output, destroy);
 
-    output->wlrOutput = NULL;
+    output->wlrOutput = nullptr;
 
     outputDestroy(output);
 }
@@ -47,7 +46,7 @@ Output *outputCreate(struct wlr_output *wlrOutput) {
     Output *output = calloc(1, sizeof(Output));
     if (!output) {
         wlr_log(WLR_ERROR, "Unable to allocate Output");
-        return NULL;
+        return nullptr;
     }
 
     output->wlrOutput = wlrOutput;
@@ -69,7 +68,7 @@ Output *outputCreate(struct wlr_output *wlrOutput) {
 
 struct wlr_output_mode *outputMaxMode(struct wlr_output *output) {
     if (!output || wl_list_empty(&output->modes)) {
-        return NULL;
+        return nullptr;
     }
 
     uint32_t maxRefresh = 0, maxResolution = 0;

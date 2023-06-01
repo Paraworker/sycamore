@@ -187,7 +187,7 @@ static inline void seatopEnd(Seat *seat) {
         seat->seatopImpl->end(seat);
     }
 
-    seat->seatopImpl = NULL;
+    seat->seatopImpl = nullptr;
 }
 
 void seatopSetDefault(Seat *seat);

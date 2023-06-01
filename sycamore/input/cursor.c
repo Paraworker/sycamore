@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wlr/types/wlr_cursor.h>
@@ -15,14 +14,14 @@
 #include "sycamore/server.h"
 
 static inline void hideCursor(Cursor *cursor) {
-    cursor->image = NULL;
-    wlr_cursor_set_image(cursor->wlrCursor, NULL, 0, 0, 0, 0, 0, 0);
+    cursor->image = nullptr;
+    wlr_cursor_set_image(cursor->wlrCursor, nullptr, 0, 0, 0, 0, 0, 0);
 }
 
 static bool xcursorInit(Cursor *cursor, const char *theme, uint32_t size) {
     if (cursor->xcursorManager) {
         wlr_xcursor_manager_destroy(cursor->xcursorManager);
-        cursor->xcursorManager = NULL;
+        cursor->xcursorManager = nullptr;
     }
 
     char sizeFmt[16];
@@ -101,7 +100,7 @@ void cursorSetSurface(Cursor *cursor, struct wlr_surface *surface, int32_t hotsp
         return;
     }
 
-    cursor->image = NULL;
+    cursor->image = nullptr;
 
     wlr_cursor_set_surface(cursor->wlrCursor, surface, hotspotX, hotspotY);
 }
@@ -129,14 +128,14 @@ void cursorRebase(Cursor *cursor) {
 }
 
 void cursorWarp(Cursor *cursor, double lx, double ly) {
-    wlr_cursor_warp(cursor->wlrCursor, NULL, lx, ly);
+    wlr_cursor_warp(cursor->wlrCursor, nullptr, lx, ly);
 }
 
 Output *cursorAtOutput(Cursor *cursor) {
     struct wlr_cursor *wlrCursor = cursor->wlrCursor;
     struct wlr_output *output = wlr_output_layout_output_at(server.outputLayout, wlrCursor->x, wlrCursor->y);
     if (!output) {
-        return NULL;
+        return nullptr;
     }
 
     return output->data;
@@ -279,27 +278,27 @@ Cursor *cursorCreate(Seat *seat, struct wl_display *display, struct wlr_output_l
     Cursor *cursor = calloc(1, sizeof(Cursor));
     if (!cursor) {
         wlr_log(WLR_ERROR, "Unable to allocate Cursor");
-        return NULL;
+        return nullptr;
     }
 
     cursor->enabled            = false;
-    cursor->image              = NULL;
-    cursor->xcursorManager     = NULL;
+    cursor->image              = nullptr;
+    cursor->xcursorManager     = nullptr;
     cursor->pressedButtonCount = 0;
     cursor->seat               = seat;
 
     cursor->wlrCursor = wlr_cursor_create();
     if (!cursor->wlrCursor) {
         free(cursor);
-        return NULL;
+        return nullptr;
     }
 
     wlr_cursor_attach_output_layout(cursor->wlrCursor, layout);
 
-    if (!xcursorInit(cursor, NULL, 24)) {
+    if (!xcursorInit(cursor, nullptr, 24)) {
         wlr_cursor_destroy(cursor->wlrCursor);
         free(cursor);
-        return NULL;
+        return nullptr;
     }
 
     cursor->gestures = wlr_pointer_gestures_v1_create(display);
@@ -307,7 +306,7 @@ Cursor *cursorCreate(Seat *seat, struct wl_display *display, struct wlr_output_l
         wlr_xcursor_manager_destroy(cursor->xcursorManager);
         wlr_cursor_destroy(cursor->wlrCursor);
         free(cursor);
-        return NULL;
+        return nullptr;
     }
 
     cursor->frame.notify = onFrame;

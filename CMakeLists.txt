@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(sycamore C)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 
 # main sources and headers
 set(HEADER_DIRECTORY "include")

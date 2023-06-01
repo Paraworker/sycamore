@@ -32,14 +32,14 @@ bool handleKeybinding(KeybindingManager *manager, uint32_t modifiers, xkb_keysym
 // action
 static void openLauncher(Keybinding *keybinding) {
     if (fork() == 0) {
-        execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus", (void *)NULL);
+        execl("/bin/sh", "/bin/sh", "-c", "fuzzel -i Papirus", nullptr);
     }
 }
 
 // action
 static void openTerminal(Keybinding *keybinding) {
     if (fork() == 0) {
-        execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", (void *)NULL);
+        execl("/bin/sh", "/bin/sh", "-c", "gnome-terminal", nullptr);
     }
 }
 
@@ -80,7 +80,7 @@ static KeybindingModifiersNode *keybindingModifiersNodeCreate(KeybindingManager 
     KeybindingModifiersNode *node = calloc(1, sizeof(KeybindingModifiersNode));
     if (!node) {
         wlr_log(WLR_ERROR, "Unable to allocate KeybindingModifiersNode");
-        return NULL;
+        return nullptr;
     }
 
     node->manager   = manager;
@@ -96,7 +96,7 @@ static Keybinding *keybindingCreate(KeybindingModifiersNode *node, uint32_t modi
     Keybinding *keybinding = calloc(1, sizeof(Keybinding));
     if (!keybinding) {
         wlr_log(WLR_ERROR, "Unable to allocate Keybinding");
-        return NULL;
+        return nullptr;
     }
 
     keybinding->modifiers     = modifiers;
@@ -131,7 +131,7 @@ KeybindingManager *keybindingManagerCreate() {
     KeybindingManager *manager = calloc(1, sizeof(KeybindingManager));
     if (!manager) {
         wlr_log(WLR_ERROR, "Unable to allocate KeybindingManager");
-        return NULL;
+        return nullptr;
     }
 
     wl_list_init(&manager->modifiersNodes);
@@ -141,7 +141,7 @@ KeybindingManager *keybindingManagerCreate() {
     if (!logo) {
         wlr_log(WLR_ERROR, "Unable to create KeybindingModifiersNode: logo");
         keybindingManagerDestroy(manager);
-        return NULL;
+        return nullptr;
     }
     keybindingCreate(logo, logo->modifiers, XKB_KEY_d, openLauncher);
     keybindingCreate(logo, logo->modifiers, XKB_KEY_Return, openTerminal);
@@ -154,7 +154,7 @@ KeybindingManager *keybindingManagerCreate() {
     if (!ctrlAlt) {
         wlr_log(WLR_ERROR, "Unable to create KeybindingModifiersNode: ctrlAlt");
         keybindingManagerDestroy(manager);
-        return NULL;
+        return nullptr;
     }
     keybindingCreate(ctrlAlt, ctrlAlt->modifiers, XKB_KEY_Escape, terminateServer);
     keybindingCreate(ctrlAlt, ctrlAlt->modifiers, XKB_KEY_XF86Switch_VT_1, switchVT);

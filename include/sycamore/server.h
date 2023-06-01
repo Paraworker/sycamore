@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_SERVER_H
 #define SYCAMORE_SERVER_H
 
-#include <stdbool.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/backend.h>

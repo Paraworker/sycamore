@@ -13,15 +13,15 @@ static const char usage[] =
         "\n";
 
 static const struct option longOptions[] = {
-        {"help", no_argument, NULL, 'h'},
-        {"startup_cmd", required_argument, NULL, 's'},
-        {0, 0, NULL, 0}
+        {"help", no_argument, nullptr, 'h'},
+        {"startup_cmd", required_argument, nullptr, 's'},
+        {0, 0, nullptr, 0}
 };
 
 int main(int argc, char **argv) {
-    wlr_log_init(WLR_DEBUG, NULL);
+    wlr_log_init(WLR_DEBUG, nullptr);
 
-    char *startupCmd = NULL;
+    char *startupCmd = nullptr;
 
     int c, i;
     while ((c = getopt_long(argc, argv, "s:h", longOptions, &i)) != -1) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 
     if (startupCmd) {
         if (fork() == 0) {
-            execl("/bin/sh", "/bin/sh", "-c", startupCmd, (void *)NULL);
+            execl("/bin/sh", "/bin/sh", "-c", startupCmd, nullptr);
         }
     }
 

@@ -81,7 +81,7 @@ Output *viewGetOutput(View *view) {
 
     struct wl_list *surfaceOutputs = &surface->current_outputs;
     if (wl_list_empty(surfaceOutputs)) {
-        return NULL;
+        return nullptr;
     }
 
     struct wlr_surface_output *surfaceOutput =
@@ -236,6 +236,6 @@ void viewPtrConnect(ViewPtr *ptr, View *view) {
 }
 
 void viewPtrDisconnect(ViewPtr *ptr) {
-    ptr->view = NULL;
+    ptr->view = nullptr;
     wl_list_remove(&ptr->link);
 }

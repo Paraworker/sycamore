@@ -35,7 +35,7 @@ static void onXdgShellViewRequestFullscreen(struct wl_listener *listener, void *
     struct wlr_xdg_toplevel_requested *requested = &view->xdgToplevel->requested;
 
     if (!requested->fullscreen) {
-        viewSetFullscreen(base, NULL, false);
+        viewSetFullscreen(base, nullptr, false);
         return;
     }
 
@@ -54,7 +54,7 @@ static void onXdgShellViewRequestMaximize(struct wl_listener *listener, void *da
     View *base = &view->baseView;
 
     if (!view->xdgToplevel->requested.maximized) {
-        viewSetMaximized(base, NULL, false);
+        viewSetMaximized(base, nullptr, false);
         return;
     }
 
@@ -195,7 +195,7 @@ XdgShellView *xdgShellViewCreate(struct wlr_xdg_toplevel *toplevel) {
     XdgShellView *view = calloc(1, sizeof(XdgShellView));
     if (!view) {
         wlr_log(WLR_ERROR, "Failed to allocate XdgShellView");
-        return NULL;
+        return nullptr;
     }
 
     viewInit(&view->baseView, VIEW_TYPE_XDG_SHELL,

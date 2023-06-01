@@ -14,7 +14,7 @@ SeatDevice *seatDeviceCreate(Seat *seat, struct wlr_input_device *wlrDevice,
         void *derivedDevice, DerivedSeatDeviceDestroy derivedDestroy) {
     SeatDevice *seatDevice = calloc(1, sizeof(SeatDevice));
     if (!seatDevice) {
-        return NULL;
+        return nullptr;
     }
 
     seatDevice->wlrDevice      = wlrDevice;

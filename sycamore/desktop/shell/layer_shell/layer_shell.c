@@ -41,14 +41,14 @@ struct LayerShell *layerShellCreate(struct wl_display *display) {
     LayerShell *layerShell = calloc(1, sizeof(LayerShell));
     if (!layerShell) {
         wlr_log(WLR_ERROR, "Unable to allocate LayerShell");
-        return NULL;
+        return nullptr;
     }
 
     layerShell->wlrLayerShell = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
     if (!layerShell->wlrLayerShell) {
         wlr_log(WLR_ERROR, "Unable to create wlrLayerShell");
         free(layerShell);
-        return NULL;
+        return nullptr;
     }
 
     layerShell->newLayerShellSurface.notify = onNewLayerShellSurface;

@@ -20,14 +20,14 @@ Pointer *pointerCreate(Seat *seat, struct wlr_input_device *wlrDevice) {
     Pointer *pointer = calloc(1, sizeof(Pointer));
     if (!pointer) {
         wlr_log(WLR_ERROR, "Unable to allocate Pointer");
-        return NULL;
+        return nullptr;
     }
 
     pointer->base = seatDeviceCreate(seat, wlrDevice, pointer, pointerDestroy);
     if (!pointer->base) {
         wlr_log(WLR_ERROR, "Unable to create seatDevice");
         free(pointer);
-        return NULL;
+        return nullptr;
     }
 
     pointer->wlrPointer = wlr_pointer_from_input_device(wlrDevice);

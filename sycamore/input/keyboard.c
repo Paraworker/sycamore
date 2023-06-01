@@ -59,7 +59,7 @@ static void keyboardDestroy(SeatDevice *seatDevice) {
     struct wlr_seat *wlrSeat = seatDevice->seat->wlrSeat;
     struct wlr_keyboard *wlrKeyboard = seatDevice->keyboard->wlrKeyboard;
     if (wlr_seat_get_keyboard(wlrSeat) == wlrKeyboard) {
-        wlr_seat_set_keyboard(wlrSeat, NULL);
+        wlr_seat_set_keyboard(wlrSeat, nullptr);
     }
 
     free(seatDevice->keyboard);
@@ -69,14 +69,14 @@ Keyboard *keyboardCreate(Seat *seat, struct wlr_input_device *wlrDevice) {
     Keyboard *keyboard = calloc(1, sizeof(Keyboard));
     if (!keyboard) {
         wlr_log(WLR_ERROR, "Unable to allocate Keyboard");
-        return NULL;
+        return nullptr;
     }
 
     keyboard->base = seatDeviceCreate(seat, wlrDevice, keyboard, keyboardDestroy);
     if (!keyboard->base) {
         wlr_log(WLR_ERROR, "Unable to create seatDevice");
         free(keyboard);
-        return NULL;
+        return nullptr;
     }
 
     keyboard->wlrKeyboard = wlr_keyboard_from_input_device(wlrDevice);
@@ -95,10 +95,10 @@ static struct xkb_keymap *keyboardCompileKeymap() {
     struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
     if (!context) {
         wlr_log(WLR_ERROR, "Unable to create xkb_context");
-        return NULL;
+        return nullptr;
     }
 
-    struct xkb_keymap *keymap = xkb_keymap_new_from_names(context, NULL,
+    struct xkb_keymap *keymap = xkb_keymap_new_from_names(context, nullptr,
                                                           XKB_KEYMAP_COMPILE_NO_FLAGS);
     xkb_context_unref(context);
     return keymap;

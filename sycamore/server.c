@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
@@ -33,8 +32,8 @@ bool serverInit() {
 
     wl_list_init(&server.allOutputs);
     wl_list_init(&server.mappedViews);
-    server.focusedView.view = NULL;
-    server.focusedLayer     = NULL;
+    server.focusedView.view = nullptr;
+    server.focusedLayer     = nullptr;
 
     server.wlDisplay = wl_display_create();
     server.backend = wlr_backend_autocreate(server.wlDisplay, &server.session);
@@ -56,7 +55,7 @@ bool serverInit() {
 
     wlr_renderer_init_wl_shm(server.renderer, server.wlDisplay);
 
-    if (wlr_renderer_get_dmabuf_texture_formats(server.renderer) != NULL) {
+    if (wlr_renderer_get_dmabuf_texture_formats(server.renderer) != nullptr) {
         wlr_drm_create(server.wlDisplay, server.renderer);
         server.dmabuf = wlr_linux_dmabuf_v1_create_with_renderer(
                 server.wlDisplay, 4, server.renderer);

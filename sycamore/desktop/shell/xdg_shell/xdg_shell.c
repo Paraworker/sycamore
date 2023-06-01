@@ -49,14 +49,14 @@ XdgShell *xdgShellCreate(struct wl_display *display) {
     XdgShell *xdgShell = calloc(1, sizeof(XdgShell));
     if (!xdgShell) {
         wlr_log(WLR_ERROR, "Unable to allocate XdgShell");
-        return NULL;
+        return nullptr;
     }
 
     xdgShell->wlrXdgShell = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
     if (!xdgShell->wlrXdgShell) {
         wlr_log(WLR_ERROR, "Unable to create wlrXdgShell");
         free(xdgShell);
-        return NULL;
+        return nullptr;
     }
 
     xdgShell->newXdgShellSurface.notify = onNewXdgShellSurface;

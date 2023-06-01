@@ -21,7 +21,7 @@ static void onLayerUnmap(struct wl_listener *listener, void *data) {
 static void onLayerDestroy(struct wl_listener *listener, void *data) {
     Layer *layer = wl_container_of(listener, layer, destroy);
 
-    layer->layerSurface = NULL;
+    layer->layerSurface = nullptr;
 
     layerDestroy(layer);
 }
@@ -74,7 +74,7 @@ void layerUnmap(Layer *layer) {
     }
 
     if (server.focusedLayer == layer) {
-        server.focusedLayer = NULL;
+        server.focusedLayer = nullptr;
         View *view = server.focusedView.view;
         if (view) {
             seatSetKeyboardFocus(server.seat, view->wlrSurface);
@@ -111,7 +111,7 @@ Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface) {
     Layer *layer = calloc(1, sizeof(Layer));
     if (!layer) {
         wlr_log(WLR_ERROR, "Unable to allocate layer");
-        return NULL;
+        return nullptr;
     }
 
     /* Allocate an output for this layer. */
@@ -120,7 +120,7 @@ Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface) {
         if (wl_list_empty(allOutputs)) {
             wlr_log(WLR_ERROR, "No output for layerSurface");
             free(layer);
-            return NULL;
+            return nullptr;
         }
 
         Output *output = wl_container_of(allOutputs->next, output, link);
