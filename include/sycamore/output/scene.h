@@ -1,6 +1,7 @@
 #ifndef SYCAMORE_SCENE_H
 #define SYCAMORE_SCENE_H
 
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_presentation_time.h>
@@ -20,7 +21,7 @@ enum SceneDescriptorType {
 
 struct Scene {
     SceneDescriptorType sceneDesc; // must be first
-    struct wlr_scene *wlrScene;
+    struct wlr_scene    *wlrScene;
 
     // tree structure:
     // - root
@@ -53,5 +54,7 @@ void sceneDestroy(Scene *scene);
 struct wlr_surface *getSurfaceFromNode(struct wlr_scene_node *node);
 
 View *getViewFromNode(struct wlr_scene_node *node);
+
+struct wlr_scene_tree *sceneGetLayerTree(Scene *scene, enum zwlr_layer_shell_v1_layer type);
 
 #endif //SYCAMORE_SCENE_H

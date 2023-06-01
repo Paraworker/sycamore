@@ -90,3 +90,18 @@ View *getViewFromNode(struct wlr_scene_node *node) {
 
     return tree->node.data;
 }
+
+struct wlr_scene_tree *sceneGetLayerTree(Scene *scene, enum zwlr_layer_shell_v1_layer type) {
+    switch (type) {
+        case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
+            return scene->shell.background;
+        case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
+            return scene->shell.bottom;
+        case ZWLR_LAYER_SHELL_V1_LAYER_TOP:
+            return scene->shell.top;
+        case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
+            return scene->shell.overlay;
+        default:
+            return NULL;
+    }
+}

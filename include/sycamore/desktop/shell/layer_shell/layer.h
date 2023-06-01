@@ -10,14 +10,13 @@ typedef struct Layer  Layer;
 typedef struct Output Output;
 
 struct Layer {
-    SceneDescriptorType sceneDesc;    //must be first
-    struct wlr_layer_surface_v1 *layerSurface;
+    SceneDescriptorType               sceneDesc;    //must be first
+    struct wlr_layer_surface_v1       *layerSurface;
     struct wlr_scene_layer_surface_v1 *scene;
 
-    bool mapped;
-
-    bool linked;
     struct wl_list link;
+    bool           linked;
+    bool           mapped;
 
     struct wl_listener destroy;
     struct wl_listener map;
@@ -36,7 +35,5 @@ Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface);
 void layerDestroy(Layer *layer);
 
 void arrangeLayers(Output *output);
-
-struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type);
 
 #endif //SYCAMORE_LAYER_H

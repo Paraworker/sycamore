@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
-#include <wlr/types/wlr_scene.h>
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include "sycamore/desktop/shell/layer_shell/layer.h"
@@ -36,8 +35,7 @@ static void onLayerSurfaceCommit(struct wl_listener *listener, void *data) {
 
     if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
         enum zwlr_layer_shell_v1_layer layerType = layerSurface->current.layer;
-        struct wlr_scene_tree *sceneTree = layerGetSceneTree(server.scene, layerType);
-        wlr_scene_node_reparent(&layer->scene->tree->node, sceneTree);
+        wlr_scene_node_reparent(&layer->scene->tree->node, sceneGetLayerTree(server.scene, layerType));
         wl_list_remove(&layer->link);
         wl_list_insert(&output->layers[layerType], &layer->link);
     }
@@ -88,22 +86,7 @@ void layerUnmap(Layer *layer) {
     cursorRebase(server.seat->cursor);
 }
 
-struct wlr_scene_tree *layerGetSceneTree(Scene *scene, enum zwlr_layer_shell_v1_layer type) {
-    switch (type) {
-        case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
-            return scene->shell.background;
-        case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
-            return scene->shell.bottom;
-        case ZWLR_LAYER_SHELL_V1_LAYER_TOP:
-            return scene->shell.top;
-        case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
-            return scene->shell.overlay;
-        default:
-            return NULL;
-    }
-}
-
-void arrange_surface(Output *output, struct wlr_box *fullArea,
+static void arrangeSurface(Output *output, struct wlr_box *fullArea,
         struct wlr_box *usableArea, enum zwlr_layer_shell_v1_layer type) {
     Layer *layer;
     wl_list_for_each(layer, &output->layers[type], link) {
@@ -118,7 +101,7 @@ void arrangeLayers(Output *output) {
     struct wlr_box usableArea = fullArea;
 
     for (int i = 0; i < LAYERS_ALL; ++i) {
-        arrange_surface(output, &fullArea, &usableArea, i);
+        arrangeSurface(output, &fullArea, &usableArea, i);
     }
 
     output->usableArea = usableArea;

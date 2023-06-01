@@ -5,6 +5,7 @@
 #include "sycamore/desktop/shell/layer_shell/layer.h"
 #include "sycamore/desktop/shell/layer_shell/layer_shell.h"
 #include "sycamore/output/output.h"
+#include "sycamore/output/scene.h"
 #include "sycamore/server.h"
 
 static void onNewLayerShellSurface(struct wl_listener *listener, void *data) {
@@ -20,8 +21,7 @@ static void onNewLayerShellSurface(struct wl_listener *listener, void *data) {
     enum zwlr_layer_shell_v1_layer layerType = layerSurface->pending.layer;
 
     // Add to scene graph
-    struct wlr_scene_tree *parent = layerGetSceneTree(server.scene, layerType);
-    layer->scene = wlr_scene_layer_surface_v1_create(parent, layer->layerSurface);
+    layer->scene = wlr_scene_layer_surface_v1_create(sceneGetLayerTree(server.scene, layerType), layer->layerSurface);
     layer->scene->tree->node.data = layer;
     layerSurface->surface->data = layer->scene->tree;
 
