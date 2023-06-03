@@ -204,9 +204,9 @@ XdgShellView *xdgShellViewCreate(struct wlr_xdg_toplevel *toplevel) {
     view->xdgToplevel = toplevel;
 
     view->map.notify = onXdgShellViewMap;
-    wl_signal_add(&toplevel->base->events.map, &view->map);
+    wl_signal_add(&toplevel->base->surface->events.map, &view->map);
     view->unmap.notify = onXdgShellViewUnmap;
-    wl_signal_add(&toplevel->base->events.unmap, &view->unmap);
+    wl_signal_add(&toplevel->base->surface->events.unmap, &view->unmap);
     view->destroy.notify = onXdgShellViewDestroy;
     wl_signal_add(&toplevel->base->events.destroy, &view->destroy);
 

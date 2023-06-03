@@ -40,8 +40,8 @@ static void onLayerSurfaceCommit(struct wl_listener *listener, void *data) {
         wl_list_insert(&output->layers[layerType], &layer->link);
     }
 
-    if (committed || layerSurface->mapped != layer->mapped) {
-        layer->mapped = layerSurface->mapped;
+    if (committed || layerSurface->surface->mapped != layer->mapped) {
+        layer->mapped = layerSurface->surface->mapped;
         arrangeLayers(output);
     }
 }
@@ -134,9 +134,9 @@ Layer *layerCreate(struct wlr_layer_surface_v1 *layerSurface) {
     layer->output       = layerSurface->output->data;
 
     layer->map.notify = onLayerMap;
-    wl_signal_add(&layerSurface->events.map, &layer->map);
+    wl_signal_add(&layerSurface->surface->events.map, &layer->map);
     layer->unmap.notify = onLayerUnmap;
-    wl_signal_add(&layerSurface->events.unmap, &layer->unmap);
+    wl_signal_add(&layerSurface->surface->events.unmap, &layer->unmap);
     layer->destroy.notify = onLayerDestroy;
     wl_signal_add(&layerSurface->events.destroy, &layer->destroy);
     layer->surfaceCommit.notify = onLayerSurfaceCommit;
