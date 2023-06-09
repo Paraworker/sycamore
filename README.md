@@ -14,6 +14,7 @@ Install dependencies:
 
 * cmake
 * libinput
+* spdlog
 * wayland
 * wlroots
 * xkbcommon
