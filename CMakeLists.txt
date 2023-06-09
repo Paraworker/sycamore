@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.21)
-project(sycamore C)
+project(sycamore)
 
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
 
 # main sources and headers
 set(HEADER_DIRECTORY "include")
 set(SOURCE_DIRECTORY "sycamore")
-set(PROTOCOL_DIRECTORY "protocol")
+set(PROTOCOL_DIRECTORY "protocols")
 
-file(GLOB_RECURSE SOURCES_FILE "${SOURCE_DIRECTORY}/*.c")
+file(GLOB_RECURSE SOURCES_FILE "${SOURCE_DIRECTORY}/*.cpp")
 file(GLOB_RECURSE HEADERS_FILE "${HEADER_DIRECTORY}/*.h")
 
 add_executable(
@@ -22,8 +22,9 @@ pkg_search_module(WLR REQUIRED wlroots)
 pkg_search_module(WS REQUIRED wayland-server)
 pkg_search_module(XKBCOMMON REQUIRED xkbcommon)
 pkg_search_module(LIBINPUT REQUIRED libinput)
+pkg_search_module(SPDLOG REQUIRED spdlog)
 
-set(CMAKE_C_FLAGS "-DWLR_USE_UNSTABLE")
+set(CMAKE_CXX_FLAGS "-DWLR_USE_UNSTABLE")
 
 include_directories(
         ${HEADER_DIRECTORY}
@@ -37,6 +38,7 @@ target_link_libraries(
         ${WS_LINK_LIBRARIES}
         ${XKBCOMMON_LINK_LIBRARIES}
         ${LIBINPUT_LINK_LIBRARIES}
+        ${SPDLOG_LINK_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
