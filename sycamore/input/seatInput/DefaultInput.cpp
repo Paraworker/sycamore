@@ -16,7 +16,7 @@ static inline void dragIconsUpdatePosition() {
 }
 
 void DefaultInput::onEnable() {
-    m_seat.getInput().rebasePointer();
+    DefaultInput::rebasePointer();
 }
 
 void DefaultInput::onDisable() {
