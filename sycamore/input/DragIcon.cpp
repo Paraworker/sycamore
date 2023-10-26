@@ -7,14 +7,14 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-void DragIcon::onCreate(wlr_drag_icon* handle, Seat& seat) {
+DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat) {
     auto tree = wlr_scene_drag_icon_create(Core::instance.scene->dragIcons, handle);
     if (!tree) {
         spdlog::error("Create scene tree for DragIcon failed!");
-        return;
+        return nullptr;
     }
 
-    new DragIcon(handle, tree, seat);
+    return new DragIcon(handle, tree, seat);
 }
 
 DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)

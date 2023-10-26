@@ -17,18 +17,11 @@ public:
 public:
     /**
      * @brief Create Scene
-     *
-     * Return nullptr on failed
+     * @return nullptr on failure
      */
     static Scene::Ptr create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
 
-public:
     ~Scene();
-
-    Scene(const Scene&) = delete;
-    Scene(Scene&&) = delete;
-    Scene& operator=(const Scene&) = delete;
-    Scene& operator=(Scene&&) = delete;
 
     auto getHandle() { return m_handle; }
 
@@ -43,6 +36,11 @@ public:
     static wlr_surface* surfaceFromNode(wlr_scene_node* node);
 
     static SceneElement* elementFromNode(wlr_scene_node* node);
+
+    Scene(const Scene&) = delete;
+    Scene(Scene&&) = delete;
+    Scene& operator=(const Scene&) = delete;
+    Scene& operator=(Scene&&) = delete;
 
 public:
     // tree structure:

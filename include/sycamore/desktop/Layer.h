@@ -12,21 +12,22 @@ class Output;
 
 class Layer {
 public:
-    static void onCreate(wlr_layer_surface_v1* layerSurface);
-
-public:
-    ~Layer();
-
-    Layer(const Layer&) = delete;
-    Layer(Layer&&) = delete;
-    Layer& operator=(const Layer&) = delete;
-    Layer& operator=(Layer&&) = delete;
+    /**
+     * @brief Create Layer
+     * @return nullptr on failure
+     */
+    static Layer* create(wlr_layer_surface_v1* layerSurface);
 
     void configure(const wlr_box& fullArea, wlr_box& usableArea);
 
     bool isFocusable() const;
 
     auto getBaseSurface() const { return m_layerSurface->surface; }
+
+    Layer(const Layer&) = delete;
+    Layer(Layer&&) = delete;
+    Layer& operator=(const Layer&) = delete;
+    Layer& operator=(Layer&&) = delete;
 
 public:
     struct {
@@ -39,6 +40,8 @@ public:
 
 private:
     Layer(wlr_layer_surface_v1* surface, wlr_scene_layer_surface_v1* helper);
+
+    ~Layer();
 
 private:
     wlr_layer_surface_v1*       m_layerSurface;

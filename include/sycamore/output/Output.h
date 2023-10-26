@@ -11,13 +11,11 @@ class Layer;
 
 class Output {
 public:
-    static void onCreate(wlr_output* handle);
-
-public:
-    Output(const Output&) = delete;
-    Output(Output&&) = delete;
-    Output& operator=(const Output&) = delete;
-    Output& operator=(Output&&) = delete;
+    /**
+     * @brief Create Output
+     * @return nullptr on failure
+     */
+    static Output* create(wlr_output* handle);
 
     const char* name() const { return m_handle->name; }
 
@@ -39,6 +37,11 @@ public:
     auto* getSceneOutput() const { return m_sceneOutput; }
 
     const wlr_box& getUsableArea() const { return m_usableArea; }
+
+    Output(const Output&) = delete;
+    Output(Output&&) = delete;
+    Output& operator=(const Output&) = delete;
+    Output& operator=(Output&&) = delete;
 
 private:
     Output(wlr_output* handle, wlr_scene_output* sceneOutput);

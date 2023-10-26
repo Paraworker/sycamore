@@ -15,18 +15,11 @@ class Cursor {
 public:
     /**
      * @brief Create Cursor
-     *
-     * Return nullptr on failed
+     * @return nullptr on failure
      */
     static Cursor* create(wlr_output_layout* layout);
 
-public:
     ~Cursor();
-
-    Cursor(const Cursor&) = delete;
-    Cursor(Cursor&&) = delete;
-    Cursor& operator=(const Cursor&) = delete;
-    Cursor& operator=(Cursor&&) = delete;
 
     void enable();
 
@@ -75,6 +68,11 @@ public:
     }
 
     void attachSeat(Seat* seat) { m_seat = seat; }
+
+    Cursor(const Cursor&) = delete;
+    Cursor(Cursor&&) = delete;
+    Cursor& operator=(const Cursor&) = delete;
+    Cursor& operator=(Cursor&&) = delete;
 
 private:
     Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager);

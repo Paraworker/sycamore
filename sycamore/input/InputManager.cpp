@@ -14,10 +14,10 @@ InputManager::~InputManager() = default;
 void InputManager::onNewInput(wlr_input_device* handle) {
     switch (handle->type) {
         case WLR_INPUT_DEVICE_KEYBOARD:
-            Keyboard::onCreate(handle);
+            Keyboard::create(handle);
             break;
         case WLR_INPUT_DEVICE_POINTER:
-            Pointer::onCreate(handle);
+            Pointer::create(handle);
             break;
         case WLR_INPUT_DEVICE_TOUCH:
             break;

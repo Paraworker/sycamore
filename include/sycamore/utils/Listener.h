@@ -17,13 +17,15 @@ concept IsCallback = requires(T object, void* data) {
 // A wrapper around wl_listener
 class Listener {
 public:
+    /**
+     * @brief Constructor
+     */
     Listener() = default;
-    ~Listener() = default;
 
-    Listener(const Listener&) = delete;
-    Listener(Listener&&) = delete;
-    Listener& operator=(const Listener&) = delete;
-    Listener& operator=(Listener&&) = delete;
+    /**
+     * @brief Destructor
+     */
+    ~Listener() = default;
 
     /**
      * @brief Set callback
@@ -77,6 +79,11 @@ public:
 
         return m_handler->isConnected();
     }
+
+    Listener(const Listener&) = delete;
+    Listener(Listener&&) = delete;
+    Listener& operator=(const Listener&) = delete;
+    Listener& operator=(Listener&&) = delete;
 
 private:
     struct HandlerBase {

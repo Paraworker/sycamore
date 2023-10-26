@@ -81,7 +81,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
 
         // Setup icon if provided
         if (drag->icon) {
-            DragIcon::onCreate(drag->icon, *this);
+            DragIcon::create(drag->icon, *this);
         }
 
         setInput(new DefaultInput(*this));

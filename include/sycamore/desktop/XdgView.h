@@ -9,13 +9,11 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class XdgView final : public View {
 public:
-    static void onCreate(wlr_xdg_toplevel* toplevel);
-
-public:
-    XdgView(const XdgView&) = delete;
-    XdgView(XdgView&&) = delete;
-    XdgView& operator=(const XdgView&) = delete;
-    XdgView& operator=(XdgView&&) = delete;
+    /**
+     * @brief Create XdgView
+     * @return nullptr on failure
+     */
+    static XdgView* create(wlr_xdg_toplevel* toplevel);
 
     Role role() const override { return XDG; }
 
@@ -33,8 +31,14 @@ public:
 
     void close() override;
 
+    XdgView(const XdgView&) = delete;
+    XdgView(XdgView&&) = delete;
+    XdgView& operator=(const XdgView&) = delete;
+    XdgView& operator=(XdgView&&) = delete;
+
 private:
     XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree);
+
     ~XdgView() override;
 
 private:

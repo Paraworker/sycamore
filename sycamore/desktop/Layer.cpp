@@ -8,14 +8,14 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-void Layer::onCreate(wlr_layer_surface_v1* layerSurface) {
+Layer* Layer::create(wlr_layer_surface_v1* layerSurface) {
     // Confirm output
     if (!layerSurface->output) {
         auto output = Core::instance.seat->getCursor().atOutput();
         if (!output) {
             spdlog::error("No output under cursor for layerSurface");
             wlr_layer_surface_v1_destroy(layerSurface);
-            return;
+            return nullptr;
         }
 
         layerSurface->output = output->getHandle();
@@ -26,12 +26,12 @@ void Layer::onCreate(wlr_layer_surface_v1* layerSurface) {
     if (!helper) {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
         wlr_layer_surface_v1_destroy(layerSurface);
-        return;
+        return nullptr;
     }
 
 
     // Create Layer
-    new Layer{layerSurface, helper};
+    return new Layer{layerSurface, helper};
 }
 
 Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* helper)
@@ -56,7 +56,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     });
 
     m_newPopup.set(&layerSurface->events.new_popup, [this](void* data) {
-        Popup::onCreate(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree);
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree);
     });
 
     m_map.set(&layerSurface->surface->events.map, [this](void*) {

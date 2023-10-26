@@ -13,31 +13,28 @@ NAMESPACE_SYCAMORE_BEGIN
 class LayerShell {
 public:
     /**
-     * @brief Setup LayerShell
+     * @brief Create LayerShell
+     * @return nullptr on failure
      */
-    static bool setup(wl_display* display, uint32_t version) {
+    static LayerShell* create(wl_display* display, uint32_t version) {
         auto handle = wlr_layer_shell_v1_create(display, version);
         if (!handle) {
             spdlog::error("Create wlr_layer_shell_v1 failed");
-            return false;
+            return nullptr;
         }
 
-        new LayerShell{handle};
-
-        return true;
+        return new LayerShell{handle};
     }
 
-public:
     LayerShell(const LayerShell&) = delete;
     LayerShell(LayerShell&&) = delete;
     LayerShell& operator=(const LayerShell&) = delete;
     LayerShell& operator=(LayerShell&&) = delete;
 
 private:
-    explicit LayerShell(wlr_layer_shell_v1* handle)
-        : m_handle(handle) {
+    explicit LayerShell(wlr_layer_shell_v1* handle) : m_handle(handle) {
         m_newSurface.set(&handle->events.new_surface, [](void* data) {
-            Layer::onCreate(static_cast<wlr_layer_surface_v1*>(data));
+            Layer::create(static_cast<wlr_layer_surface_v1*>(data));
         });
 
         m_destroy.set(&handle->events.destroy, [this](void*) { delete this; });

@@ -76,13 +76,13 @@ bool Core::init() {
         return false;
     }
 
-    if (!XdgShell::setup(display, XDG_SHELL_VERSION)) {
-        spdlog::error("Setup XdgShell failed");
+    if (!XdgShell::create(display, XDG_SHELL_VERSION)) {
+        spdlog::error("Create XdgShell failed");
         return false;
     }
 
-    if (!LayerShell::setup(display, LAYER_SHELL_VERSION)) {
-        spdlog::error("Setup LayerShell failed");
+    if (!LayerShell::create(display, LAYER_SHELL_VERSION)) {
+        spdlog::error("Create LayerShell failed");
         return false;
     }
 
@@ -107,11 +107,11 @@ bool Core::init() {
     });
 
     m_newOutput.set(&backend->events.new_output, [](void* data) {
-        Output::onCreate(static_cast<wlr_output*>(data));
+        Output::create(static_cast<wlr_output*>(data));
     });
 
     m_newSurface.set(&compositor->events.new_surface, [](void* data) {
-        Surface::onCreate(static_cast<wlr_surface*>(data));
+        Surface::create(static_cast<wlr_surface*>(data));
     });
 
     setenv("WAYLAND_DISPLAY", m_socket.c_str(), true);

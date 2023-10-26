@@ -11,11 +11,13 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Surface {
 public:
-    static void onCreate(wlr_surface* handle) {
-        new Surface{handle};
+    /**
+     * @brief Create Surface
+     */
+    static Surface* create(wlr_surface* handle) {
+        return new Surface{handle};
     }
 
-public:
     Surface(const Surface&) = delete;
     Surface(Surface&&) = delete;
     Surface& operator=(const Surface&) = delete;

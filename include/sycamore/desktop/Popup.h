@@ -10,9 +10,12 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Popup {
 public:
-    static void onCreate(wlr_xdg_popup* handle, wlr_scene_tree* parent);
+    /**
+     * @brief Create Popup
+     * @return nullptr on failure
+     */
+    static Popup* create(wlr_xdg_popup* handle, wlr_scene_tree* parent);
 
-public:
     Popup(const Popup&) = delete;
     Popup(Popup&&) = delete;
     Popup& operator=(const Popup&) = delete;
@@ -20,6 +23,7 @@ public:
 
 private:
     Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree);
+
     ~Popup();
 
 private:

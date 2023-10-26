@@ -7,20 +7,20 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-void Output::onCreate(wlr_output* handle) {
+Output* Output::create(wlr_output* handle) {
     spdlog::info("New Output: {}", handle->name);
 
     if (!wlr_output_init_render(handle, Core::instance.allocator, Core::instance.renderer)) {
         spdlog::error("Output: {} init render failed", handle->name);
         wlr_output_destroy(handle);
-        return;
+        return nullptr;
     }
 
     auto sceneOutput = wlr_scene_output_create(Core::instance.scene->getHandle(), handle);
     if (!sceneOutput) {
         spdlog::error("Output: {} create wlr_scene_output failed", handle->name);
         wlr_output_destroy(handle);
-        return;
+        return nullptr;
     }
 
     auto output = new Output{handle, sceneOutput};
@@ -29,6 +29,8 @@ void Output::onCreate(wlr_output* handle) {
 
     // TODO: configurable
     output->apply();
+
+    return output;
 }
 
 Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)

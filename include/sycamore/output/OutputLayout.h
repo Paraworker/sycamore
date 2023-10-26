@@ -19,18 +19,11 @@ public:
 public:
     /**
      * @brief Create OutputLayout
-     *
-     * Return nullptr on failed
+     * @return nullptr on failure
      */
     static OutputLayout::Ptr create();
 
-public:
     ~OutputLayout();
-
-    OutputLayout(const OutputLayout&) = delete;
-    OutputLayout(OutputLayout&&) = delete;
-    OutputLayout& operator=(const OutputLayout&) = delete;
-    OutputLayout& operator=(OutputLayout&&) = delete;
 
     auto getHandle() const { return m_handle; }
 
@@ -41,6 +34,11 @@ public:
     void remove(Output* output);
 
     Output* findOutputAt(const Point<double>& coords) const;
+
+    OutputLayout(const OutputLayout&) = delete;
+    OutputLayout(OutputLayout&&) = delete;
+    OutputLayout& operator=(const OutputLayout&) = delete;
+    OutputLayout& operator=(OutputLayout&&) = delete;
 
 private:
     explicit OutputLayout(wlr_output_layout* handle);

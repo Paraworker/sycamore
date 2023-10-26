@@ -13,18 +13,22 @@ class Seat;
 
 class DragIcon {
 public:
-    static void onCreate(wlr_drag_icon* handle, Seat& seat);
+    /**
+     * @brief Create DragIcon
+     * @return nullptr on failure
+     */
+    static DragIcon* create(wlr_drag_icon* handle, Seat& seat);
 
-public:
+    void updatePosition() const;
+
     DragIcon(const DragIcon&) = delete;
     DragIcon(DragIcon&&) = delete;
     DragIcon& operator=(const DragIcon&) = delete;
     DragIcon& operator=(DragIcon&&) = delete;
 
-    void updatePosition() const;
-
 private:
     DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat);
+
     ~DragIcon() = default;
 
     void setPosition(const Point<int32_t>& pos) const {

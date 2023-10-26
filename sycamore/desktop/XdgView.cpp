@@ -7,16 +7,16 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-void XdgView::onCreate(wlr_xdg_toplevel* toplevel) {
+XdgView* XdgView::create(wlr_xdg_toplevel* toplevel) {
     // Create tree
     auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.view, toplevel->base);
     if (!tree) {
         spdlog::error("Create scene tree for XdgView failed!");
-        return;
+        return nullptr;
     }
 
     // Create XdgView
-    new XdgView{toplevel, tree};
+    return new XdgView{toplevel, tree};
 }
 
 XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
@@ -93,7 +93,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     });
 
     m_newPopup.set([this](void* data) {
-        Popup::onCreate(static_cast<wlr_xdg_popup*>(data), m_tree);
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree);
     });
 
     m_move.set([this](void*) {

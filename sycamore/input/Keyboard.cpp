@@ -21,7 +21,7 @@ static xkb_keymap* compileKeymap() {
     return keymap;
 }
 
-void Keyboard::onCreate(wlr_input_device* deviceHandle) {
+Keyboard* Keyboard::create(wlr_input_device* deviceHandle) {
     spdlog::info("New Keyboard: {}", deviceHandle->name);
 
     auto keyboardHandle = wlr_keyboard_from_input_device(deviceHandle);
@@ -29,18 +29,22 @@ void Keyboard::onCreate(wlr_input_device* deviceHandle) {
     auto keymap = compileKeymap();
     if (!keymap) {
         spdlog::error("Keyboard: {} compile xkb_keymap failed", deviceHandle->name);
-        return;
+        return nullptr;
     }
 
     if (!wlr_keyboard_set_keymap(keyboardHandle, keymap)) {
         spdlog::error("Keyboard: {} set keymap failed", deviceHandle->name);
         xkb_keymap_unref(keymap);
-        return;
+        return nullptr;
     }
 
     xkb_keymap_unref(keymap);
 
-    InputManager::instance.add(new Keyboard{deviceHandle, keyboardHandle});
+    auto keyboard = new Keyboard{deviceHandle, keyboardHandle};
+
+    InputManager::instance.add(keyboard);
+
+    return keyboard;
 }
 
 Keyboard::Keyboard(wlr_input_device* deviceHandle, wlr_keyboard* keyboardHandle)

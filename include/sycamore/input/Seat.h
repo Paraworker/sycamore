@@ -20,18 +20,11 @@ public:
 public:
     /**
      * @brief Create Seat
-     *
-     * Return nullptr on failed
+     * @return nullptr on failure
      */
     static Seat::Ptr create(wl_display* display, wlr_output_layout* layout, const char* name);
 
-public:
     ~Seat();
-
-    Seat(const Seat&) = delete;
-    Seat(Seat&&) = delete;
-    Seat& operator=(const Seat&) = delete;
-    Seat& operator=(Seat&&) = delete;
 
     auto getHandle() const { return m_handle; }
 
@@ -54,6 +47,11 @@ public:
     void updateCapabilities();
 
     bool bindingEnterCheck(View* view) const;
+
+    Seat(const Seat&) = delete;
+    Seat(Seat&&) = delete;
+    Seat& operator=(const Seat&) = delete;
+    Seat& operator=(Seat&&) = delete;
 
 private:
     Seat(wlr_seat* handle, Cursor* cursor);

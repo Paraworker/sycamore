@@ -10,14 +10,13 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class InputManager {
 public:
-    static void onNewInput(wlr_input_device* handle);
-
-public:
     void add(InputDevice* device);
 
     void remove(InputDevice* device);
 
     const List& getDeviceList(wlr_input_device_type type) const { return m_deviceList[type]; }
+
+    static void onNewInput(wlr_input_device* handle);
 
 public:
     List m_deviceList[INPUT_DEVICE_TYPE_NUM];

@@ -9,9 +9,11 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Pointer final : public InputDevice {
 public:
-    static void onCreate(wlr_input_device* deviceHandle);
+    /**
+     * @brief Create Pointer
+     */
+    static Pointer* create(wlr_input_device* deviceHandle);
 
-public:
     Pointer(const Pointer&) = delete;
     Pointer(Pointer&&) = delete;
     Pointer& operator=(const Pointer&) = delete;
@@ -19,6 +21,7 @@ public:
 
 private:
     Pointer(wlr_input_device* deviceHandle, wlr_pointer* pointerHandle);
+
     ~Pointer();
 
 private:

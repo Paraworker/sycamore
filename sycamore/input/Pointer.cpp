@@ -7,7 +7,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-void Pointer::onCreate(wlr_input_device *deviceHandle) {
+Pointer* Pointer::create(wlr_input_device *deviceHandle) {
     spdlog::info("New Pointer: {}", deviceHandle->name);
 
     // Default config
@@ -16,7 +16,12 @@ void Pointer::onCreate(wlr_input_device *deviceHandle) {
     touchpadSetAccelSpeed(deviceHandle, 0.3);
 
     Core::instance.seat->getCursor().attachDevice(deviceHandle);
-    InputManager::instance.add(new Pointer{deviceHandle, wlr_pointer_from_input_device(deviceHandle)});
+
+    auto pointer = new Pointer{deviceHandle, wlr_pointer_from_input_device(deviceHandle)};
+
+    InputManager::instance.add(pointer);
+
+    return pointer;
 }
 
 Pointer::Pointer(wlr_input_device* deviceHandle, wlr_pointer* pointerHandle)
