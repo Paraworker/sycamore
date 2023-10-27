@@ -5,6 +5,8 @@
 #include "sycamore/input/seatInput/PointerResize.h"
 #include "sycamore/Core.h"
 
+#include <spdlog/spdlog.h>
+
 NAMESPACE_SYCAMORE_BEGIN
 
 XdgView* XdgView::create(wlr_xdg_toplevel* toplevel) {

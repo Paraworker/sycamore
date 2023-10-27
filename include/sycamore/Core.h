@@ -2,8 +2,6 @@
 #define SYCAMORE_CORE_H
 
 #include "sycamore/defines.h"
-#include "sycamore/desktop/shell/LayerShell.h"
-#include "sycamore/desktop/shell/XdgShell.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/output/OutputLayout.h"
 #include "sycamore/scene/Scene.h"

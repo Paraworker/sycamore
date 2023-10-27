@@ -1,3 +1,4 @@
+#include "sycamore/desktop/View.h"
 #include "sycamore/desktop/WindowManager.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/InputDevice.h"

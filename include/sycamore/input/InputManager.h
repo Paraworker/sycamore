@@ -4,11 +4,15 @@
 #include "sycamore/defines.h"
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/utils/List.h"
+#include "sycamore/Core.h"
 
 NAMESPACE_SYCAMORE_BEGIN
 
 class InputManager {
 public:
+    /**
+     * @brief Get the list of a certain type device
+     */
     const List& getDeviceList(wlr_input_device_type type) const { return m_deviceList[type]; }
 
     void onNewDevice(wlr_input_device* handle);
@@ -16,25 +20,33 @@ public:
     template<typename T>
     requires std::is_base_of_v<InputDevice, T>
     void onDestroyDevice(T* device) {
-        removeDevice(device);
+        m_deviceList[device->type()].remove(device->link);
         delete device;
+
+        Core::instance.seat->updateCapabilities();
     }
 
 public:
     static InputManager instance;
 
 private:
-    InputManager();
+    /**
+     * @brief Constructor
+     */
+    InputManager() = default;
 
-    ~InputManager();
-
-    void addDevice(InputDevice* device);
-    void removeDevice(InputDevice* device);
+    /**
+     * @brief Destructor
+     */
+    ~InputManager() = default;
 
     template<typename T>
     requires std::is_base_of_v<InputDevice, T>
     void newDevice(wlr_input_device* handle) {
-        addDevice(new T{handle});
+        auto device = new T{handle};
+        m_deviceList[device->type()].add(device->link);
+
+        Core::instance.seat->updateCapabilities();
     }
 
 private:
