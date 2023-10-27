@@ -1,4 +1,4 @@
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/desktop/XdgView.h"
 #include "sycamore/input/seatInput/PointerMove.h"
@@ -33,7 +33,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_map.set(&m_surface->events.map, [this](void*) {
         // Add to list
-        WindowManager::instance.addMappedView(this);
+        ShellManager::instance.addMappedView(this);
 
         // Connect signals
         m_commit.connect(&m_surface->events.commit);
@@ -52,15 +52,15 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         setToOutputCenter(output);
 
         if (requested.maximized) {
-            WindowManager::maximizeRequest(this, true, output);
+            ShellManager::maximizeRequest(this, true, output);
         }
 
         if (requested.fullscreen) {
-            WindowManager::fullscreenRequest(this, true, output);
+            ShellManager::fullscreenRequest(this, true, output);
         }
 
         // Focus it
-        WindowManager::instance.setFocus(this);
+        ShellManager::instance.setFocus(this);
 
         // emit signal
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -76,7 +76,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        WindowManager::instance.removeMappedView(this);
+        ShellManager::instance.removeMappedView(this);
 
         // emit signal
         wl_signal_emit_mutable(&events.unmap, nullptr);
@@ -119,27 +119,27 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         auto& requested = m_toplevel->requested;
 
         if (!requested.fullscreen) {
-            WindowManager::fullscreenRequest(this, false, nullptr);
+            ShellManager::fullscreenRequest(this, false, nullptr);
             return;
         }
 
         // If there is an output provided, try to satisfy it
         auto output = requested.fullscreen_output;
         if (output && output->data) {
-            WindowManager::fullscreenRequest(this, true, static_cast<Output*>(output->data));
+            ShellManager::fullscreenRequest(this, true, static_cast<Output*>(output->data));
             return;
         }
 
-        WindowManager::fullscreenRequest(this, true, getOutput());
+        ShellManager::fullscreenRequest(this, true, getOutput());
     });
 
     m_maximize.set([this](void*) {
         if (!m_toplevel->requested.maximized) {
-            WindowManager::maximizeRequest(this, false, nullptr);
+            ShellManager::maximizeRequest(this, false, nullptr);
             return;
         }
 
-        WindowManager::maximizeRequest(this, true, getOutput());
+        ShellManager::maximizeRequest(this, true, getOutput());
     });
 
     m_minimize.set([](void*) {

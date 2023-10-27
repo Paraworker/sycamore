@@ -1,4 +1,4 @@
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/View.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/output/Output.h"
@@ -6,9 +6,9 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-WindowManager WindowManager::instance{};
+ShellManager ShellManager::instance{};
 
-WindowManager::WindowManager() {
+ShellManager::ShellManager() {
     m_focusUnmap.view.set([this](void*) {
         m_focusState.view = nullptr;
         m_focusUnmap.view.disconnect();
@@ -24,9 +24,9 @@ WindowManager::WindowManager() {
     });
 }
 
-WindowManager::~WindowManager() = default;
+ShellManager::~ShellManager() = default;
 
-void WindowManager::setFocus(View* view) {
+void ShellManager::setFocus(View* view) {
     // Note: this function only deals with keyboard focus.
     if (m_focusState.view == view) {
         return;
@@ -57,7 +57,7 @@ void WindowManager::setFocus(View* view) {
     m_focusUnmap.view.connect(&view->events.unmap);
 }
 
-void WindowManager::setFocus(Layer* layer) {
+void ShellManager::setFocus(Layer* layer) {
     if (m_focusState.layer == layer) {
         return;
     }
@@ -68,15 +68,15 @@ void WindowManager::setFocus(Layer* layer) {
     Core::instance.seat->setKeyboardFocus(layer->getBaseSurface());
 }
 
-void WindowManager::addMappedView(View* view) {
+void ShellManager::addMappedView(View* view) {
     m_mappedViewList.add(view->link);
 }
 
-void WindowManager::removeMappedView(View* view) {
+void ShellManager::removeMappedView(View* view) {
     m_mappedViewList.remove(view->link);
 }
 
-void WindowManager::maximizeRequest(View* view, bool state, Output* output) {
+void ShellManager::maximizeRequest(View* view, bool state, Output* output) {
     if (state == view->state().maximized) {
         return;
     }
@@ -111,7 +111,7 @@ void WindowManager::maximizeRequest(View* view, bool state, Output* output) {
     view->state().maximized = state;
 }
 
-void WindowManager::fullscreenRequest(View *view, bool state, Output *output) {
+void ShellManager::fullscreenRequest(View *view, bool state, Output *output) {
     if (state == view->state().fullscreen) {
         return;
     }

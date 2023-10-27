@@ -1,4 +1,4 @@
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/output/Output.h"
@@ -61,7 +61,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_map.set(&layerSurface->surface->events.map, [this](void*) {
         if (isFocusable()) {
-            WindowManager::instance.setFocus(this);
+            ShellManager::instance.setFocus(this);
         }
 
         // emit signal

@@ -1,5 +1,5 @@
 #include "sycamore/desktop/View.h"
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/input/InputManager.h"
@@ -160,7 +160,7 @@ bool Seat::bindingEnterCheck(View* view) const {
     }
 
     // Deny pointerMove/pointerResize from unfocused view or there is no focused view.
-    if (view != WindowManager::instance.getFocusState().view) {
+    if (view != ShellManager::instance.getFocusState().view) {
         return false;
     }
 

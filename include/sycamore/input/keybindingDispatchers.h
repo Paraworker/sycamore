@@ -2,7 +2,7 @@
 #define SYCAMORE_KEYBINDING_DISPATCHERS_H
 
 #include "sycamore/defines.h"
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/View.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/input/KeybindingManager.h"
@@ -23,7 +23,7 @@ struct Spawn {
 
 struct CloseFocusedView {
     void operator()() const {
-        if (auto view = WindowManager::instance.getFocusState().view; view) {
+        if (auto view = ShellManager::instance.getFocusState().view; view) {
             view->close();
         }
     }
@@ -31,12 +31,12 @@ struct CloseFocusedView {
 
 struct CycleView {
     void operator()() const {
-        if (WindowManager::instance.getMappedViewList().size() < 2) {
+        if (ShellManager::instance.getMappedViewList().size() < 2) {
             return;
         }
 
-        View* next = wl_container_of(WindowManager::instance.getMappedViewList().getHandle().prev, next, link);
-        WindowManager::instance.setFocus(next);
+        View* next = wl_container_of(ShellManager::instance.getMappedViewList().getHandle().prev, next, link);
+        ShellManager::instance.setFocus(next);
         Core::instance.seat->getInput().rebasePointer();
     }
 };

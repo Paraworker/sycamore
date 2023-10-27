@@ -76,7 +76,7 @@ public:
 public:
     Events      events;
     RestoreData restore;
-    wl_list     link{}; // WindowManager::mappedViewList
+    wl_list     link{}; // ShellManager::mappedViewList
 
 protected:
     View(wlr_surface* surface, wlr_scene_tree* tree);

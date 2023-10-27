@@ -1,5 +1,5 @@
-#ifndef SYCAMORE_WINDOW_MANAGER_H
-#define SYCAMORE_WINDOW_MANAGER_H
+#ifndef SYCAMORE_SHELL_MANAGER_H
+#define SYCAMORE_SHELL_MANAGER_H
 
 #include "sycamore/defines.h"
 #include "sycamore/utils/List.h"
@@ -11,7 +11,7 @@ class Layer;
 class Output;
 class View;
 
-class WindowManager {
+class ShellManager {
 public:
     struct FocusState {
         // focused view
@@ -40,17 +40,23 @@ public:
 
     const List& getMappedViewList() const { return m_mappedViewList; }
 
-public:
     static void maximizeRequest(View* view, bool state, Output* output);
 
     static void fullscreenRequest(View* view, bool state, Output* output);
 
 public:
-    static WindowManager instance;
+    static ShellManager instance;
 
 private:
-    WindowManager();
-    ~WindowManager();
+    /**
+     * @brief Constructor
+     */
+    ShellManager();
+
+    /**
+     * @brief Destructor
+     */
+    ~ShellManager();
 
 private:
     struct FocusUnmap {
@@ -69,4 +75,4 @@ private:
 
 NAMESPACE_SYCAMORE_END
 
-#endif //SYCAMORE_WINDOW_MANAGER_H
+#endif //SYCAMORE_SHELL_MANAGER_H

@@ -1,4 +1,4 @@
-#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/View.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
@@ -34,7 +34,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event) {
     if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.getCursor().getPosition(), sCoords)); element) {
         // If pressed on a view, focus it.
         if (element->type() == SceneElement::VIEW) {
-            WindowManager::instance.setFocus(static_cast<ViewElement*>(element)->getView());
+            ShellManager::instance.setFocus(static_cast<ViewElement*>(element)->getView());
         }
     }
 
