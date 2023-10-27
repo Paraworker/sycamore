@@ -103,7 +103,7 @@ bool Core::init() {
     wlr_single_pixel_buffer_manager_v1_create(display);
 
     m_newInput.set(&backend->events.new_input, [](void* data) {
-        InputManager::onNewInput(static_cast<wlr_input_device*>(data));
+        InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
     });
 
     m_newOutput.set(&backend->events.new_output, [](void* data) {

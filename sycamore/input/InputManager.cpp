@@ -7,37 +7,35 @@ NAMESPACE_SYCAMORE_BEGIN
 
 InputManager InputManager::instance{};
 
-InputManager::InputManager() = default;
-
-InputManager::~InputManager() = default;
-
-void InputManager::onNewInput(wlr_input_device* handle) {
-    switch (handle->type) {
-        case WLR_INPUT_DEVICE_KEYBOARD:
-            Keyboard::create(handle);
-            break;
-        case WLR_INPUT_DEVICE_POINTER:
-            Pointer::create(handle);
-            break;
-        case WLR_INPUT_DEVICE_TOUCH:
-            break;
-        case WLR_INPUT_DEVICE_TABLET_TOOL:
-            break;
-        case WLR_INPUT_DEVICE_TABLET_PAD:
-            break;
-        case WLR_INPUT_DEVICE_SWITCH:
-            break;
-    }
-}
-
-void InputManager::add(InputDevice* device) {
+void InputManager::addDevice(InputDevice* device) {
     m_deviceList[device->type()].add(device->link);
     Core::instance.seat->updateCapabilities();
 }
 
-void InputManager::remove(InputDevice* device) {
+void InputManager::removeDevice(InputDevice* device) {
     m_deviceList[device->type()].remove(device->link);
     Core::instance.seat->updateCapabilities();
+}
+
+InputManager::InputManager() = default;
+
+InputManager::~InputManager() = default;
+
+void InputManager::onNewDevice(wlr_input_device* handle) {
+    switch (handle->type) {
+        case WLR_INPUT_DEVICE_KEYBOARD:
+            newDevice<Keyboard>(handle);
+            break;
+        case WLR_INPUT_DEVICE_POINTER:
+            newDevice<Pointer>(handle);
+            break;
+        case WLR_INPUT_DEVICE_TOUCH:
+        case WLR_INPUT_DEVICE_TABLET_TOOL:
+        case WLR_INPUT_DEVICE_TABLET_PAD:
+        case WLR_INPUT_DEVICE_SWITCH:
+        default:
+            break;
+    }
 }
 
 NAMESPACE_SYCAMORE_END

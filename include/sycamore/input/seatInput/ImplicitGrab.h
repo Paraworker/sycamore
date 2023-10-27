@@ -2,7 +2,9 @@
 #define SYCAMORE_IMPLICIT_GRAB_H
 
 #include "sycamore/input/InputManager.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/utils/Listener.h"
+#include "sycamore/utils/Point.h"
 #include "SeatInput.h"
 
 NAMESPACE_SYCAMORE_BEGIN

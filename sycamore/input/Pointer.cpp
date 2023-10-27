@@ -7,32 +7,28 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-Pointer* Pointer::create(wlr_input_device *deviceHandle) {
+Pointer::Pointer(wlr_input_device* deviceHandle)
+    : InputDevice(deviceHandle), m_pointerHandle(wlr_pointer_from_input_device(deviceHandle)) {
     spdlog::info("New Pointer: {}", deviceHandle->name);
-
-    // Default config
-    touchpadSetTapToClick(deviceHandle);
-    touchpadSetNaturalScroll(deviceHandle);
-    touchpadSetAccelSpeed(deviceHandle, 0.3);
 
     Core::instance.seat->getCursor().attachDevice(deviceHandle);
 
-    auto pointer = new Pointer{deviceHandle, wlr_pointer_from_input_device(deviceHandle)};
-
-    InputManager::instance.add(pointer);
-
-    return pointer;
-}
-
-Pointer::Pointer(wlr_input_device* deviceHandle, wlr_pointer* pointerHandle)
-    : InputDevice(deviceHandle), m_pointerHandle(pointerHandle) {
     m_destroy.set(&deviceHandle->events.destroy, [this](void*) {
-        Core::instance.seat->getCursor().detachDevice(m_deviceHandle);
-        InputManager::instance.remove(this);
-        delete this;
+        InputManager::instance.onDestroyDevice(this);
     });
+
+    applyConfig();
 }
 
-Pointer::~Pointer() = default;
+Pointer::~Pointer() {
+    Core::instance.seat->getCursor().detachDevice(m_deviceHandle);
+}
+
+void Pointer::applyConfig() {
+    // TODO: configurable
+    touchpadSetTapToClick(m_deviceHandle);
+    touchpadSetNaturalScroll(m_deviceHandle);
+    touchpadSetAccelSpeed(m_deviceHandle, 0.3);
+}
 
 NAMESPACE_SYCAMORE_END

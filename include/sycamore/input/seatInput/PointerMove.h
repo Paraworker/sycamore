@@ -3,6 +3,7 @@
 
 #include "sycamore/desktop/View.h"
 #include "sycamore/input/InputManager.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/utils/Listener.h"
 #include "SeatInput.h"
 

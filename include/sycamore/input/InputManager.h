@@ -3,30 +3,42 @@
 
 #include "sycamore/defines.h"
 #include "sycamore/input/InputDevice.h"
-#include "sycamore/input/Seat.h"
 #include "sycamore/utils/List.h"
 
 NAMESPACE_SYCAMORE_BEGIN
 
 class InputManager {
 public:
-    void add(InputDevice* device);
-
-    void remove(InputDevice* device);
-
     const List& getDeviceList(wlr_input_device_type type) const { return m_deviceList[type]; }
 
-    static void onNewInput(wlr_input_device* handle);
+    void onNewDevice(wlr_input_device* handle);
 
-public:
-    List m_deviceList[INPUT_DEVICE_TYPE_NUM];
+    template<typename T>
+    requires std::is_base_of_v<InputDevice, T>
+    void onDestroyDevice(T* device) {
+        removeDevice(device);
+        delete device;
+    }
 
 public:
     static InputManager instance;
 
 private:
     InputManager();
+
     ~InputManager();
+
+    void addDevice(InputDevice* device);
+    void removeDevice(InputDevice* device);
+
+    template<typename T>
+    requires std::is_base_of_v<InputDevice, T>
+    void newDevice(wlr_input_device* handle) {
+        addDevice(new T{handle});
+    }
+
+private:
+    List m_deviceList[INPUT_DEVICE_TYPE_NUM];
 };
 
 NAMESPACE_SYCAMORE_END
