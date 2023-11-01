@@ -1,6 +1,6 @@
 #include "sycamore/desktop/View.h"
-#include "sycamore/output/Output.h"
 #include "sycamore/utils/box.h"
+#include "sycamore/Core.h"
 
 NAMESPACE_SYCAMORE_BEGIN
 
@@ -17,12 +17,8 @@ View::View(wlr_surface* surface, wlr_scene_tree* tree)
 View::~View() = default;
 
 Output* View::getOutput() const {
-    if (wl_list_empty(&m_surface->current_outputs)) {
-        return nullptr;
-    }
-
-    wlr_surface_output* surfaceOutput = wl_container_of(m_surface->current_outputs.prev, surfaceOutput, link);
-    return static_cast<Output*>(surfaceOutput->output->data);
+    // FIXME
+    return Core::instance.seat->getCursor().atOutput();
 }
 
 void View::setToOutputCenter(Output* output) {

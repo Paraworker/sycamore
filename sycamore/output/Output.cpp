@@ -98,7 +98,7 @@ bool Output::apply() {
 }
 
 wlr_box Output::getRelativeGeometry() const {
-    wlr_box box;
+    wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
     return box;
 }
