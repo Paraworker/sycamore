@@ -4,6 +4,7 @@
 #include "sycamore/defines.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Listener.h"
+#include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
 NAMESPACE_SYCAMORE_BEGIN
@@ -23,6 +24,14 @@ public:
     bool isFocusable() const;
 
     auto getBaseSurface() const { return m_layerSurface->surface; }
+
+    Point<int32_t> getPosition() const {
+        return {m_sceneHelper->tree->node.x, m_sceneHelper->tree->node.y};
+    }
+
+    Output* getOutput() const {
+        return m_output;
+    }
 
     Layer(const Layer&) = delete;
     Layer(Layer&&) = delete;

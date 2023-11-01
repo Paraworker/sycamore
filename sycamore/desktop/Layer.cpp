@@ -56,7 +56,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     });
 
     m_newPopup.set(&layerSurface->events.new_popup, [this](void* data) {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree);
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
     });
 
     m_map.set(&layerSurface->surface->events.map, [this](void*) {

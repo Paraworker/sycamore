@@ -2,6 +2,7 @@
 #define SYCAMORE_VIEW_H
 
 #include "sycamore/defines.h"
+#include "sycamore/output/Output.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"

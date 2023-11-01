@@ -95,7 +95,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     });
 
     m_newPopup.set([this](void* data) {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree);
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ViewHandler>(this));
     });
 
     m_move.set([this](void*) {

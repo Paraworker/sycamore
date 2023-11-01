@@ -21,8 +21,16 @@ public:
 
     bool apply();
 
+    /**
+     * @brief Get the geometry in local layout
+     * @return {0, 0, width, height}
+     */
     wlr_box getRelativeGeometry() const;
 
+    /**
+     * @brief Get the geometry in output layout
+     * @return {x, y, width, height}
+     */
     wlr_box getLayoutGeometry() const;
 
     /**
