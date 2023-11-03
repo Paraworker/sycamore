@@ -44,9 +44,8 @@ public:
     }
 
     /**
-     * @brief Connect to a signal
-     *
-     * No-op if callback isn't set or a signal is already connected
+     * @brief Connect to the signal
+     * @note No-op if callback isn't set or a signal is already connected
      */
     void connect(wl_signal* signal) {
         if (!m_handler) {
@@ -58,8 +57,7 @@ public:
 
     /**
      * @brief Disconnect form the signal
-     *
-     * No-op if callback isn't set or no signal is connected
+     * @note No-op if callback isn't set or no signal is connected
      */
     void disconnect() {
         if (!m_handler) {
@@ -70,7 +68,7 @@ public:
     }
 
     /**
-     * @brief Is a signal connected
+     * @brief Is the signal connected
      */
     bool isConnected() const {
         if (!m_handler) {

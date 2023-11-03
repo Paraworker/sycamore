@@ -43,7 +43,14 @@ public:
     static KeybindingManager instance;
 
 private:
+    /**
+     * @brief Constructor
+     */
     KeybindingManager();
+
+    /**
+     * @brief Destructor
+     */
     ~KeybindingManager();
 
 private:

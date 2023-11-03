@@ -58,7 +58,14 @@ public:
     static Core instance;
 
 private:
-    Core()  = default;
+    /**
+     * @brief Constructor
+     */
+    Core() = default;
+
+    /**
+     * @brief Destructor
+     */
     ~Core() = default;
 
 private:
