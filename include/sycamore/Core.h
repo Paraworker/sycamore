@@ -50,9 +50,9 @@ public: // wlr
     wlr_pointer_gestures_v1* gestures     = nullptr;
 
 public:
-    OutputLayout::Ptr outputLayout;
-    Scene::Ptr        scene;
-    Seat::Ptr         seat;
+    OutputLayout::UPtr outputLayout;
+    Scene::UPtr        scene;
+    Seat::UPtr         seat;
 
 public:
     static Core instance;

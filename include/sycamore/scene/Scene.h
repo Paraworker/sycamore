@@ -12,14 +12,14 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Scene {
 public:
-    using Ptr = std::unique_ptr<Scene>;
+    using UPtr = std::unique_ptr<Scene>;
 
 public:
     /**
      * @brief Create Scene
      * @return nullptr on failure
      */
-    static Scene::Ptr create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
+    static Scene::UPtr create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
 
     ~Scene();
 

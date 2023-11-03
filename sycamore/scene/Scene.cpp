@@ -13,7 +13,7 @@ private:
     friend class Scene;
 };
 
-Scene::Ptr Scene::create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf) {
+Scene::UPtr Scene::create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf) {
     auto handle = wlr_scene_create();
     if (!handle) {
         spdlog::error("Create wlr_scene failed");
@@ -29,7 +29,7 @@ Scene::Ptr Scene::create(wlr_output_layout* layout, wlr_presentation* presentati
     wlr_scene_set_presentation(handle, presentation);
     wlr_scene_set_linux_dmabuf_v1(handle, dmabuf);
 
-    return Ptr{new Scene{handle, sceneLayout}};
+    return UPtr{new Scene{handle, sceneLayout}};
 }
 
 Scene::Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout)

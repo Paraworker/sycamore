@@ -10,7 +10,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-Seat::Ptr Seat::create(wl_display* display, wlr_output_layout* layout, const char* name) {
+Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const char* name) {
     auto handle = wlr_seat_create(display, name);
     if (!handle) {
         spdlog::error("Create wlr_seat failed");
@@ -24,7 +24,7 @@ Seat::Ptr Seat::create(wl_display* display, wlr_output_layout* layout, const cha
         return nullptr;
     }
 
-    return Ptr{new Seat{handle, cursor}};
+    return UPtr{new Seat{handle, cursor}};
 }
 
 Seat::Seat(wlr_seat* handle, Cursor* cursor)

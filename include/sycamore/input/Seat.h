@@ -15,14 +15,14 @@ class View;
 
 class Seat {
 public:
-    using Ptr = std::unique_ptr<Seat>;
+    using UPtr = std::unique_ptr<Seat>;
     
 public:
     /**
      * @brief Create Seat
      * @return nullptr on failure
      */
-    static Seat::Ptr create(wl_display* display, wlr_output_layout* layout, const char* name);
+    static Seat::UPtr create(wl_display* display, wlr_output_layout* layout, const char* name);
 
     ~Seat();
 

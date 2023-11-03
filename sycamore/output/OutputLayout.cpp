@@ -6,14 +6,14 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-OutputLayout::Ptr OutputLayout::create() {
+OutputLayout::UPtr OutputLayout::create() {
     auto layout = wlr_output_layout_create();
     if (!layout) {
         spdlog::error("Create wlr_output_layout failed");
         return nullptr;
     }
 
-    return Ptr{new OutputLayout{layout}};
+    return UPtr{new OutputLayout{layout}};
 }
 
 OutputLayout::OutputLayout(wlr_output_layout* handle) : m_handle(handle) {}

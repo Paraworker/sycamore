@@ -14,14 +14,14 @@ class Output;
 
 class OutputLayout {
 public:
-    using Ptr = std::unique_ptr<OutputLayout>;
+    using UPtr = std::unique_ptr<OutputLayout>;
 
 public:
     /**
      * @brief Create OutputLayout
      * @return nullptr on failure
      */
-    static OutputLayout::Ptr create();
+    static OutputLayout::UPtr create();
 
     ~OutputLayout();
 
