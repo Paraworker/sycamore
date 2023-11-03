@@ -12,7 +12,7 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Popup {
 public:
-    // Operations for different owner
+    // Operations for different toplevel parent
     class OwnerHandler {
     public:
         using SPtr = std::shared_ptr<OwnerHandler>;
@@ -24,12 +24,12 @@ public:
         virtual ~OwnerHandler() = default;
 
         /**
-         * @brief Unconstrain operation
+         * @brief Unconstrain
          */
         virtual void unconstrain(Popup* popup) = 0;
     };
 
-    class ViewHandler : public Popup::OwnerHandler {
+    class ViewHandler : public OwnerHandler {
     public:
         explicit ViewHandler(View* view) : m_view(view) {}
 
@@ -52,7 +52,7 @@ public:
         View* m_view;
     };
 
-    class LayerHandler : public Popup::OwnerHandler {
+    class LayerHandler : public OwnerHandler {
     public:
         explicit LayerHandler(Layer* layer) : m_layer(layer) {}
 
@@ -89,8 +89,14 @@ public:
     Popup& operator=(Popup&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr handler);
 
+    /**
+     * @brief Destructor
+     */
     ~Popup();
 
 private:
