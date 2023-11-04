@@ -3,10 +3,10 @@
 
 #include "sycamore/wlroots.h"
 
-void touchpadSetNaturalScroll(wlr_input_device *device);
+void touchpadSetNaturalScroll(wlr_input_device* device);
 
-void touchpadSetTapToClick(wlr_input_device *device);
+void touchpadSetTapToClick(wlr_input_device* device);
 
-void touchpadSetAccelSpeed(wlr_input_device *device, double speed);
+void touchpadSetAccelSpeed(wlr_input_device* device, double speed);
 
 #endif //SYCAMORE_LIBINPUT_H
