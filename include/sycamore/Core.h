@@ -35,11 +35,10 @@ public:
      */
     void run() const;
 
-public: // libwayland
-    wl_display*    display   = nullptr;
-    wl_event_loop* eventLoop = nullptr;
+public:
+    wl_display*              display      = nullptr;
+    wl_event_loop*           eventLoop    = nullptr;
 
-public: // wlr
     wlr_backend*             backend      = nullptr;
     wlr_allocator*           allocator    = nullptr;
     wlr_compositor*          compositor   = nullptr;
@@ -49,10 +48,9 @@ public: // wlr
     wlr_linux_dmabuf_v1*     dmabuf       = nullptr;
     wlr_pointer_gestures_v1* gestures     = nullptr;
 
-public:
-    OutputLayout::UPtr outputLayout;
-    Scene::UPtr        scene;
-    Seat::UPtr         seat;
+    OutputLayout::UPtr       outputLayout;
+    Scene::UPtr              scene;
+    Seat::UPtr               seat;
 
 public:
     static Core instance;

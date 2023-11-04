@@ -100,9 +100,9 @@ private:
     ~Popup();
 
 private:
-    wlr_xdg_popup*      m_handle;
-    wlr_scene_tree*     m_tree;
-    OwnerHandler::SPtr  m_owner;
+    wlr_xdg_popup*     m_handle;
+    wlr_scene_tree*    m_tree;
+    OwnerHandler::SPtr m_owner;
 
 private:
     Listener m_reposition;
