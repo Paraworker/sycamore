@@ -1,14 +1,11 @@
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/output/Output.h"
-#include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
 
-#include <utility>
-
 NAMESPACE_SYCAMORE_BEGIN
 
-Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& handler) {
+Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner) {
     // Create tree
     auto tree = wlr_scene_xdg_surface_create(parentTree, handle->base);
     if (!tree) {
@@ -17,11 +14,15 @@ Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const Ow
     }
 
     // Create Popup
-    return new Popup{handle, tree, handler};
+    return new Popup{handle, tree, owner};
 }
 
-Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr handler)
-    : m_handle(handle), m_tree(tree), m_owner(std::move(handler)) {
+Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner)
+    : m_handle(handle), m_tree(tree), m_owner(std::move(owner)) {
+    m_reposition.set(&handle->events.reposition, [this](void*) {
+        m_owner->unconstrain(this);
+    });
+
     m_newPopup.set(&handle->base->events.new_popup, [this](void* data) {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, m_owner);
     });

@@ -77,7 +77,7 @@ public:
      * @brief Create Popup
      * @return nullptr on failure
      */
-    static Popup* create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& handler);
+    static Popup* create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner);
 
     void unconstrainFromBox(const wlr_box& box) {
         wlr_xdg_popup_unconstrain_from_box(m_handle, &box);
@@ -92,7 +92,7 @@ private:
     /**
      * @brief Constructor
      */
-    Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr handler);
+    Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner);
 
     /**
      * @brief Destructor
@@ -105,6 +105,7 @@ private:
     OwnerHandler::SPtr  m_owner;
 
 private:
+    Listener m_reposition;
     Listener m_newPopup;
     Listener m_destroy;
 };
