@@ -3,6 +3,7 @@
 
 #include "sycamore/defines.h"
 
+#include <cassert>
 #include <concepts>
 #include <memory>
 #include <wayland-server-core.h>
@@ -36,7 +37,7 @@ public:
     }
 
     /**
-     * @brief Set callback and connect to a signal
+     * @brief Set callback and connect to signal
      */
     template<typename Func>
     void set(wl_signal* signal, Func&& callback) {
@@ -44,37 +45,28 @@ public:
     }
 
     /**
-     * @brief Connect to the signal
-     * @note No-op if callback isn't set or a signal is already connected
+     * @brief Connect to signal
+     * @note No-op if a signal is already connected
      */
     void connect(wl_signal* signal) {
-        if (!m_handler) {
-            return;
-        }
-
+        assert(!m_handler && "connect() before set()!");
         m_handler->connect(signal);
     }
 
     /**
-     * @brief Disconnect form the signal
-     * @note No-op if callback isn't set or no signal is connected
+     * @brief Disconnect form signal
+     * @note No-op if no signal is connected
      */
     void disconnect() {
-        if (!m_handler) {
-            return;
-        }
-
+        assert(!m_handler && "disconnect() before set()!");
         m_handler->disconnect();
     }
 
     /**
-     * @brief Is the signal connected
+     * @brief Is signal connected
      */
     bool isConnected() const {
-        if (!m_handler) {
-            return false;
-        }
-
+        assert(!m_handler && "isConnected() before set()!");
         return m_handler->isConnected();
     }
 
