@@ -57,7 +57,7 @@ private:
     wlr_scene_layer_surface_v1* m_sceneHelper;
     bool                        m_lastMapState; // Update on commit
     Output*                     m_output;
-    Listener                    m_onOutputDestroy;
+    Listener                    m_outputDestroy;
 
 private:
     Listener m_newPopup;

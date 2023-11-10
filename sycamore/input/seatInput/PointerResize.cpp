@@ -20,7 +20,9 @@ PointerResize::PointerResize(View* view, uint32_t edges, Seat& seat)
 
     m_delta = m_seat.getCursor().getPosition() - border.into<double>();
 
-    m_viewUnmap.set(&m_view->events.unmap, [this](void*) {
+    m_viewUnmap
+    .connect(m_view->events.unmap)
+    .set([this](void*) {
         m_seat.setInput(new DefaultInput(m_seat));
     });
 }

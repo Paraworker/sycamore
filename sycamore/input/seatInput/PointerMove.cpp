@@ -8,7 +8,9 @@ PointerMove::PointerMove(View* view, Seat& seat)
     : m_view(view)
     , m_delta(seat.getCursor().getPosition() - view->getPosition().into<double>())
     , m_seat(seat) {
-    m_viewUnmap.set(&m_view->events.unmap, [this](void*) {
+    m_viewUnmap
+    .connect(m_view->events.unmap)
+    .set([this](void*) {
         m_seat.setInput(new DefaultInput(m_seat));
     });
 }

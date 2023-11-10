@@ -11,7 +11,9 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
     : InputDevice(deviceHandle), m_keyboardHandle(wlr_keyboard_from_input_device(deviceHandle)) {
     spdlog::info("New Keyboard: {}", deviceHandle->name);
 
-    m_modifiers.set(&m_keyboardHandle->events.modifiers, [this](void*) {
+    m_modifiers
+    .connect(m_keyboardHandle->events.modifiers)
+    .set([this](void*) {
         auto seatHandle = Core::instance.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
@@ -19,7 +21,9 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
         syncLeds();
     });
 
-    m_key.set(&m_keyboardHandle->events.key, [this](void* data) {
+    m_key
+    .connect(m_keyboardHandle->events.key)
+    .set([this](void* data) {
         auto event = static_cast<wlr_keyboard_key_event*>(data);
 
         // Translate libinput keycode -> xkbcommon
@@ -48,7 +52,9 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
         }
     });
 
-    m_destroy.set(&deviceHandle->events.destroy, [this](void*) {
+    m_destroy
+    .connect(deviceHandle->events.destroy)
+    .set([this](void*) {
         InputManager::instance.onDestroyDevice(this);
     });
 

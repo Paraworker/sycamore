@@ -33,11 +33,15 @@ public:
 
 private:
     explicit LayerShell(wlr_layer_shell_v1* handle) : m_handle(handle) {
-        m_newSurface.set(&handle->events.new_surface, [](void* data) {
+        m_newSurface
+        .connect(handle->events.new_surface)
+        .set([](void* data) {
             Layer::create(static_cast<wlr_layer_surface_v1*>(data));
         });
 
-        m_destroy.set(&handle->events.destroy, [this](void*) { delete this; });
+        m_destroy
+        .connect(handle->events.destroy)
+        .set([this](void*) { delete this; });
     }
 
     ~LayerShell() = default;

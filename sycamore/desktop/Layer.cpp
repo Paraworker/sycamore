@@ -45,21 +45,27 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     // Link to output
     wl_list_insert(&m_output->layers[m_layerSurface->pending.layer], &link);
-    m_onOutputDestroy.set(&m_output->events.destroy, [this](void*) {
+    m_outputDestroy
+    .connect(m_output->events.destroy)
+    .set([this](void*) {
         m_layerSurface->output = nullptr;
 
         // Unlink output
         wl_list_remove(&link);
 
         m_output = nullptr;
-        m_onOutputDestroy.disconnect();
+        m_outputDestroy.disconnect();
     });
 
-    m_newPopup.set(&layerSurface->events.new_popup, [this](void* data) {
+    m_newPopup
+    .connect(layerSurface->events.new_popup)
+    .set([this](void* data) {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
     });
 
-    m_map.set(&layerSurface->surface->events.map, [this](void*) {
+    m_map
+    .connect(layerSurface->surface->events.map)
+    .set([this](void*) {
         if (isFocusable()) {
             ShellManager::instance.setFocus(this);
         }
@@ -68,12 +74,16 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
-    m_unmap.set(&layerSurface->surface->events.unmap, [this](void*) {
+    m_unmap
+    .connect(layerSurface->surface->events.unmap)
+    .set([this](void*) {
         // emit signal
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 
-    m_commit.set(&layerSurface->surface->events.commit, [this](void*) {
+    m_commit
+    .connect(layerSurface->surface->events.commit)
+    .set([this](void*) {
         uint32_t committed   = m_layerSurface->current.committed;
         bool     mapped      = m_layerSurface->surface->mapped;
         bool     needArrange = false;
@@ -113,7 +123,9 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         }
     });
 
-    m_destroy.set(&layerSurface->surface->events.destroy, [this](void*) {
+    m_destroy
+    .connect(layerSurface->surface->events.destroy)
+    .set([this](void*) {
         // emit signal first
         wl_signal_emit_mutable(&events.destroy, nullptr);
 

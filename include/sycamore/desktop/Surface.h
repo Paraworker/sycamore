@@ -25,7 +25,9 @@ public:
 
 private:
     explicit Surface(wlr_surface* handle) : m_handle(handle) {
-        m_destroy.set(&handle->events.destroy, [this](void*) { delete this; });
+        m_destroy
+        .connect(handle->events.destroy)
+        .set([this](void*) { delete this; });
     }
 
     ~Surface() { Core::instance.seat->getInput().rebasePointer(); }

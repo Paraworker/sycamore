@@ -25,24 +25,28 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     : View(toplevel->base->surface, tree)
     , m_toplevel(toplevel) {
     // On creation, we only connect destroy, map, unmap
-    m_destroy.set(&m_surface->events.destroy, [this](void*) {
+    m_destroy
+    .connect(m_surface->events.destroy)
+    .set([this](void*) {
         // emit signal before destruction
         wl_signal_emit_mutable(&events.destroy, nullptr);
         delete this;
     });
 
-    m_map.set(&m_surface->events.map, [this](void*) {
+    m_map
+    .connect(m_surface->events.map)
+    .set([this](void*) {
         // Add to list
         ShellManager::instance.addMappedView(this);
 
         // Connect signals
-        m_commit.connect(&m_surface->events.commit);
-        m_newPopup.connect(&m_toplevel->base->events.new_popup);
-        m_move.connect(&m_toplevel->events.request_move);
-        m_resize.connect(&m_toplevel->events.request_resize);
-        m_fullscreen.connect(&m_toplevel->events.request_fullscreen);
-        m_maximize.connect(&m_toplevel->events.request_maximize);
-        m_minimize.connect(&m_toplevel->events.request_minimize);
+        m_commit.connect(m_surface->events.commit);
+        m_newPopup.connect(m_toplevel->base->events.new_popup);
+        m_move.connect(m_toplevel->events.request_move);
+        m_resize.connect(m_toplevel->events.request_resize);
+        m_fullscreen.connect(m_toplevel->events.request_fullscreen);
+        m_maximize.connect(m_toplevel->events.request_maximize);
+        m_minimize.connect(m_toplevel->events.request_minimize);
 
         // Layout stuff
         auto& requested = m_toplevel->requested;
@@ -66,7 +70,9 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
-    m_unmap.set(&m_surface->events.unmap, [this](void*) {
+    m_unmap
+    .connect(m_surface->events.unmap)
+    .set([this](void*) {
         // Disconnect signals
         m_commit.disconnect();
         m_newPopup.disconnect();
@@ -170,7 +176,7 @@ uint32_t XdgView::setSize(uint32_t width, uint32_t height) {
 }
 
 wlr_box XdgView::getGeometry() {
-    wlr_box box;
+    wlr_box box{};
     wlr_xdg_surface_get_geometry(m_toplevel->base, &box);
     return box;
 }
