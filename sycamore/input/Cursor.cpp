@@ -40,28 +40,34 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
     , m_xcursor(nullptr)
     , m_pointerButtonCount(0)
     , m_seat(nullptr) {
-    m_motion.set(&handle->events.motion, [this](void* data) {
-        enable();
-
+    m_motion
+    .connect(handle->events.motion)
+    .set([this](void* data) {
         auto event = static_cast<wlr_pointer_motion_event*>(data);
+
+        enable();
 
         wlr_cursor_move(m_handle, &event->pointer->base, event->delta_x, event->delta_y);
         m_seat->getInput().onPointerMotion(event->time_msec);
     });
 
-    m_motionAbsolute.set(&handle->events.motion_absolute, [this](void* data) {
-        enable();
-
+    m_motionAbsolute
+    .connect(handle->events.motion_absolute)
+    .set([this](void* data) {
         auto event = static_cast<wlr_pointer_motion_absolute_event*>(data);
+
+        enable();
 
         wlr_cursor_warp_absolute(m_handle, &event->pointer->base, event->x, event->y);
         m_seat->getInput().onPointerMotion(event->time_msec);
     });
 
-    m_button.set(&handle->events.button, [this](void* data) {
-        enable();
-
+    m_button
+    .connect(handle->events.button)
+    .set([this](void* data) {
         auto event = static_cast<wlr_pointer_button_event*>(data);
+
+        enable();
 
         if (event->state == WLR_BUTTON_PRESSED) {
             ++m_pointerButtonCount;
@@ -72,52 +78,72 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
         m_seat->getInput().onPointerButton(event);
     });
 
-    m_axis.set(&handle->events.axis, [this](void* data) {
+    m_axis
+    .connect(handle->events.axis)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
     });
 
-    m_frame.set(&handle->events.frame, [this](void *data) {
+    m_frame
+    .connect(handle->events.frame)
+    .set([this](void *data) {
         enable();
         wlr_seat_pointer_notify_frame(m_seat->getHandle());
     });
 
-    m_swipeBegin.set(&handle->events.swipe_begin, [this](void* data) {
+    m_swipeBegin
+    .connect(handle->events.swipe_begin)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
     });
 
-    m_swipeUpdate.set(&handle->events.swipe_update, [this](void* data) {
+    m_swipeUpdate
+    .connect(handle->events.swipe_update)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
     });
 
-    m_swipeEnd.set(&handle->events.swipe_end, [this](void* data) {
+    m_swipeEnd
+    .connect(handle->events.swipe_end)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
     });
 
-    m_pinchBegin.set(&handle->events.pinch_begin, [this](void* data) {
+    m_pinchBegin
+    .connect(handle->events.pinch_begin)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
     });
 
-    m_pinchUpdate.set(&handle->events.pinch_update, [this](void* data) {
+    m_pinchUpdate
+    .connect(handle->events.pinch_update)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
     });
 
-    m_pinchEnd.set(&handle->events.pinch_end, [this](void* data) {
+    m_pinchEnd
+    .connect(handle->events.pinch_end)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
     });
 
-    m_holdBegin.set(&handle->events.hold_begin, [this](void* data) {
+    m_holdBegin
+    .connect(handle->events.hold_begin)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
     });
 
-    m_holdEnd.set(&handle->events.hold_end, [this](void* data) {
+    m_holdEnd
+    .connect(handle->events.hold_end)
+    .set([this](void* data) {
         enable();
         m_seat->getInput().onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
     });

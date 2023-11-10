@@ -9,7 +9,9 @@ ImplicitGrab::ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, S
     : m_surface(surface)
     , m_delta(sCoords - seat.getCursor().getPosition())
     , m_seat(seat) {
-    m_surfaceUnmap.set(&m_surface->events.unmap, [this](void*) {
+    m_surfaceUnmap
+    .connect(m_surface->events.unmap)
+    .set([this](void*) {
         m_seat.setInput(new DefaultInput(m_seat));
     });
 }

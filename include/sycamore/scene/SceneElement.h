@@ -24,9 +24,9 @@ protected:
     SceneElement(Type type, wlr_scene_node* node) : m_type(type) {
         node->data = this;
 
-        m_destroy.set(&node->events.destroy, [this](void*) {
-            delete this;
-        });
+        m_destroy
+        .connect(node->events.destroy)
+        .set([this](void*) { delete this; });
     }
 
     virtual ~SceneElement() = default;

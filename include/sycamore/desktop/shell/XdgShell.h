@@ -33,7 +33,9 @@ public:
 
 private:
     explicit XdgShell(wlr_xdg_shell* handle) : m_handle(handle) {
-        m_newSurface.set(&handle->events.new_surface, [](void* data) {
+        m_newSurface
+        .connect(handle->events.new_surface)
+        .set([](void* data) {
             auto xdgSurface = static_cast<wlr_xdg_surface*>(data);
 
             if (xdgSurface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL) {
@@ -41,7 +43,9 @@ private:
             }
         });
 
-        m_destroy.set(&handle->events.destroy, [this](void*) { delete this; });
+        m_destroy
+        .connect(handle->events.destroy)
+        .set([this](void*) { delete this; });
     }
 
     ~XdgShell() = default;

@@ -54,7 +54,7 @@ void ShellManager::setFocus(View* view) {
     }
 
     m_focusState.view = view;
-    m_focusUnmap.view.connect(&view->events.unmap);
+    m_focusUnmap.view.connect(view->events.unmap);
 }
 
 void ShellManager::setFocus(Layer* layer) {
@@ -63,7 +63,7 @@ void ShellManager::setFocus(Layer* layer) {
     }
 
     m_focusState.layer = layer;
-    m_focusUnmap.layer.connect(&layer->events.unmap);
+    m_focusUnmap.layer.connect(layer->events.unmap);
 
     Core::instance.seat->setKeyboardFocus(layer->getBaseSurface());
 }

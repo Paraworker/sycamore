@@ -37,7 +37,9 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
     // Enable DefaultInput
     m_input->onEnable();
 
-    m_setCursor.set(&handle->events.request_set_cursor, [this](void* data) {
+    m_setCursor
+    .connect(handle->events.request_set_cursor)
+    .set([this](void* data) {
         auto event = static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
 
         auto* focusedClient = m_handle->pointer_state.focused_client;
@@ -48,17 +50,23 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
         m_cursor->setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
     });
 
-    m_setSelection.set(&handle->events.request_set_selection, [this](void* data) {
+    m_setSelection
+    .connect(handle->events.request_set_selection)
+    .set([this](void* data) {
         auto event = static_cast<wlr_seat_request_set_selection_event*>(data);
         wlr_seat_set_selection(m_handle, event->source, event->serial);
     });
 
-    m_setPrimarySelection.set(&handle->events.request_set_primary_selection, [this](void* data) {
+    m_setPrimarySelection
+    .connect(handle->events.request_set_primary_selection)
+    .set([this](void* data) {
         auto event = static_cast<wlr_seat_request_set_primary_selection_event*>(data);
         wlr_seat_set_primary_selection(m_handle, event->source, event->serial);
     });
 
-    m_requestStartDrag.set(&handle->events.request_start_drag, [this](void* data) {
+    m_requestStartDrag
+    .connect(handle->events.request_start_drag)
+    .set([this](void* data) {
         auto event = static_cast<wlr_seat_request_start_drag_event*>(data);
 
         if (wlr_seat_validate_pointer_grab_serial(m_handle, event->origin, event->serial)) {
@@ -77,7 +85,9 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
         wlr_data_source_destroy(event->drag->source);
     });
 
-    m_startDrag.set(&handle->events.start_drag, [this](void* data) {
+    m_startDrag
+    .connect(handle->events.start_drag)
+    .set([this](void* data) {
         auto drag = static_cast<wlr_drag*>(data);
 
         // Setup icon if provided

@@ -104,15 +104,21 @@ bool Core::init() {
     wlr_gamma_control_manager_v1_create(display);
     wlr_single_pixel_buffer_manager_v1_create(display);
 
-    m_newInput.set(&backend->events.new_input, [](void* data) {
+    m_newInput
+    .connect(backend->events.new_input)
+    .set([](void* data) {
         InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
     });
 
-    m_newOutput.set(&backend->events.new_output, [](void* data) {
+    m_newOutput
+    .connect(backend->events.new_output)
+    .set([](void* data) {
         Output::create(static_cast<wlr_output*>(data));
     });
 
-    m_newSurface.set(&compositor->events.new_surface, [](void* data) {
+    m_newSurface
+    .connect(compositor->events.new_surface)
+    .set([](void* data) {
         Surface::create(static_cast<wlr_surface*>(data));
     });
 
