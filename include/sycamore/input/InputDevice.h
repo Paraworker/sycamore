@@ -6,7 +6,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class InputDevice {
+class InputDevice
+{
 public:
     auto type() const { return m_deviceHandle->type; }
 

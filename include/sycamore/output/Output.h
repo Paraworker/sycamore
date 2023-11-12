@@ -9,7 +9,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Layer;
 
-class Output {
+class Output
+{
 public:
     /**
      * @brief Create Output
@@ -22,13 +23,13 @@ public:
     bool apply();
 
     /**
-     * @brief Get the geometry in local layout
+     * @brief Get geometry in local layout
      * @return {0, 0, width, height}
      */
     wlr_box getRelativeGeometry() const;
 
     /**
-     * @brief Get the geometry in output layout
+     * @brief Get geometry in output layout
      * @return {x, y, width, height}
      */
     wlr_box getLayoutGeometry() const;
@@ -57,7 +58,8 @@ private:
     ~Output();
 
 public:
-    struct {
+    struct
+    {
         wl_signal destroy;
     } events{};
 

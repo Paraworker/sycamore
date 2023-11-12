@@ -6,22 +6,26 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-// A wrapper around wl_list
-class List {
+// A wrapper for wl_list
+class List
+{
 public:
     List() { wl_list_init(&m_handle); }
 
-    void add(wl_list& link) {
+    void add(wl_list& link)
+    {
         wl_list_insert(&m_handle, &link);
         ++m_size;
     }
 
-    void remove(wl_list& link) {
+    void remove(wl_list& link)
+    {
         wl_list_remove(&link);
         --m_size;
     }
 
-    void reinsert(wl_list& link) {
+    void reinsert(wl_list& link)
+    {
         wl_list_remove(&link);
         wl_list_insert(&m_handle, &link);
     }

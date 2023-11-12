@@ -9,10 +9,12 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-XdgView* XdgView::create(wlr_xdg_toplevel* toplevel) {
+XdgView* XdgView::create(wlr_xdg_toplevel* toplevel)
+{
     // Create tree
     auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.view, toplevel->base);
-    if (!tree) {
+    if (!tree)
+    {
         spdlog::error("Create scene tree for XdgView failed!");
         return nullptr;
     }
@@ -22,12 +24,13 @@ XdgView* XdgView::create(wlr_xdg_toplevel* toplevel) {
 }
 
 XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
-    : View(toplevel->base->surface, tree)
-    , m_toplevel(toplevel) {
+    : View(toplevel->base->surface, tree), m_toplevel(toplevel)
+{
     // On creation, we only connect destroy, map, unmap
     m_destroy
     .connect(m_surface->events.destroy)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         // emit signal before destruction
         wl_signal_emit_mutable(&events.destroy, nullptr);
         delete this;
@@ -35,7 +38,8 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_map
     .connect(m_surface->events.map)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         // Add to list
         ShellManager::instance.addMappedView(this);
 
@@ -55,11 +59,13 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         setToOutputCenter(output);
 
-        if (requested.maximized) {
+        if (requested.maximized)
+        {
             ShellManager::maximizeRequest(this, true, output);
         }
 
-        if (requested.fullscreen) {
+        if (requested.fullscreen)
+        {
             ShellManager::fullscreenRequest(this, true, output);
         }
 
@@ -72,7 +78,8 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_unmap
     .connect(m_surface->events.unmap)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         // Disconnect signals
         m_commit.disconnect();
         m_newPopup.disconnect();
@@ -90,30 +97,37 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     // All listeners below are not connected util map
 
-    m_commit.set([this](void*) {
+    m_commit.set([this](void*)
+    {
         auto newGeometry = getGeometry();
 
         // geometry changed
-        if (memcmp(&m_committedGeometry, &newGeometry, sizeof(wlr_box)) != 0) {
+        if (memcmp(&m_committedGeometry, &newGeometry, sizeof(wlr_box)) != 0)
+        {
             m_committedGeometry = newGeometry;
             Core::instance.seat->getInput().rebasePointer();
         }
     });
 
-    m_newPopup.set([this](void* data) {
+    m_newPopup.set([this](void* data)
+    {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ViewHandler>(this));
     });
 
-    m_move.set([this](void*) {
-        if (!Core::instance.seat->bindingEnterCheck(this)) {
+    m_move.set([this](void*)
+    {
+        if (!Core::instance.seat->bindingEnterCheck(this))
+        {
             return;
         }
 
         Core::instance.seat->setInput(new PointerMove(this, *Core::instance.seat));
     });
 
-    m_resize.set([this](void* data) {
-        if (!Core::instance.seat->bindingEnterCheck(this)) {
+    m_resize.set([this](void* data)
+    {
+        if (!Core::instance.seat->bindingEnterCheck(this))
+        {
             return;
         }
 
@@ -121,17 +135,20 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         Core::instance.seat->setInput(new PointerResize(this, event->edges, *Core::instance.seat));
     });
 
-    m_fullscreen.set([this](void*) {
+    m_fullscreen.set([this](void*)
+    {
         auto& requested = m_toplevel->requested;
 
-        if (!requested.fullscreen) {
+        if (!requested.fullscreen)
+        {
             ShellManager::fullscreenRequest(this, false, nullptr);
             return;
         }
 
         // If there is an output provided, try to satisfy it
         auto output = requested.fullscreen_output;
-        if (output && output->data) {
+        if (output && output->data)
+        {
             ShellManager::fullscreenRequest(this, true, static_cast<Output*>(output->data));
             return;
         }
@@ -139,8 +156,10 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         ShellManager::fullscreenRequest(this, true, getOutput());
     });
 
-    m_maximize.set([this](void*) {
-        if (!m_toplevel->requested.maximized) {
+    m_maximize.set([this](void*)
+    {
+        if (!m_toplevel->requested.maximized)
+        {
             ShellManager::maximizeRequest(this, false, nullptr);
             return;
         }
@@ -148,40 +167,48 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         ShellManager::maximizeRequest(this, true, getOutput());
     });
 
-    m_minimize.set([](void*) {
+    m_minimize.set([](void*)
+    {
         // TODO
     });
 }
 
 XdgView::~XdgView() = default;
 
-uint32_t XdgView::setMaximized(bool maximized) {
+uint32_t XdgView::setMaximized(bool maximized)
+{
     return wlr_xdg_toplevel_set_maximized(m_toplevel, maximized);
 }
 
-uint32_t XdgView::setFullscreen(bool fullscreen) {
+uint32_t XdgView::setFullscreen(bool fullscreen)
+{
     return wlr_xdg_toplevel_set_fullscreen(m_toplevel, fullscreen);
 }
 
-uint32_t XdgView::setActivated(bool activated) {
+uint32_t XdgView::setActivated(bool activated)
+{
     return wlr_xdg_toplevel_set_activated(m_toplevel, activated);
 }
 
-uint32_t XdgView::setResizing(bool resizing) {
+uint32_t XdgView::setResizing(bool resizing)
+{
     return wlr_xdg_toplevel_set_resizing(m_toplevel, resizing);
 }
 
-uint32_t XdgView::setSize(uint32_t width, uint32_t height) {
+uint32_t XdgView::setSize(uint32_t width, uint32_t height)
+{
     return wlr_xdg_toplevel_set_size(m_toplevel, width, height);
 }
 
-wlr_box XdgView::getGeometry() {
+wlr_box XdgView::getGeometry()
+{
     wlr_box box{};
     wlr_xdg_surface_get_geometry(m_toplevel->base, &box);
     return box;
 }
 
-void XdgView::close() {
+void XdgView::close()
+{
     wlr_xdg_toplevel_send_close(m_toplevel);
 }
 

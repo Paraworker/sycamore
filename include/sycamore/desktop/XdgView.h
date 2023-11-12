@@ -7,7 +7,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class XdgView final : public View {
+class XdgView final : public View
+{
 public:
     /**
      * @brief Create XdgView

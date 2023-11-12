@@ -9,13 +9,15 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-// A wrapper around wl_listener
-class Listener {
+// A wrapper for wl_listener
+class Listener
+{
 public:
     /**
      * @brief Constructor
      */
-    Listener() : m_wrapped{{}, onSignal} {
+    Listener() : m_wrapped{{}, onSignal}
+    {
         wl_list_init(&m_wrapped.link);
     }
 
@@ -29,7 +31,8 @@ public:
      * @brief Set callback
      */
     template<typename Func>
-    Listener& set(Func&& callback) {
+    Listener& set(Func&& callback)
+    {
         m_callback = std::forward<Func>(callback);
         return *this;
     }
@@ -37,7 +40,8 @@ public:
     /**
      * @brief Connect to signal
      */
-    Listener& connect(wl_signal& signal) {
+    Listener& connect(wl_signal& signal)
+    {
         assert(!isConnected() && "connect() on a connected listener!");
         wl_signal_add(&signal, &m_wrapped);
         return *this;
@@ -47,8 +51,10 @@ public:
      * @brief Disconnect form signal
      * @note No-op if signal isn't connected
      */
-    Listener& disconnect() {
-        if (isConnected()) {
+    Listener& disconnect()
+    {
+        if (isConnected())
+        {
             wl_list_remove(&m_wrapped.link);
             wl_list_init(&m_wrapped.link);
         }
@@ -59,7 +65,8 @@ public:
     /**
      * @brief Is signal connected
      */
-    bool isConnected() const {
+    bool isConnected() const
+    {
         return !wl_list_empty(&m_wrapped.link);
     }
 
@@ -69,7 +76,8 @@ public:
     Listener& operator=(Listener&&) = delete;
 
 private:
-    static void onSignal(wl_listener* listener, void* data) {
+    static void onSignal(wl_listener* listener, void* data)
+    {
         reinterpret_cast<Listener*>(listener)->m_callback(data);
     }
 

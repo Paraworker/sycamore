@@ -8,7 +8,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class InputManager {
+class InputManager
+{
 public:
     /**
      * @brief Get the list of a certain type device
@@ -19,7 +20,8 @@ public:
 
     template<typename T>
     requires std::is_base_of_v<InputDevice, T>
-    void onDestroyDevice(T* device) {
+    void onDestroyDevice(T* device)
+    {
         m_deviceList[device->type()].remove(device->link);
         delete device;
 
@@ -42,7 +44,8 @@ private:
 
     template<typename T>
     requires std::is_base_of_v<InputDevice, T>
-    void newDevice(wlr_input_device* handle) {
+    void newDevice(wlr_input_device* handle)
+    {
         auto device = new T{handle};
         m_deviceList[device->type()].add(device->link);
 

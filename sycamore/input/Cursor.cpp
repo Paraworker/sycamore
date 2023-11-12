@@ -6,8 +6,10 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t size) {
-    if (theme) {
+static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t size)
+{
+    if (theme)
+    {
         setenv("XCURSOR_THEME", theme, 1);
     }
 
@@ -16,14 +18,17 @@ static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t siz
     return wlr_xcursor_manager_create(theme, size);
 }
 
-Cursor* Cursor::create(wlr_output_layout* layout) {
+Cursor* Cursor::create(wlr_output_layout* layout)
+{
     auto handle = wlr_cursor_create();
-    if (!handle) {
+    if (!handle)
+    {
         return nullptr;
     }
 
     auto manager = xcursorManagerCreate(nullptr, 24);
-    if (!manager) {
+    if (!manager)
+    {
         wlr_cursor_destroy(handle);
         return nullptr;
     }
@@ -39,10 +44,12 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
     , m_enabled(false)
     , m_xcursor(nullptr)
     , m_pointerButtonCount(0)
-    , m_seat(nullptr) {
+    , m_seat(nullptr)
+{
     m_motion
     .connect(handle->events.motion)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         auto event = static_cast<wlr_pointer_motion_event*>(data);
 
         enable();
@@ -53,7 +60,8 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
 
     m_motionAbsolute
     .connect(handle->events.motion_absolute)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         auto event = static_cast<wlr_pointer_motion_absolute_event*>(data);
 
         enable();
@@ -64,14 +72,18 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
 
     m_button
     .connect(handle->events.button)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         auto event = static_cast<wlr_pointer_button_event*>(data);
 
         enable();
 
-        if (event->state == WLR_BUTTON_PRESSED) {
+        if (event->state == WLR_BUTTON_PRESSED)
+        {
             ++m_pointerButtonCount;
-        } else if (m_pointerButtonCount > 0) {
+        }
+        else if (m_pointerButtonCount > 0)
+        {
             --m_pointerButtonCount;
         }
 
@@ -80,70 +92,80 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
 
     m_axis
     .connect(handle->events.axis)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
     });
 
     m_frame
     .connect(handle->events.frame)
-    .set([this](void *data) {
+    .set([this](void* data)
+    {
         enable();
         wlr_seat_pointer_notify_frame(m_seat->getHandle());
     });
 
     m_swipeBegin
     .connect(handle->events.swipe_begin)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
     });
 
     m_swipeUpdate
     .connect(handle->events.swipe_update)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
     });
 
     m_swipeEnd
     .connect(handle->events.swipe_end)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
     });
 
     m_pinchBegin
     .connect(handle->events.pinch_begin)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
     });
 
     m_pinchUpdate
     .connect(handle->events.pinch_update)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
     });
 
     m_pinchEnd
     .connect(handle->events.pinch_end)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
     });
 
     m_holdBegin
     .connect(handle->events.hold_begin)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
     });
 
     m_holdEnd
     .connect(handle->events.hold_end)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         enable();
         m_seat->getInput().onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
     });
@@ -166,15 +188,18 @@ Cursor::~Cursor() {
     m_holdEnd.disconnect();
 
     // Maybe nullptr
-    if (m_xcursorManager) {
+    if (m_xcursorManager)
+    {
         wlr_xcursor_manager_destroy(m_xcursorManager);
     }
 
     wlr_cursor_destroy(m_handle);
 }
 
-void Cursor::enable() {
-    if (m_enabled) {
+void Cursor::enable()
+{
+    if (m_enabled)
+    {
         return;
     }
 
@@ -183,8 +208,10 @@ void Cursor::enable() {
     m_seat->getInput().rebasePointer();
 }
 
-void Cursor::disable() {
-    if (!m_enabled) {
+void Cursor::disable()
+{
+    if (!m_enabled)
+    {
         return;
     }
 
@@ -194,12 +221,15 @@ void Cursor::disable() {
     wlr_seat_pointer_notify_clear_focus(m_seat->getHandle());
 }
 
-void Cursor::setXcursor(const char* name) {
-    if (!m_enabled) {
+void Cursor::setXcursor(const char* name)
+{
+    if (!m_enabled)
+    {
         return;
     }
 
-    if (!name) {
+    if (!name)
+    {
         hide();
         return;
     }
@@ -209,8 +239,10 @@ void Cursor::setXcursor(const char* name) {
     wlr_cursor_set_xcursor(m_handle, m_xcursorManager, name);
 }
 
-void Cursor::setSurface(wlr_surface* surface, const Point<int32_t>& hotspot) {
-    if (!m_enabled) {
+void Cursor::setSurface(wlr_surface* surface, const Point<int32_t>& hotspot)
+{
+    if (!m_enabled)
+    {
         return;
     }
 
@@ -219,26 +251,32 @@ void Cursor::setSurface(wlr_surface* surface, const Point<int32_t>& hotspot) {
     wlr_cursor_set_surface(m_handle, surface, hotspot.x, hotspot.y);
 }
 
-void Cursor::refreshXcursor() {
-    if (!m_enabled) {
+void Cursor::refreshXcursor()
+{
+    if (!m_enabled)
+    {
         return;
     }
 
     warp(getPosition());
 
-    if (!m_xcursor) {
+    if (!m_xcursor)
+    {
         return;
     }
 
     wlr_cursor_set_xcursor(m_handle, m_xcursorManager, m_xcursor);
 }
 
-bool Cursor::updateXcursorTheme(const char* theme, uint32_t size) {
-    if (m_xcursorManager) {
+bool Cursor::updateXcursorTheme(const char* theme, uint32_t size)
+{
+    if (m_xcursorManager)
+    {
         wlr_xcursor_manager_destroy(m_xcursorManager);
     }
 
-    if (m_xcursorManager = xcursorManagerCreate(theme, size); !m_xcursorManager) {
+    if (m_xcursorManager = xcursorManagerCreate(theme, size); !m_xcursorManager)
+    {
         return false;
     }
 
@@ -247,7 +285,8 @@ bool Cursor::updateXcursorTheme(const char* theme, uint32_t size) {
     return true;
 }
 
-Output* Cursor::atOutput() const {
+Output* Cursor::atOutput() const
+{
     return Core::instance.outputLayout->findOutputAt(getPosition());
 }
 

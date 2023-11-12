@@ -7,7 +7,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Pointer final : public InputDevice {
+class Pointer final : public InputDevice
+{
 public:
     void applyConfig();
 

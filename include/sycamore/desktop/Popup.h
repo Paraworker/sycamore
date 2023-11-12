@@ -10,10 +10,12 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Popup {
+class Popup
+{
 public:
     // Operations for different toplevel parent
-    class OwnerHandler {
+    class OwnerHandler
+    {
     public:
         using SPtr = std::shared_ptr<OwnerHandler>;
 
@@ -29,14 +31,17 @@ public:
         virtual void unconstrain(Popup* popup) = 0;
     };
 
-    class ViewHandler : public OwnerHandler {
+    class ViewHandler : public OwnerHandler
+    {
     public:
         explicit ViewHandler(View* view) : m_view(view) {}
 
         ~ViewHandler() override = default;
 
-        void unconstrain(Popup* popup) override {
-            if (auto output = m_view->getOutput(); output) {
+        void unconstrain(Popup* popup) override
+        {
+            if (auto output = m_view->getOutput(); output)
+            {
                 auto geo = m_view->getGeometry();
                 auto pos = m_view->getPosition();
                 auto box = output->getRelativeGeometry();
@@ -52,13 +57,15 @@ public:
         View* m_view;
     };
 
-    class LayerHandler : public OwnerHandler {
+    class LayerHandler : public OwnerHandler
+    {
     public:
         explicit LayerHandler(Layer* layer) : m_layer(layer) {}
 
         ~LayerHandler() override = default;
 
-        void unconstrain(Popup* popup) override {
+        void unconstrain(Popup* popup) override
+        {
             auto pos = m_layer->getPosition();
             auto box = m_layer->getOutput()->getRelativeGeometry();
 
@@ -79,7 +86,8 @@ public:
      */
     static Popup* create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner);
 
-    void unconstrainFromBox(const wlr_box& box) {
+    void unconstrainFromBox(const wlr_box& box)
+    {
         wlr_xdg_popup_unconstrain_from_box(m_handle, &box);
     }
 
@@ -110,7 +118,8 @@ private:
     Listener m_destroy;
 };
 
-class PopupElement final : public SceneElement {
+class PopupElement final : public SceneElement
+{
 public:
     Popup* getPopup() const { return m_popup; }
 

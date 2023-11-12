@@ -5,7 +5,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 KeybindingManager KeybindingManager::instance{};
 
-KeybindingManager::KeybindingManager() {
+KeybindingManager::KeybindingManager()
+{
     add({WLR_MODIFIER_LOGO, XKB_KEY_d}, Spawn{"fuzzel -i Papirus"});
     add({WLR_MODIFIER_LOGO, XKB_KEY_Return}, Spawn{"gnome-terminal"});
     add({WLR_MODIFIER_LOGO, XKB_KEY_q}, CloseFocusedView{});
@@ -21,25 +22,31 @@ KeybindingManager::KeybindingManager() {
 
 KeybindingManager::~KeybindingManager() = default;
 
-bool KeybindingManager::add(const KeyInfo& info, Dispatcher&& dispatcher) {
-    if (!info) {
+bool KeybindingManager::add(const KeyInfo& info, Dispatcher&& dispatcher)
+{
+    if (!info)
+    {
         return false;
     }
 
     return m_bindingMap.emplace(info, std::move(dispatcher)).second;
 }
 
-bool KeybindingManager::remove(const KeyInfo& info) {
+bool KeybindingManager::remove(const KeyInfo& info)
+{
     return (m_bindingMap.erase(info) == 1);
 }
 
-bool KeybindingManager::dispatch(const KeyInfo& info) {
-    if (!info) {
+bool KeybindingManager::dispatch(const KeyInfo& info)
+{
+    if (!info)
+    {
         return false;
     }
 
     auto itr = m_bindingMap.find(info);
-    if (itr == m_bindingMap.end()) {
+    if (itr == m_bindingMap.end())
+    {
         return false;
     }
 

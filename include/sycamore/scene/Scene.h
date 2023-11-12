@@ -10,7 +10,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Scene {
+class Scene
+{
 public:
     using UPtr = std::unique_ptr<Scene>;
 
@@ -29,7 +30,8 @@ public:
 
     wlr_scene_tree* getLayerTree(zwlr_layer_shell_v1_layer type) const;
 
-    wlr_scene_node* nodeAt(const Point<double>& lCoords, Point<double>& sCoords) const {
+    wlr_scene_node* nodeAt(const Point<double>& lCoords, Point<double>& sCoords) const
+    {
         return wlr_scene_node_at(&shell.root->node, lCoords.x, lCoords.y, &sCoords.x, &sCoords.y);
     }
 
@@ -52,7 +54,8 @@ public:
     // 	   - top
     //     - overlay
     // 	 - dragIcons
-    struct {
+    struct
+    {
         wlr_scene_tree* root;
         wlr_scene_tree* background;
         wlr_scene_tree* bottom;

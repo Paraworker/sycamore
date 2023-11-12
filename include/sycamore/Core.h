@@ -13,7 +13,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Core {
+class Core
+{
 public:
     /**
      * @brief Initialize

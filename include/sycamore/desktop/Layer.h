@@ -11,7 +11,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Output;
 
-class Layer {
+class Layer
+{
 public:
     /**
      * @brief Create Layer
@@ -25,13 +26,12 @@ public:
 
     auto getBaseSurface() const { return m_layerSurface->surface; }
 
-    Point<int32_t> getPosition() const {
+    Point<int32_t> getPosition() const
+    {
         return {m_sceneHelper->tree->node.x, m_sceneHelper->tree->node.y};
     }
 
-    Output* getOutput() const {
-        return m_output;
-    }
+    Output* getOutput() const { return m_output; }
 
     Layer(const Layer&) = delete;
     Layer(Layer&&) = delete;
@@ -39,7 +39,8 @@ public:
     Layer& operator=(Layer&&) = delete;
 
 public:
-    struct {
+    struct
+    {
         wl_signal map;
         wl_signal unmap;
         wl_signal destroy;
@@ -67,7 +68,8 @@ private:
     Listener m_destroy;
 };
 
-class LayerElement final : public SceneElement {
+class LayerElement final : public SceneElement
+{
 public:
     Layer* getLayer() const { return m_layer; }
 

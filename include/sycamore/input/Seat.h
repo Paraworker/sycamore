@@ -13,7 +13,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class View;
 
-class Seat {
+class Seat
+{
 public:
     using UPtr = std::unique_ptr<Seat>;
     
@@ -32,7 +33,8 @@ public:
 
     SeatInput& getInput() const { return *m_input; }
 
-    void setInput(SeatInput* newInput) {
+    void setInput(SeatInput* newInput)
+    {
         m_input->onDisable();
         delete m_input;
 

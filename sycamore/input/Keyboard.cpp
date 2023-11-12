@@ -8,12 +8,15 @@
 NAMESPACE_SYCAMORE_BEGIN
 
 Keyboard::Keyboard(wlr_input_device* deviceHandle)
-    : InputDevice(deviceHandle), m_keyboardHandle(wlr_keyboard_from_input_device(deviceHandle)) {
+    : InputDevice(deviceHandle)
+    , m_keyboardHandle(wlr_keyboard_from_input_device(deviceHandle))
+{
     spdlog::info("New Keyboard: {}", deviceHandle->name);
 
     m_modifiers
     .connect(m_keyboardHandle->events.modifiers)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         auto seatHandle = Core::instance.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
@@ -23,7 +26,8 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_key
     .connect(m_keyboardHandle->events.key)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         auto event = static_cast<wlr_keyboard_key_event*>(data);
 
         // Translate libinput keycode -> xkbcommon
@@ -34,16 +38,19 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
         // Handle keybinding
         bool handled{false};
-        if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+        if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
+        {
             KeyInfo info{getModifiers(), {}};
 
-            for (int i = 0; i < nsyms; ++i) {
+            for (int i = 0; i < nsyms; ++i)
+            {
                 info.sym = syms[i];
                 handled = KeybindingManager::instance.dispatch(info);
             }
         }
 
-        if (!handled) {
+        if (!handled)
+        {
             auto seatHandle = Core::instance.seat->getHandle();
             wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
             wlr_seat_keyboard_notify_key(seatHandle, event->time_msec, event->keycode, event->state);
@@ -54,7 +61,8 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_destroy
     .connect(deviceHandle->events.destroy)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         InputManager::instance.onDestroyDevice(this);
     });
 
@@ -63,17 +71,20 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
 Keyboard::~Keyboard() = default;
 
-void Keyboard::applyConfig() {
+void Keyboard::applyConfig()
+{
     /* Compile an XKB keymap
     * We assume the defaults right now (e.g. layout = "us"). */
     auto ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    if (!ctx) {
+    if (!ctx)
+    {
         spdlog::error("Create xkb_context failed");
         return;
     }
 
     auto keymap = xkb_keymap_new_from_names(ctx, nullptr, XKB_KEYMAP_COMPILE_NO_FLAGS);
-    if (!keymap) {
+    if (!keymap)
+    {
         spdlog::error("Create keymap failed");
         xkb_context_unref(ctx);
         return;
@@ -84,21 +95,27 @@ void Keyboard::applyConfig() {
     xkb_context_unref(ctx);
 }
 
-void Keyboard::syncLeds() {
-    if (!m_keyboardHandle->xkb_state) {
+void Keyboard::syncLeds()
+{
+    if (!m_keyboardHandle->xkb_state)
+    {
         return;
     }
 
     uint32_t leds = 0;
-    for (uint32_t i = 0; i < WLR_LED_COUNT; ++i) {
-        if (xkb_state_led_index_is_active(m_keyboardHandle->xkb_state, m_keyboardHandle->led_indexes[i])) {
+    for (uint32_t i = 0; i < WLR_LED_COUNT; ++i)
+    {
+        if (xkb_state_led_index_is_active(m_keyboardHandle->xkb_state, m_keyboardHandle->led_indexes[i]))
+        {
             leds |= (1 << i);
         }
     }
 
     Keyboard* keyboard;
-    wl_list_for_each(keyboard, &InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_KEYBOARD).getHandle(), link) {
-        if (keyboard->m_keyboardHandle != m_keyboardHandle) {
+    wl_list_for_each(keyboard, &InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_KEYBOARD).getHandle(), link)
+    {
+        if (keyboard->m_keyboardHandle != m_keyboardHandle)
+        {
             wlr_keyboard_led_update(keyboard->m_keyboardHandle, leds);
         }
     }

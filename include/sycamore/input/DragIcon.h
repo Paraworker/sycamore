@@ -11,7 +11,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Seat;
 
-class DragIcon {
+class DragIcon
+{
 public:
     /**
      * @brief Create DragIcon
@@ -31,7 +32,8 @@ private:
 
     ~DragIcon() = default;
 
-    void setPosition(const Point<int32_t>& pos) const {
+    void setPosition(const Point<int32_t>& pos) const
+    {
         wlr_scene_node_set_position(&m_tree->node, pos.x, pos.y);
     }
 
@@ -44,7 +46,8 @@ private:
     Listener m_destroy;
 };
 
-class DragIconElement final : public SceneElement {
+class DragIconElement final : public SceneElement
+{
 public:
     DragIcon* getIcon() const { return m_icon; }
 

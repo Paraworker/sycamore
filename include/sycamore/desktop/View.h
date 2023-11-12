@@ -13,21 +13,25 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Output;
 
-class View {
+class View
+{
 public:
     enum Role { XDG, XWAYLAND };
 
-    struct State {
+    struct State
+    {
         bool maximized  = false;
         bool fullscreen = false;
     };
 
-    struct RestoreData {
+    struct RestoreData
+    {
         wlr_box maximize;
         wlr_box fullscreen;
     };
 
-    struct Events {
+    struct Events
+    {
         wl_signal map;
         wl_signal unmap;
         wl_signal destroy;
@@ -38,15 +42,18 @@ public:
 
     void setToOutputCenter(Output* output);
 
-    void moveTo(const Point<int32_t>& position) const {
+    void moveTo(const Point<int32_t>& position) const
+    {
         wlr_scene_node_set_position(&m_tree->node, position.x, position.y);
     }
 
-    Point<int32_t> getPosition() const {
+    Point<int32_t> getPosition() const
+    {
         return {m_tree->node.x, m_tree->node.y};
     }
 
-    void toFront() const {
+    void toFront() const
+    {
         wlr_scene_node_raise_to_top(&m_tree->node);
     }
 
@@ -89,7 +96,8 @@ protected:
     State           m_state;
 };
 
-class ViewElement final : public SceneElement {
+class ViewElement final : public SceneElement
+{
 public:
     View* getView() const { return m_view; }
 

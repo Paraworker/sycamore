@@ -8,7 +8,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class PointerResize : public SeatInput {
+class PointerResize : public SeatInput
+{
 public:
     PointerResize(View* view, uint32_t edges, Seat& seat);
 

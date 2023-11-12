@@ -7,9 +7,11 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class SceneElement {
+class SceneElement
+{
 public:
-    enum Type {
+    enum Type
+    {
         ROOT,
         VIEW,
         LAYER,
@@ -21,7 +23,8 @@ public:
     Type type() const { return m_type; }
 
 protected:
-    SceneElement(Type type, wlr_scene_node* node) : m_type(type) {
+    SceneElement(Type type, wlr_scene_node* node) : m_type(type)
+    {
         node->data = this;
 
         m_destroy

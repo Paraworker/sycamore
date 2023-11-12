@@ -5,7 +5,8 @@
 NAMESPACE_SYCAMORE_BEGIN
 
 View::View(wlr_surface* surface, wlr_scene_tree* tree)
-    : m_surface(surface), m_tree(tree) {
+    : m_surface(surface), m_tree(tree)
+{
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
     wl_signal_init(&events.destroy);
@@ -16,13 +17,16 @@ View::View(wlr_surface* surface, wlr_scene_tree* tree)
 
 View::~View() = default;
 
-Output* View::getOutput() const {
+Output* View::getOutput() const
+{
     // FIXME
     return Core::instance.seat->getCursor().atOutput();
 }
 
-void View::setToOutputCenter(Output* output) {
-    if (!output) {
+void View::setToOutputCenter(Output* output)
+{
+    if (!output)
+    {
         return;
     }
 
@@ -34,7 +38,8 @@ void View::setToOutputCenter(Output* output) {
     viewGeoBox.y = center.y - (viewGeoBox.height / 2);
 
     // Don't let view's top being out of output.
-    if (viewGeoBox.y < outputBox.y) {
+    if (viewGeoBox.y < outputBox.y)
+    {
         viewGeoBox.y = outputBox.y;
     }
 

@@ -11,9 +11,11 @@ class Layer;
 class Output;
 class View;
 
-class ShellManager {
+class ShellManager
+{
 public:
-    struct FocusState {
+    struct FocusState
+    {
         // focused view
         View* view = nullptr;
 
@@ -59,7 +61,8 @@ private:
     ~ShellManager();
 
 private:
-    struct FocusUnmap {
+    struct FocusUnmap
+    {
         // on focused view unmap
         Listener view;
 

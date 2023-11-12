@@ -7,9 +7,11 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat) {
+DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat)
+{
     auto tree = wlr_scene_drag_icon_create(Core::instance.scene->dragIcons, handle);
-    if (!tree) {
+    if (!tree)
+    {
         spdlog::error("Create scene tree for DragIcon failed!");
         return nullptr;
     }
@@ -18,7 +20,8 @@ DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat) {
 }
 
 DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)
-    : m_handle(handle), m_tree(tree), m_seat(seat) {
+    : m_handle(handle), m_tree(tree), m_seat(seat)
+{
     m_destroy
     .connect(handle->events.destroy)
     .set([this](void*) { delete this; });
@@ -29,8 +32,10 @@ DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)
     new DragIconElement{&tree->node, this};
 }
 
-void DragIcon::updatePosition() const {
-    switch (m_handle->drag->grab_type) {
+void DragIcon::updatePosition() const
+{
+    switch (m_handle->drag->grab_type)
+    {
         case WLR_DRAG_GRAB_KEYBOARD:
             return;
         case WLR_DRAG_GRAB_KEYBOARD_POINTER:

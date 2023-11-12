@@ -5,7 +5,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class DefaultInput : public SeatInput {
+class DefaultInput : public SeatInput
+{
 public:
     explicit DefaultInput(Seat& seat) : m_seat(seat) {}
 

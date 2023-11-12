@@ -8,11 +8,14 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-Layer* Layer::create(wlr_layer_surface_v1* layerSurface) {
+Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
+{
     // Confirm output
-    if (!layerSurface->output) {
+    if (!layerSurface->output)
+    {
         auto output = Core::instance.seat->getCursor().atOutput();
-        if (!output) {
+        if (!output)
+        {
             spdlog::error("No output under cursor for layerSurface");
             wlr_layer_surface_v1_destroy(layerSurface);
             return nullptr;
@@ -23,7 +26,8 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface) {
 
     // Create scene helper
     auto helper = wlr_scene_layer_surface_v1_create(Core::instance.scene->getLayerTree(layerSurface->pending.layer), layerSurface);
-    if (!helper) {
+    if (!helper)
+    {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
         wlr_layer_surface_v1_destroy(layerSurface);
         return nullptr;
@@ -38,16 +42,19 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     : m_layerSurface(layerSurface)
     , m_sceneHelper(helper)
     , m_output(static_cast<Output*>(layerSurface->output->data))
-    , m_lastMapState(false) {
+    , m_lastMapState(false)
+ {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
     wl_signal_init(&events.destroy);
 
     // Link to output
     wl_list_insert(&m_output->layers[m_layerSurface->pending.layer], &link);
+
     m_outputDestroy
     .connect(m_output->events.destroy)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         m_layerSurface->output = nullptr;
 
         // Unlink output
@@ -59,14 +66,17 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_newPopup
     .connect(layerSurface->events.new_popup)
-    .set([this](void* data) {
+    .set([this](void* data)
+    {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
     });
 
     m_map
     .connect(layerSurface->surface->events.map)
-    .set([this](void*) {
-        if (isFocusable()) {
+    .set([this](void*)
+    {
+        if (isFocusable())
+        {
             ShellManager::instance.setFocus(this);
         }
 
@@ -76,22 +86,26 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_unmap
     .connect(layerSurface->surface->events.unmap)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         // emit signal
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 
     m_commit
     .connect(layerSurface->surface->events.commit)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         uint32_t committed   = m_layerSurface->current.committed;
         bool     mapped      = m_layerSurface->surface->mapped;
         bool     needArrange = false;
         bool     needRebase  = false;
 
-        if (committed) {
+        if (committed)
+        {
             // layer type changed
-            if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER) {
+            if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER)
+            {
                 auto newLayer = m_layerSurface->current.layer;
                 wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::instance.scene->getLayerTree(newLayer));
 
@@ -100,36 +114,42 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
             }
 
             // only need rebase after mapped
-            if (mapped) {
+            if (mapped)
+            {
                 needRebase = true;
             }
 
             needArrange = true;
         }
 
-        if (mapped != m_lastMapState) {
+        if (mapped != m_lastMapState)
+        {
             m_lastMapState = mapped;
 
             // need rebase if map state changed
             needRebase = true;
         }
 
-        if (needArrange) {
+        if (needArrange)
+        {
             m_output->arrangeLayers();
         }
 
-        if (needRebase) {
+        if (needRebase)
+        {
             Core::instance.seat->getInput().rebasePointer();
         }
     });
 
     m_destroy
     .connect(layerSurface->surface->events.destroy)
-    .set([this](void*) {
+    .set([this](void*)
+    {
         // emit signal first
         wl_signal_emit_mutable(&events.destroy, nullptr);
 
-        if (m_output) {
+        if (m_output)
+        {
             // Unlink output
             wl_list_remove(&link);
             m_output->arrangeLayers();
@@ -144,11 +164,13 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
 Layer::~Layer() = default;
 
-void Layer::configure(const wlr_box& fullArea, wlr_box& usableArea) {
+void Layer::configure(const wlr_box& fullArea, wlr_box& usableArea)
+{
     wlr_scene_layer_surface_v1_configure(m_sceneHelper, &fullArea, &usableArea);
 }
 
-bool Layer::isFocusable() const {
+bool Layer::isFocusable() const
+{
     return (m_layerSurface->current.keyboard_interactive) &&
            (m_layerSurface->current.layer > ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM);
 }

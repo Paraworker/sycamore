@@ -7,9 +7,11 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Keyboard final : public InputDevice {
+class Keyboard final : public InputDevice
+{
 public:
-    uint32_t getModifiers() const {
+    uint32_t getModifiers() const
+    {
         return wlr_keyboard_get_modifiers(m_keyboardHandle);
     }
 

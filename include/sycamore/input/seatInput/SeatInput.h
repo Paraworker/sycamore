@@ -5,7 +5,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class SeatInput {
+class SeatInput
+{
 public:
     enum Type { PASSTHROUGH, BINDING };
 

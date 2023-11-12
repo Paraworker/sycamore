@@ -14,7 +14,8 @@
 #define namespace _namespace
 #define static
 
-extern "C" {
+extern "C"
+{
 #include <wlr/backend.h>
 #include <wlr/backend/libinput.h>
 #include <wlr/render/allocator.h>

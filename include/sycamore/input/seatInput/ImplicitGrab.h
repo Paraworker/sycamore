@@ -9,7 +9,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class ImplicitGrab : public SeatInput {
+class ImplicitGrab : public SeatInput
+{
 public:
     ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat);
 

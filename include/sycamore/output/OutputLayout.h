@@ -12,7 +12,8 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Output;
 
-class OutputLayout {
+class OutputLayout
+{
 public:
     using UPtr = std::unique_ptr<OutputLayout>;
 

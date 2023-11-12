@@ -2,9 +2,11 @@
 
 #include <spdlog/spdlog.h>
 
-static bool setAccelSpeed(libinput_device* device, double speed) {
+static bool setAccelSpeed(libinput_device* device, double speed)
+{
     if (!libinput_device_config_accel_is_available(device) ||
-        libinput_device_config_accel_get_speed(device) == speed) {
+        libinput_device_config_accel_get_speed(device) == speed)
+    {
         return false;
     }
 
@@ -13,9 +15,11 @@ static bool setAccelSpeed(libinput_device* device, double speed) {
     return true;
 }
 
-static bool setAccelProfile(libinput_device* device, libinput_config_accel_profile profile) {
+static bool setAccelProfile(libinput_device* device, libinput_config_accel_profile profile)
+{
     if (!libinput_device_config_accel_is_available(device) ||
-        libinput_device_config_accel_get_profile(device) == profile) {
+        libinput_device_config_accel_get_profile(device) == profile)
+    {
         return false;
     }
 
@@ -24,9 +28,11 @@ static bool setAccelProfile(libinput_device* device, libinput_config_accel_profi
     return true;
 }
 
-static bool setTap(libinput_device* device, libinput_config_tap_state tap) {
+static bool setTap(libinput_device* device, libinput_config_tap_state tap)
+{
     if (libinput_device_config_tap_get_finger_count(device) <= 0 ||
-        libinput_device_config_tap_get_enabled(device) == tap) {
+        libinput_device_config_tap_get_enabled(device) == tap)
+    {
         return false;
     }
 
@@ -35,9 +41,11 @@ static bool setTap(libinput_device* device, libinput_config_tap_state tap) {
     return true;
 }
 
-static bool setNaturalScroll(libinput_device* device, bool enable) {
+static bool setNaturalScroll(libinput_device* device, bool enable)
+{
     if (!libinput_device_config_scroll_has_natural_scroll(device) ||
-        libinput_device_config_scroll_get_natural_scroll_enabled(device) == enable) {
+        libinput_device_config_scroll_get_natural_scroll_enabled(device) == enable)
+    {
         return false;
     }
 
@@ -46,9 +54,11 @@ static bool setNaturalScroll(libinput_device* device, bool enable) {
     return true;
 }
 
-static bool deviceIsTouchpad(wlr_input_device* device) {
+static bool deviceIsTouchpad(wlr_input_device* device)
+{
     if (device->type != WLR_INPUT_DEVICE_POINTER ||
-        !wlr_input_device_is_libinput(device)) {
+        !wlr_input_device_is_libinput(device))
+    {
         return false;
     }
 
@@ -56,8 +66,10 @@ static bool deviceIsTouchpad(wlr_input_device* device) {
     return libinput_device_config_tap_get_finger_count(handle) > 0;
 }
 
-void touchpadSetNaturalScroll(wlr_input_device* device) {
-    if (!deviceIsTouchpad(device)) {
+void touchpadSetNaturalScroll(wlr_input_device* device)
+{
+    if (!deviceIsTouchpad(device))
+    {
         return;
     }
 
@@ -65,8 +77,10 @@ void touchpadSetNaturalScroll(wlr_input_device* device) {
     setNaturalScroll(handle, true);
 }
 
-void touchpadSetTapToClick(wlr_input_device* device) {
-    if (!deviceIsTouchpad(device)) {
+void touchpadSetTapToClick(wlr_input_device* device)
+{
+    if (!deviceIsTouchpad(device))
+    {
         return;
     }
 
@@ -74,8 +88,10 @@ void touchpadSetTapToClick(wlr_input_device* device) {
     setTap(handle, LIBINPUT_CONFIG_TAP_ENABLED);
 }
 
-void touchpadSetAccelSpeed(wlr_input_device* device, double speed) {
-    if (!deviceIsTouchpad(device)) {
+void touchpadSetAccelSpeed(wlr_input_device* device, double speed)
+{
+    if (!deviceIsTouchpad(device))
+    {
         return;
     }
 

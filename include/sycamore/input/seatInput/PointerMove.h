@@ -9,7 +9,8 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class PointerMove : public SeatInput {
+class PointerMove : public SeatInput
+{
 public:
     PointerMove(View* view, Seat& seat);
 

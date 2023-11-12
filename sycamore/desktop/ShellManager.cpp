@@ -8,14 +8,18 @@ NAMESPACE_SYCAMORE_BEGIN
 
 ShellManager ShellManager::instance{};
 
-ShellManager::ShellManager() {
-    m_focusUnmap.view.set([this](void*) {
+ShellManager::ShellManager()
+{
+    m_focusUnmap.view.set([this](void*)
+    {
         m_focusState.view = nullptr;
         m_focusUnmap.view.disconnect();
     });
 
-    m_focusUnmap.layer.set([this](void*) {
-        if (m_focusState.view) {
+    m_focusUnmap.layer.set([this](void*)
+    {
+        if (m_focusState.view)
+        {
             Core::instance.seat->setKeyboardFocus(m_focusState.view->getBaseSurface());
         }
 
@@ -26,13 +30,16 @@ ShellManager::ShellManager() {
 
 ShellManager::~ShellManager() = default;
 
-void ShellManager::setFocus(View* view) {
+void ShellManager::setFocus(View* view)
+{
     // Note: this function only deals with keyboard focus.
-    if (m_focusState.view == view) {
+    if (m_focusState.view == view)
+    {
         return;
     }
 
-    if (m_focusState.view) {
+    if (m_focusState.view)
+    {
         /* Deactivate the previously focused view. This lets the client know
          * it no longer has focus and the client will repaint accordingly, e.g.
          * stop displaying a caret. */
@@ -49,7 +56,8 @@ void ShellManager::setFocus(View* view) {
     // Activate the new view
     view->setActivated(true);
 
-    if (!m_focusState.layer) {
+    if (!m_focusState.layer)
+    {
         Core::instance.seat->setKeyboardFocus(view->getBaseSurface());
     }
 
@@ -57,8 +65,10 @@ void ShellManager::setFocus(View* view) {
     m_focusUnmap.view.connect(view->events.unmap);
 }
 
-void ShellManager::setFocus(Layer* layer) {
-    if (m_focusState.layer == layer) {
+void ShellManager::setFocus(Layer* layer)
+{
+    if (m_focusState.layer == layer)
+    {
         return;
     }
 
@@ -68,20 +78,25 @@ void ShellManager::setFocus(Layer* layer) {
     Core::instance.seat->setKeyboardFocus(layer->getBaseSurface());
 }
 
-void ShellManager::addMappedView(View* view) {
+void ShellManager::addMappedView(View* view)
+{
     m_mappedViewList.add(view->link);
 }
 
-void ShellManager::removeMappedView(View* view) {
+void ShellManager::removeMappedView(View* view)
+{
     m_mappedViewList.remove(view->link);
 }
 
-void ShellManager::maximizeRequest(View* view, bool state, Output* output) {
-    if (state == view->state().maximized) {
+void ShellManager::maximizeRequest(View* view, bool state, Output* output)
+{
+    if (state == view->state().maximized)
+    {
         return;
     }
 
-    if (!state) {
+    if (!state)
+    {
         // Restore from maximized mode
         view->setMaximized(state);
         view->setSize(view->restore.maximize.width, view->restore.maximize.height);
@@ -91,7 +106,8 @@ void ShellManager::maximizeRequest(View* view, bool state, Output* output) {
     }
 
     // Set to maximized mode
-    if (!output) {
+    if (!output)
+    {
         return;
     }
 
@@ -111,12 +127,15 @@ void ShellManager::maximizeRequest(View* view, bool state, Output* output) {
     view->state().maximized = state;
 }
 
-void ShellManager::fullscreenRequest(View *view, bool state, Output *output) {
-    if (state == view->state().fullscreen) {
+void ShellManager::fullscreenRequest(View *view, bool state, Output *output)
+{
+    if (state == view->state().fullscreen)
+    {
         return;
     }
 
-    if (!state) {
+    if (!state)
+    {
         // Restore from fullscreen mode
         wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, true);
 
@@ -128,7 +147,8 @@ void ShellManager::fullscreenRequest(View *view, bool state, Output *output) {
     }
 
     // Set to fullscreen mode
-    if (!output) {
+    if (!output)
+    {
         return;
     }
 

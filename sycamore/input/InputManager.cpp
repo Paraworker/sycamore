@@ -6,8 +6,10 @@ NAMESPACE_SYCAMORE_BEGIN
 
 InputManager InputManager::instance{};
 
-void InputManager::onNewDevice(wlr_input_device* handle) {
-    switch (handle->type) {
+void InputManager::onNewDevice(wlr_input_device* handle)
+{
+    switch (handle->type)
+    {
         case WLR_INPUT_DEVICE_KEYBOARD:
             newDevice<Keyboard>(handle);
             break;

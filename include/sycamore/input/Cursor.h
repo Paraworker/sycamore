@@ -11,7 +11,8 @@ NAMESPACE_SYCAMORE_BEGIN
 class Output;
 class Seat;
 
-class Cursor {
+class Cursor
+{
 public:
     /**
      * @brief Create Cursor
@@ -51,7 +52,8 @@ public:
 
     Output* atOutput() const;
 
-    void warp(const Point<double>& coords) const {
+    void warp(const Point<double>& coords) const
+    {
         wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
     }
 
@@ -59,11 +61,13 @@ public:
 
     size_t getPointerButtonCount() const { return m_pointerButtonCount; }
 
-    void attachDevice(wlr_input_device* device) const {
+    void attachDevice(wlr_input_device* device) const
+    {
         wlr_cursor_attach_input_device(m_handle, device);
     }
 
-    void detachDevice(wlr_input_device* device) const {
+    void detachDevice(wlr_input_device* device) const
+    {
         wlr_cursor_detach_input_device(m_handle, device);
     }
 
@@ -77,7 +81,8 @@ public:
 private:
     Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager);
 
-    void hide() {
+    void hide()
+    {
         m_xcursor = nullptr;
         wlr_cursor_unset_image(m_handle);
     }
