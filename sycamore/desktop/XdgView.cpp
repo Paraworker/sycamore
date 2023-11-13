@@ -28,7 +28,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 {
     // On creation, we only connect destroy, map, unmap
     m_destroy
-    .connect(m_surface->events.destroy)
+    .connect(toplevel->base->events.destroy)
     .set([this](void*)
     {
         // emit signal before destruction
