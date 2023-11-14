@@ -142,7 +142,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     });
 
     m_destroy
-    .connect(layerSurface->surface->events.destroy)
+    .connect(layerSurface->events.destroy)
     .set([this](void*)
     {
         // emit signal first
