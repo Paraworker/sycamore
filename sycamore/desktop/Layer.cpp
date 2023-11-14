@@ -39,10 +39,10 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
 }
 
 Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* helper)
-    : m_layerSurface(layerSurface)
-    , m_sceneHelper(helper)
-    , m_output(static_cast<Output*>(layerSurface->output->data))
-    , m_lastMapState(false)
+    : m_layerSurface{layerSurface}
+    , m_sceneHelper{helper}
+    , m_output{static_cast<Output*>(layerSurface->output->data)}
+    , m_lastMapState{false}
  {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);

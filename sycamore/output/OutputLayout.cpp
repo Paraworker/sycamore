@@ -18,7 +18,7 @@ OutputLayout::UPtr OutputLayout::create()
     return UPtr{new OutputLayout{layout}};
 }
 
-OutputLayout::OutputLayout(wlr_output_layout* handle) : m_handle(handle) {}
+OutputLayout::OutputLayout(wlr_output_layout* handle) : m_handle{handle} {}
 
 OutputLayout::~OutputLayout()
 {

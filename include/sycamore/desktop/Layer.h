@@ -75,8 +75,8 @@ public:
 
 private:
     LayerElement(wlr_scene_node* node, Layer* layer)
-        : SceneElement(SceneElement::LAYER, node)
-        , m_layer(layer) {}
+        : SceneElement{SceneElement::LAYER, node}
+        , m_layer{layer} {}
 
     ~LayerElement() override = default;
 

@@ -8,7 +8,7 @@ NAMESPACE_SYCAMORE_BEGIN
 class DefaultInput : public SeatInput
 {
 public:
-    explicit DefaultInput(Seat& seat) : m_seat(seat) {}
+    explicit DefaultInput(Seat& seat) : m_seat{seat} {}
 
     ~DefaultInput() override = default;
 

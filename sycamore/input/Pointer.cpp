@@ -8,8 +8,8 @@
 NAMESPACE_SYCAMORE_BEGIN
 
 Pointer::Pointer(wlr_input_device* deviceHandle)
-    : InputDevice(deviceHandle)
-    , m_pointerHandle(wlr_pointer_from_input_device(deviceHandle))
+    : InputDevice{deviceHandle}
+    , m_pointerHandle{wlr_pointer_from_input_device(deviceHandle)}
 {
     spdlog::info("New Pointer: {}", deviceHandle->name);
 

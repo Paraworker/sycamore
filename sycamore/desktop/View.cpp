@@ -5,7 +5,7 @@
 NAMESPACE_SYCAMORE_BEGIN
 
 View::View(wlr_surface* surface, wlr_scene_tree* tree)
-    : m_surface(surface), m_tree(tree)
+    : m_surface{surface}, m_tree{tree}
 {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);

@@ -31,9 +31,9 @@ Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const ch
 }
 
 Seat::Seat(wlr_seat* handle, Cursor* cursor)
-    : m_handle(handle)
-    , m_cursor(cursor)
-    , m_input(new DefaultInput(*this))
+    : m_handle{handle}
+    , m_cursor{cursor}
+    , m_input{new DefaultInput{*this}}
 {
     // Attach cursor
     m_cursor->attachSeat(this);
@@ -108,7 +108,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
             DragIcon::create(drag->icon, *this);
         }
 
-        setInput(new DefaultInput(*this));
+        setInput(new DefaultInput{*this});
     });
 }
 

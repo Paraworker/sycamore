@@ -28,17 +28,17 @@ public:
         /**
          * @brief Unconstrain
          */
-        virtual void unconstrain(Popup* popup) = 0;
+        virtual void unconstrain(Popup& popup) = 0;
     };
 
     class ViewHandler : public OwnerHandler
     {
     public:
-        explicit ViewHandler(View* view) : m_view(view) {}
+        explicit ViewHandler(View* view) : m_view{view} {}
 
         ~ViewHandler() override = default;
 
-        void unconstrain(Popup* popup) override
+        void unconstrain(Popup& popup) override
         {
             if (auto output = m_view->getOutput(); output)
             {
@@ -49,7 +49,7 @@ public:
                 box.x = -pos.x + geo.x;
                 box.y = -pos.y + geo.y;
 
-                popup->unconstrainFromBox(box);
+                popup.unconstrainFromBox(box);
             }
         }
 
@@ -60,11 +60,11 @@ public:
     class LayerHandler : public OwnerHandler
     {
     public:
-        explicit LayerHandler(Layer* layer) : m_layer(layer) {}
+        explicit LayerHandler(Layer* layer) : m_layer{layer} {}
 
         ~LayerHandler() override = default;
 
-        void unconstrain(Popup* popup) override
+        void unconstrain(Popup& popup) override
         {
             auto pos = m_layer->getPosition();
             auto box = m_layer->getOutput()->getRelativeGeometry();
@@ -72,7 +72,7 @@ public:
             box.x = -pos.x;
             box.y = -pos.y;
 
-            popup->unconstrainFromBox(box);
+            popup.unconstrainFromBox(box);
         }
 
     private:
@@ -125,7 +125,7 @@ public:
 
 private:
     PopupElement(wlr_scene_node* node, Popup* popup)
-        : SceneElement(SceneElement::POPUP, node), m_popup(popup) {}
+        : SceneElement{SceneElement::POPUP, node}, m_popup{popup} {}
 
     ~PopupElement() override = default;
 

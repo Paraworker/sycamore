@@ -37,9 +37,9 @@ Output* Output::create(wlr_output* handle)
 }
 
 Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
-    : m_handle(handle)
-    , m_sceneOutput(sceneOutput)
-    , m_usableArea(getLayoutGeometry())
+    : m_handle{handle}
+    , m_sceneOutput{sceneOutput}
+    , m_usableArea{getLayoutGeometry()}
 {
     wl_signal_init(&events.destroy);
 

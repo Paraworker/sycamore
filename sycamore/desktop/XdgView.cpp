@@ -24,7 +24,7 @@ XdgView* XdgView::create(wlr_xdg_toplevel* toplevel)
 }
 
 XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
-    : View(toplevel->base->surface, tree), m_toplevel(toplevel)
+    : View{toplevel->base->surface, tree}, m_toplevel{toplevel}
 {
     // On creation, we only connect destroy, map, unmap
     m_destroy
@@ -121,7 +121,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             return;
         }
 
-        Core::instance.seat->setInput(new PointerMove(this, *Core::instance.seat));
+        Core::instance.seat->setInput(new PointerMove{this, *Core::instance.seat});
     });
 
     m_resize.set([this](void* data)
@@ -132,7 +132,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         }
 
         auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
-        Core::instance.seat->setInput(new PointerResize(this, event->edges, *Core::instance.seat));
+        Core::instance.seat->setInput(new PointerResize{this, event->edges, *Core::instance.seat});
     });
 
     m_fullscreen.set([this](void*)

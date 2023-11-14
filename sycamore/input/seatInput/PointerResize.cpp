@@ -24,7 +24,7 @@ PointerResize::PointerResize(View* view, uint32_t edges, Seat& seat)
 
     m_viewUnmap
     .connect(m_view->events.unmap)
-    .set([this](void*) { m_seat.setInput(new DefaultInput(m_seat)); });
+    .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
 }
 
 PointerResize::~PointerResize() = default;
@@ -47,7 +47,7 @@ void PointerResize::onPointerButton(wlr_pointer_button_event* event)
     {
         // If there is no button being pressed
         // we back to default.
-        m_seat.setInput(new DefaultInput(m_seat));
+        m_seat.setInput(new DefaultInput{m_seat});
     }
 }
 

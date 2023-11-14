@@ -11,7 +11,7 @@ PointerMove::PointerMove(View* view, Seat& seat)
 {
     m_viewUnmap
     .connect(m_view->events.unmap)
-    .set([this](void*) { m_seat.setInput(new DefaultInput(m_seat)); });
+    .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
 }
 
 PointerMove::~PointerMove() = default;
@@ -33,7 +33,7 @@ void PointerMove::onPointerButton(wlr_pointer_button_event* event)
     {
         // If there is no button being pressed
         // we back to default.
-        m_seat.setInput(new DefaultInput(m_seat));
+        m_seat.setInput(new DefaultInput{m_seat});
     }
 }
 

@@ -35,7 +35,7 @@ public:
     XdgShell& operator=(XdgShell&&) = delete;
 
 private:
-    explicit XdgShell(wlr_xdg_shell* handle) : m_handle(handle)
+    explicit XdgShell(wlr_xdg_shell* handle) : m_handle{handle}
     {
         m_newSurface
         .connect(handle->events.new_surface)

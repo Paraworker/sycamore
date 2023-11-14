@@ -103,7 +103,7 @@ public:
 
 private:
     ViewElement(wlr_scene_node* node, View* view)
-        : SceneElement(SceneElement::VIEW, node), m_view(view) {}
+        : SceneElement{SceneElement::VIEW, node}, m_view{view} {}
 
     ~ViewElement() override = default;
 

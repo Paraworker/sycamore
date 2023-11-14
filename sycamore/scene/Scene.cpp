@@ -37,7 +37,7 @@ Scene::UPtr Scene::create(wlr_output_layout* layout, wlr_presentation* presentat
 }
 
 Scene::Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout)
-    : m_handle(handle), m_sceneLayout(sceneLayout)
+    : m_handle{handle}, m_sceneLayout{sceneLayout}
 {
     // Create trees
     shell.root = wlr_scene_tree_create(&m_handle->tree);

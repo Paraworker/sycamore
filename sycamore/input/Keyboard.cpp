@@ -8,8 +8,8 @@
 NAMESPACE_SYCAMORE_BEGIN
 
 Keyboard::Keyboard(wlr_input_device* deviceHandle)
-    : InputDevice(deviceHandle)
-    , m_keyboardHandle(wlr_keyboard_from_input_device(deviceHandle))
+    : InputDevice{deviceHandle}
+    , m_keyboardHandle{wlr_keyboard_from_input_device(deviceHandle)}
 {
     spdlog::info("New Keyboard: {}", deviceHandle->name);
 

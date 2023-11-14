@@ -35,7 +35,7 @@ public:
     LayerShell& operator=(LayerShell&&) = delete;
 
 private:
-    explicit LayerShell(wlr_layer_shell_v1* handle) : m_handle(handle)
+    explicit LayerShell(wlr_layer_shell_v1* handle) : m_handle{handle}
     {
         m_newSurface
         .connect(handle->events.new_surface)

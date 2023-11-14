@@ -39,12 +39,12 @@ Cursor* Cursor::create(wlr_output_layout* layout)
 }
 
 Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
-    : m_handle(handle)
-    , m_xcursorManager(manager)
-    , m_enabled(false)
-    , m_xcursor(nullptr)
-    , m_pointerButtonCount(0)
-    , m_seat(nullptr)
+    : m_handle{handle}
+    , m_xcursorManager{manager}
+    , m_enabled{false}
+    , m_xcursor{nullptr}
+    , m_pointerButtonCount{0}
+    , m_seat{nullptr}
 {
     m_motion
     .connect(handle->events.motion)
@@ -171,7 +171,8 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
     });
 }
 
-Cursor::~Cursor() {
+Cursor::~Cursor()
+{
     // Disconnect signals before m_handle destroyed
     m_motion.disconnect();
     m_motionAbsolute.disconnect();

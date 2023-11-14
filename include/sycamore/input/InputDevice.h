@@ -18,7 +18,7 @@ public:
 
 protected:
     explicit InputDevice(wlr_input_device* handle)
-        : m_deviceHandle(handle) {}
+        : m_deviceHandle{handle} {}
 
     ~InputDevice() = default;
 

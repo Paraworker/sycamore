@@ -26,7 +26,7 @@ public:
     Surface& operator=(Surface&&) = delete;
 
 private:
-    explicit Surface(wlr_surface* handle) : m_handle(handle)
+    explicit Surface(wlr_surface* handle) : m_handle{handle}
     {
         m_destroy
         .connect(handle->events.destroy)
