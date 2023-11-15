@@ -13,7 +13,7 @@ public:
     enum Type
     {
         ROOT,
-        VIEW,
+        TOPLEVEL,
         LAYER,
         POPUP,
         DRAG_ICON,

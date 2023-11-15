@@ -1,5 +1,5 @@
-#include "sycamore/desktop/View.h"
 #include "sycamore/desktop/ShellManager.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/input/InputManager.h"
@@ -176,9 +176,9 @@ void Seat::setKeyboardFocus(wlr_surface* surface) const
     wlr_seat_keyboard_notify_enter(m_handle, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-bool Seat::bindingEnterCheck(View* view) const
+bool Seat::bindingEnterCheck(Toplevel* toplevel) const
 {
-    /* This fuction is used for checking whether an
+    /* This function is used for checking whether an
     * 'pointer interactive' input mode should begin. including:
     *
     * PointerMove
@@ -190,13 +190,13 @@ bool Seat::bindingEnterCheck(View* view) const
         return false;
     }
 
-    if (view->isPinned())
+    if (toplevel->isPinned())
     {
         return false;
     }
 
-    // Deny pointerMove/pointerResize from unfocused view or there is no focused view.
-    if (view != ShellManager::instance.getFocusState().view)
+    // Deny pointerMove/pointerResize from unfocused toplevel or there is no focused toplevel.
+    if (toplevel != ShellManager::instance.getFocusState().toplevel)
     {
         return false;
     }

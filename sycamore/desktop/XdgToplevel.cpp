@@ -1,6 +1,6 @@
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Popup.h"
-#include "sycamore/desktop/XdgView.h"
+#include "sycamore/desktop/XdgToplevel.h"
 #include "sycamore/input/seatInput/PointerMove.h"
 #include "sycamore/input/seatInput/PointerResize.h"
 #include "sycamore/Core.h"
@@ -9,22 +9,22 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-XdgView* XdgView::create(wlr_xdg_toplevel* toplevel)
+XdgToplevel* XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
     // Create tree
-    auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.view, toplevel->base);
+    auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.toplevel, toplevel->base);
     if (!tree)
     {
-        spdlog::error("Create scene tree for XdgView failed!");
+        spdlog::error("Create scene tree for XdgToplevel failed!");
         return nullptr;
     }
 
-    // Create XdgView
-    return new XdgView{toplevel, tree};
+    // Create XdgToplevel
+    return new XdgToplevel{toplevel, tree};
 }
 
-XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
-    : View{toplevel->base->surface, tree}, m_toplevel{toplevel}
+XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
+    : Toplevel{toplevel->base->surface, tree}, m_toplevel{toplevel}
 {
     // On creation, we only connect destroy, map, unmap
     m_destroy
@@ -41,7 +41,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     .set([this](void*)
     {
         // Add to list
-        ShellManager::instance.addMappedView(this);
+        ShellManager::instance.addMappedToplevel(this);
 
         // Connect signals
         m_commit.connect(m_surface->events.commit);
@@ -89,7 +89,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        ShellManager::instance.removeMappedView(this);
+        ShellManager::instance.removeMappedToplevel(this);
 
         // emit signal
         wl_signal_emit_mutable(&events.unmap, nullptr);
@@ -111,7 +111,7 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_newPopup.set([this](void* data)
     {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ViewHandler>(this));
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ToplevelHandler>(this));
     });
 
     m_move.set([this](void*)
@@ -173,41 +173,41 @@ XdgView::XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     });
 }
 
-XdgView::~XdgView() = default;
+XdgToplevel::~XdgToplevel() = default;
 
-uint32_t XdgView::setMaximized(bool maximized)
+uint32_t XdgToplevel::setMaximized(bool maximized)
 {
     return wlr_xdg_toplevel_set_maximized(m_toplevel, maximized);
 }
 
-uint32_t XdgView::setFullscreen(bool fullscreen)
+uint32_t XdgToplevel::setFullscreen(bool fullscreen)
 {
     return wlr_xdg_toplevel_set_fullscreen(m_toplevel, fullscreen);
 }
 
-uint32_t XdgView::setActivated(bool activated)
+uint32_t XdgToplevel::setActivated(bool activated)
 {
     return wlr_xdg_toplevel_set_activated(m_toplevel, activated);
 }
 
-uint32_t XdgView::setResizing(bool resizing)
+uint32_t XdgToplevel::setResizing(bool resizing)
 {
     return wlr_xdg_toplevel_set_resizing(m_toplevel, resizing);
 }
 
-uint32_t XdgView::setSize(uint32_t width, uint32_t height)
+uint32_t XdgToplevel::setSize(uint32_t width, uint32_t height)
 {
     return wlr_xdg_toplevel_set_size(m_toplevel, width, height);
 }
 
-wlr_box XdgView::getGeometry()
+wlr_box XdgToplevel::getGeometry()
 {
     wlr_box box{};
     wlr_xdg_surface_get_geometry(m_toplevel->base, &box);
     return box;
 }
 
-void XdgView::close()
+void XdgToplevel::close()
 {
     wlr_xdg_toplevel_send_close(m_toplevel);
 }

@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_POINTER_MOVE_H
 #define SYCAMORE_POINTER_MOVE_H
 
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/utils/Listener.h"
@@ -12,7 +12,7 @@ NAMESPACE_SYCAMORE_BEGIN
 class PointerMove : public SeatInput
 {
 public:
-    PointerMove(View* view, Seat& seat);
+    PointerMove(Toplevel* toplevel, Seat& seat);
 
     ~PointerMove() override;
 
@@ -27,8 +27,8 @@ public:
     Type type() const override { return SeatInput::BINDING; }
 
 private:
-    View*         m_view;
-    Listener      m_viewUnmap;
+    Toplevel*     m_toplevel;
+    Listener      m_toplevelUnmap;
     Point<double> m_delta;
     Seat&         m_seat;
 };

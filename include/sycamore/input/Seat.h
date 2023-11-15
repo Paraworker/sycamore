@@ -11,7 +11,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class View;
+class Toplevel;
 
 class Seat
 {
@@ -48,7 +48,7 @@ public:
 
     void updateCapabilities();
 
-    bool bindingEnterCheck(View* view) const;
+    bool bindingEnterCheck(Toplevel* toplevel) const;
 
     Seat(const Seat&) = delete;
     Seat(Seat&&) = delete;

@@ -1,5 +1,5 @@
 #include "sycamore/desktop/ShellManager.h"
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/input/seatInput/ImplicitGrab.h"
@@ -39,10 +39,10 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     Point<double> sCoords{};
     if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.getCursor().getPosition(), sCoords)); element)
     {
-        // If pressed on a view, focus it.
-        if (element->type() == SceneElement::VIEW)
+        // If pressed on a toplevel, focus it.
+        if (element->type() == SceneElement::TOPLEVEL)
         {
-            ShellManager::instance.setFocus(static_cast<ViewElement*>(element)->getView());
+            ShellManager::instance.setFocus(static_cast<ToplevelElement*>(element)->getToplevel());
         }
     }
 

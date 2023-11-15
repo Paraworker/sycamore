@@ -9,15 +9,15 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Layer;
 class Output;
-class View;
+class Toplevel;
 
 class ShellManager
 {
 public:
     struct FocusState
     {
-        // focused view
-        View* view = nullptr;
+        // focused toplevel
+        Toplevel* toplevel = nullptr;
 
         // focused layer
         Layer* layer = nullptr;
@@ -25,9 +25,9 @@ public:
 
 public:
     /**
-     * @brief Focus a view
+     * @brief Focus a toplevel
      */
-    void setFocus(View* view);
+    void setFocus(Toplevel* toplevel);
 
     /**
      * @brief Focus a layer
@@ -36,15 +36,15 @@ public:
 
     const FocusState& getFocusState() const { return m_focusState; }
 
-    void addMappedView(View* view);
+    void addMappedToplevel(Toplevel* toplevel);
 
-    void removeMappedView(View* view);
+    void removeMappedToplevel(Toplevel* toplevel);
 
-    const List& getMappedViewList() const { return m_mappedViewList; }
+    const List& getMappedToplevelList() const { return m_mappedToplevelList; }
 
-    static void maximizeRequest(View* view, bool state, Output* output);
+    static void maximizeRequest(Toplevel* toplevel, bool state, Output* output);
 
-    static void fullscreenRequest(View* view, bool state, Output* output);
+    static void fullscreenRequest(Toplevel* toplevel, bool state, Output* output);
 
 public:
     static ShellManager instance;
@@ -63,15 +63,15 @@ private:
 private:
     struct FocusUnmap
     {
-        // on focused view unmap
-        Listener view;
+        // on focused toplevel unmap
+        Listener toplevel;
 
         // on focused layer unmap
         Listener layer;
     };
 
 private:
-    List       m_mappedViewList;
+    List       m_mappedToplevelList;
     FocusState m_focusState;
     FocusUnmap m_focusUnmap;
 };

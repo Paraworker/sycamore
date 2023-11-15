@@ -44,7 +44,7 @@ Scene::Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout)
 
     shell.background = wlr_scene_tree_create(shell.root);
     shell.bottom     = wlr_scene_tree_create(shell.root);
-    shell.view       = wlr_scene_tree_create(shell.root);
+    shell.toplevel   = wlr_scene_tree_create(shell.root);
     shell.top        = wlr_scene_tree_create(shell.root);
     shell.overlay    = wlr_scene_tree_create(shell.root);
 

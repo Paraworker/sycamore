@@ -1,20 +1,20 @@
-#ifndef SYCAMORE_XDG_VIEW_H
-#define SYCAMORE_XDG_VIEW_H
+#ifndef SYCAMORE_XDG_TOPLEVEL_H
+#define SYCAMORE_XDG_TOPLEVEL_H
 
 #include "sycamore/defines.h"
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/utils/Listener.h"
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class XdgView final : public View
+class XdgToplevel final : public Toplevel
 {
 public:
     /**
-     * @brief Create XdgView
+     * @brief Create XdgToplevel
      * @return nullptr on failure
      */
-    static XdgView* create(wlr_xdg_toplevel* toplevel);
+    static XdgToplevel* create(wlr_xdg_toplevel* toplevel);
 
     Role role() const override { return XDG; }
 
@@ -32,15 +32,15 @@ public:
 
     void close() override;
 
-    XdgView(const XdgView&) = delete;
-    XdgView(XdgView&&) = delete;
-    XdgView& operator=(const XdgView&) = delete;
-    XdgView& operator=(XdgView&&) = delete;
+    XdgToplevel(const XdgToplevel&) = delete;
+    XdgToplevel(XdgToplevel&&) = delete;
+    XdgToplevel& operator=(const XdgToplevel&) = delete;
+    XdgToplevel& operator=(XdgToplevel&&) = delete;
 
 private:
-    XdgView(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree);
+    XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree);
 
-    ~XdgView() override;
+    ~XdgToplevel() override;
 
 private:
     wlr_xdg_toplevel* m_toplevel;
@@ -61,4 +61,4 @@ private:
 
 NAMESPACE_SYCAMORE_END
 
-#endif //SYCAMORE_XDG_VIEW_H
+#endif //SYCAMORE_XDG_TOPLEVEL_H

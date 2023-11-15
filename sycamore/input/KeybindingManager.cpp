@@ -9,8 +9,8 @@ KeybindingManager::KeybindingManager()
 {
     add({WLR_MODIFIER_LOGO, XKB_KEY_d}, Spawn{"fuzzel -i Papirus"});
     add({WLR_MODIFIER_LOGO, XKB_KEY_Return}, Spawn{"gnome-terminal"});
-    add({WLR_MODIFIER_LOGO, XKB_KEY_q}, CloseFocusedView{});
-    add({WLR_MODIFIER_LOGO, XKB_KEY_Tab}, CycleView{});
+    add({WLR_MODIFIER_LOGO, XKB_KEY_q}, CloseFocusedToplevel{});
+    add({WLR_MODIFIER_LOGO, XKB_KEY_Tab}, CycleToplevel{});
     add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_Escape}, Terminate{});
     add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_1}, SwitchVT<1>{});
     add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_2}, SwitchVT<2>{});

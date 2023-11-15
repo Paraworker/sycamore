@@ -4,13 +4,13 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-PointerMove::PointerMove(View* view, Seat& seat)
-    : m_view(view)
-    , m_delta(seat.getCursor().getPosition() - view->getPosition().into<double>())
+PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
+    : m_toplevel(toplevel)
+    , m_delta(seat.getCursor().getPosition() - toplevel->getPosition().into<double>())
     , m_seat(seat)
 {
-    m_viewUnmap
-    .connect(m_view->events.unmap)
+    m_toplevelUnmap
+    .connect(toplevel->events.unmap)
     .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
 }
 
@@ -39,8 +39,8 @@ void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 
 void PointerMove::onPointerMotion(uint32_t timeMsec)
 {
-    // Move the grabbed view to the new position.
-    m_view->moveTo((m_seat.getCursor().getPosition() - m_delta).into<int32_t>());
+    // Move the grabbed toplevel to the new position.
+    m_toplevel->moveTo((m_seat.getCursor().getPosition() - m_delta).into<int32_t>());
 }
 
 NAMESPACE_SYCAMORE_END

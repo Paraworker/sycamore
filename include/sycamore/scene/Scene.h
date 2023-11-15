@@ -50,7 +50,7 @@ public:
     //   - shell
     // 	   - background
     // 	   - bottom
-    // 	   - view
+    // 	   - toplevel
     // 	   - top
     //     - overlay
     // 	 - dragIcons
@@ -59,7 +59,7 @@ public:
         wlr_scene_tree* root;
         wlr_scene_tree* background;
         wlr_scene_tree* bottom;
-        wlr_scene_tree* view;
+        wlr_scene_tree* toplevel;
         wlr_scene_tree* top;
         wlr_scene_tree* overlay;
     } shell{};

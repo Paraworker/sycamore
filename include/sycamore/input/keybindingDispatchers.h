@@ -3,7 +3,7 @@
 
 #include "sycamore/defines.h"
 #include "sycamore/desktop/ShellManager.h"
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/input/KeybindingManager.h"
 #include "sycamore/utils/process.h"
@@ -23,27 +23,27 @@ struct Spawn
     std::string cmd;
 };
 
-struct CloseFocusedView
+struct CloseFocusedToplevel
 {
     void operator()() const
     {
-        if (auto view = ShellManager::instance.getFocusState().view; view)
+        if (auto toplevel = ShellManager::instance.getFocusState().toplevel; toplevel)
         {
-            view->close();
+            toplevel->close();
         }
     }
 };
 
-struct CycleView
+struct CycleToplevel
 {
     void operator()() const
     {
-        if (ShellManager::instance.getMappedViewList().size() < 2)
+        if (ShellManager::instance.getMappedToplevelList().size() < 2)
         {
             return;
         }
 
-        View* next = wl_container_of(ShellManager::instance.getMappedViewList().getHandle().prev, next, link);
+        Toplevel* next = wl_container_of(ShellManager::instance.getMappedToplevelList().getHandle().prev, next, link);
         ShellManager::instance.setFocus(next);
         Core::instance.seat->getInput().rebasePointer();
     }

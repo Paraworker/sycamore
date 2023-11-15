@@ -3,7 +3,7 @@
 
 #include "sycamore/defines.h"
 #include "sycamore/desktop/Layer.h"
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
@@ -31,19 +31,19 @@ public:
         virtual void unconstrain(Popup& popup) = 0;
     };
 
-    class ViewHandler : public OwnerHandler
+    class ToplevelHandler : public OwnerHandler
     {
     public:
-        explicit ViewHandler(View* view) : m_view{view} {}
+        explicit ToplevelHandler(Toplevel* toplevel) : m_toplevel{toplevel} {}
 
-        ~ViewHandler() override = default;
+        ~ToplevelHandler() override = default;
 
         void unconstrain(Popup& popup) override
         {
-            if (auto output = m_view->getOutput(); output)
+            if (auto output = m_toplevel->getOutput(); output)
             {
-                auto geo = m_view->getGeometry();
-                auto pos = m_view->getPosition();
+                auto geo = m_toplevel->getGeometry();
+                auto pos = m_toplevel->getPosition();
                 auto box = output->getRelativeGeometry();
 
                 box.x = -pos.x + geo.x;
@@ -54,7 +54,7 @@ public:
         }
 
     private:
-        View* m_view;
+        Toplevel* m_toplevel;
     };
 
     class LayerHandler : public OwnerHandler

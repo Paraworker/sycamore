@@ -1,5 +1,5 @@
-#ifndef SYCAMORE_VIEW_H
-#define SYCAMORE_VIEW_H
+#ifndef SYCAMORE_TOPLEVEL_H
+#define SYCAMORE_TOPLEVEL_H
 
 #include "sycamore/defines.h"
 #include "sycamore/output/Output.h"
@@ -13,7 +13,7 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class Output;
 
-class View
+class Toplevel
 {
 public:
     enum Role { XDG, XWAYLAND };
@@ -84,11 +84,11 @@ public:
 public:
     Events      events;
     RestoreData restore;
-    wl_list     link{}; // ShellManager::mappedViewList
+    wl_list     link{}; // ShellManager::m_mappedToplevelList
 
 protected:
-    View(wlr_surface* surface, wlr_scene_tree* tree);
-    virtual ~View();
+    Toplevel(wlr_surface* surface, wlr_scene_tree* tree);
+    virtual ~Toplevel();
 
 protected:
     wlr_surface*    m_surface;
@@ -96,22 +96,22 @@ protected:
     State           m_state;
 };
 
-class ViewElement final : public SceneElement
+class ToplevelElement final : public SceneElement
 {
 public:
-    View* getView() const { return m_view; }
+    Toplevel* getToplevel() const { return m_toplevel; }
 
 private:
-    ViewElement(wlr_scene_node* node, View* view)
-        : SceneElement{SceneElement::VIEW, node}, m_view{view} {}
+    ToplevelElement(wlr_scene_node* node, Toplevel* toplevel)
+        : SceneElement{SceneElement::TOPLEVEL, node}, m_toplevel{toplevel} {}
 
-    ~ViewElement() override = default;
+    ~ToplevelElement() override = default;
 
 private:
-    friend class View;
-    View* m_view;
+    friend class Toplevel;
+    Toplevel* m_toplevel;
 };
 
 NAMESPACE_SYCAMORE_END
 
-#endif //SYCAMORE_VIEW_H
+#endif //SYCAMORE_TOPLEVEL_H

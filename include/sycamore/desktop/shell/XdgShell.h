@@ -2,7 +2,7 @@
 #define SYCAMORE_XDG_SHELL_H
 
 #include "sycamore/defines.h"
-#include "sycamore/desktop/XdgView.h"
+#include "sycamore/desktop/XdgToplevel.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
@@ -45,7 +45,7 @@ private:
 
             if (xdgSurface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
             {
-                XdgView::create(xdgSurface->toplevel);
+                XdgToplevel::create(xdgSurface->toplevel);
             }
         });
 

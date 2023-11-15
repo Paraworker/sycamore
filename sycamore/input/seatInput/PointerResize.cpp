@@ -4,15 +4,15 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-PointerResize::PointerResize(View* view, uint32_t edges, Seat& seat)
-    : m_view(view)
+PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
+    : m_toplevel(toplevel)
     , m_edges(edges)
-    , m_grabGeo(view->getGeometry())
+    , m_grabGeo(toplevel->getGeometry())
     , m_seat(seat)
 {
-    auto viewPos = view->getPosition();
-    m_grabGeo.x += viewPos.x;
-    m_grabGeo.y += viewPos.y;
+    auto toplevelPos = toplevel->getPosition();
+    m_grabGeo.x += toplevelPos.x;
+    m_grabGeo.y += toplevelPos.y;
 
     Point<int> border
     {
@@ -22,8 +22,8 @@ PointerResize::PointerResize(View* view, uint32_t edges, Seat& seat)
 
     m_delta = m_seat.getCursor().getPosition() - border.into<double>();
 
-    m_viewUnmap
-    .connect(m_view->events.unmap)
+    m_toplevelUnmap
+    .connect(toplevel->events.unmap)
     .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
 }
 
@@ -31,14 +31,14 @@ PointerResize::~PointerResize() = default;
 
 void PointerResize::onEnable()
 {
-    m_view->setResizing(true);
+    m_toplevel->setResizing(true);
     wlr_seat_pointer_notify_clear_focus(m_seat.getHandle());
     m_seat.getCursor().setXcursor(wlr_xcursor_get_resize_name(static_cast<wlr_edges>(m_edges)));
 }
 
 void PointerResize::onDisable()
 {
-    m_view->setResizing(false);
+    m_toplevel->setResizing(false);
 }
 
 void PointerResize::onPointerButton(wlr_pointer_button_event* event)
@@ -53,9 +53,9 @@ void PointerResize::onPointerButton(wlr_pointer_button_event* event)
 
 void PointerResize::onPointerMotion(uint32_t timeMsec)
 {
-    /* Resizing the grabbed view can be a little bit complicated, because we
-     * could be resizing from any corner or edge. This not only resizes the view
-     * on one or two axes, but can also move the view if you resize from the top
+    /* Resizing the grabbed toplevel can be a little bit complicated, because we
+     * could be resizing from any corner or edge. This not only resizes the toplevel
+     * on one or two axes, but can also move the toplevel if you resize from the top
      * or left edges (or top-left corner).
      *
      * Note that I took some shortcuts here. In a more fleshed-out compositor,
@@ -102,10 +102,10 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
         }
     }
 
-    auto viewGeoBox = m_view->getGeometry();
+    auto toplevelGeo = m_toplevel->getGeometry();
 
-    m_view->moveTo({newLeft - viewGeoBox.x, newTop - viewGeoBox.y});
-    m_view->setSize(newRight - newLeft, newBottom - newTop);
+    m_toplevel->moveTo({newLeft - toplevelGeo.x, newTop - toplevelGeo.y});
+    m_toplevel->setSize(newRight - newLeft, newBottom - newTop);
 }
 
 NAMESPACE_SYCAMORE_END

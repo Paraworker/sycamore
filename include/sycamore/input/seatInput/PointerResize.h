@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_POINTER_RESIZE_H
 #define SYCAMORE_POINTER_RESIZE_H
 
-#include "sycamore/desktop/View.h"
+#include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/input/Seat.h"
 #include "SeatInput.h"
@@ -11,7 +11,7 @@ NAMESPACE_SYCAMORE_BEGIN
 class PointerResize : public SeatInput
 {
 public:
-    PointerResize(View* view, uint32_t edges, Seat& seat);
+    PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat);
 
     ~PointerResize() override;
 
@@ -26,8 +26,8 @@ public:
     Type type() const override { return SeatInput::BINDING; }
 
 private:
-    View*         m_view;
-    Listener      m_viewUnmap;
+    Toplevel*     m_toplevel;
+    Listener      m_toplevelUnmap;
     uint32_t      m_edges;
     wlr_box       m_grabGeo;
     Point<double> m_delta;
