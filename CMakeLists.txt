@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 # main sources and headers
 set(HEADER_DIRECTORY "include")
-set(SOURCE_DIRECTORY "sycamore")
+set(SOURCE_DIRECTORY "src")
 set(PROTOCOL_DIRECTORY "protocols")
 
 file(GLOB_RECURSE SOURCES_FILE "${SOURCE_DIRECTORY}/*.cpp")
