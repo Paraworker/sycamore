@@ -34,7 +34,6 @@ public:
     {
         wl_signal map;
         wl_signal unmap;
-        wl_signal destroy;
     };
 
 public:
@@ -87,7 +86,14 @@ public:
     wl_list     link{}; // ShellManager::m_mappedToplevelList
 
 protected:
+    /**
+     * @brief Constructor
+     */
     Toplevel(wlr_surface* surface, wlr_scene_tree* tree);
+
+    /**
+     * @brief Destructor
+     */
     virtual ~Toplevel();
 
 protected:

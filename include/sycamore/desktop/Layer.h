@@ -14,6 +14,13 @@ class Output;
 class Layer
 {
 public:
+    struct Events
+    {
+        wl_signal map;
+        wl_signal unmap;
+    };
+
+public:
     /**
      * @brief Create Layer
      * @return nullptr on failure
@@ -39,13 +46,7 @@ public:
     Layer& operator=(Layer&&) = delete;
 
 public:
-    struct
-    {
-        wl_signal map;
-        wl_signal unmap;
-        wl_signal destroy;
-    } events{};
-
+    Events  events;
     wl_list link{};
 
 private:

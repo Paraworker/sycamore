@@ -8,25 +8,7 @@ NAMESPACE_SYCAMORE_BEGIN
 
 ShellManager ShellManager::instance{};
 
-ShellManager::ShellManager()
-{
-    m_focusUnmap.toplevel.set([this](void*)
-    {
-        m_focusState.toplevel = nullptr;
-        m_focusUnmap.toplevel.disconnect();
-    });
-
-    m_focusUnmap.layer.set([this](void*)
-    {
-        if (m_focusState.toplevel)
-        {
-            Core::instance.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
-        }
-
-        m_focusState.layer = nullptr;
-        m_focusUnmap.layer.disconnect();
-    });
-}
+ShellManager::ShellManager() = default;
 
 ShellManager::~ShellManager() = default;
 
@@ -44,9 +26,6 @@ void ShellManager::setFocus(Toplevel* toplevel)
          * it no longer has focus and the client will repaint accordingly, e.g.
          * stop displaying a caret. */
         m_focusState.toplevel->setActivated(false);
-
-        m_focusState.toplevel = nullptr;
-        m_focusUnmap.toplevel.disconnect();
     }
 
     // Move the toplevel to the front
@@ -62,7 +41,6 @@ void ShellManager::setFocus(Toplevel* toplevel)
     }
 
     m_focusState.toplevel = toplevel;
-    m_focusUnmap.toplevel.connect(toplevel->events.unmap);
 }
 
 void ShellManager::setFocus(Layer* layer)
@@ -73,19 +51,65 @@ void ShellManager::setFocus(Layer* layer)
     }
 
     m_focusState.layer = layer;
-    m_focusUnmap.layer.connect(layer->events.unmap);
 
     Core::instance.seat->setKeyboardFocus(layer->getBaseSurface());
 }
 
-void ShellManager::addMappedToplevel(Toplevel* toplevel)
+void ShellManager::onToplevelMap(Toplevel* toplevel)
 {
     m_mappedToplevelList.add(toplevel->link);
+    setFocus(toplevel);
 }
 
-void ShellManager::removeMappedToplevel(Toplevel* toplevel)
+void ShellManager::onToplevelUnmap(Toplevel* toplevel)
 {
     m_mappedToplevelList.remove(toplevel->link);
+
+    if (m_focusState.toplevel == toplevel)
+    {
+        m_focusState.toplevel = nullptr;
+
+        // Focus the topmost toplevel if there is one
+        if (m_mappedToplevelList.size() > 0)
+        {
+            Toplevel* newFocus = wl_container_of(m_mappedToplevelList.getHandle().next, newFocus, link);
+            setFocus(newFocus);
+        }
+    }
+}
+
+void ShellManager::onLayerMap(Layer* layer)
+{
+    if (layer->isFocusable())
+    {
+        setFocus(layer);
+    }
+}
+
+void ShellManager::onLayerUnmap(Layer* layer)
+{
+    if (m_focusState.toplevel)
+    {
+        Core::instance.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
+    }
+
+    if (m_focusState.layer == layer)
+    {
+        m_focusState.layer = nullptr;
+    }
+}
+
+void ShellManager::cycleToplevel()
+{
+    if (m_mappedToplevelList.size() < 2)
+    {
+        return;
+    }
+
+    Toplevel* next = wl_container_of(m_mappedToplevelList.getHandle().prev, next, link);
+    setFocus(next);
+
+    Core::instance.seat->getInput().rebasePointer();
 }
 
 void ShellManager::maximizeRequest(Toplevel* toplevel, bool state, Output* output)

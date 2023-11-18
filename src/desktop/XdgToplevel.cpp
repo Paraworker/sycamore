@@ -29,19 +29,13 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     // On creation, we only connect destroy, map, unmap
     m_destroy
     .connect(toplevel->base->events.destroy)
-    .set([this](void*)
-    {
-        // emit signal before destruction
-        wl_signal_emit_mutable(&events.destroy, nullptr);
-        delete this;
-    });
+    .set([this](void*) { delete this; });
 
     m_map
     .connect(m_surface->events.map)
     .set([this](void*)
     {
-        // Add to list
-        ShellManager::instance.addMappedToplevel(this);
+        ShellManager::instance.onToplevelMap(this);
 
         // Connect signals
         m_commit.connect(m_surface->events.commit);
@@ -69,10 +63,6 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             ShellManager::fullscreenRequest(this, true, output);
         }
 
-        // Focus it
-        ShellManager::instance.setFocus(this);
-
-        // emit signal
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
@@ -89,9 +79,8 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        ShellManager::instance.removeMappedToplevel(this);
+        ShellManager::instance.onToplevelUnmap(this);
 
-        // emit signal
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 

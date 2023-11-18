@@ -46,7 +46,6 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
  {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
-    wl_signal_init(&events.destroy);
 
     // Link to output
     wl_list_insert(&m_output->layers[m_layerSurface->pending.layer], &link);
@@ -75,12 +74,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.map)
     .set([this](void*)
     {
-        if (isFocusable())
-        {
-            ShellManager::instance.setFocus(this);
-        }
-
-        // emit signal
+        ShellManager::instance.onLayerMap(this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
@@ -88,7 +82,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.unmap)
     .set([this](void*)
     {
-        // emit signal
+        ShellManager::instance.onLayerUnmap(this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 
@@ -145,9 +139,6 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->events.destroy)
     .set([this](void*)
     {
-        // emit signal first
-        wl_signal_emit_mutable(&events.destroy, nullptr);
-
         if (m_output)
         {
             // Unlink output

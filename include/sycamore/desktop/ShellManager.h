@@ -36,11 +36,15 @@ public:
 
     const FocusState& getFocusState() const { return m_focusState; }
 
-    void addMappedToplevel(Toplevel* toplevel);
+    void onToplevelMap(Toplevel* toplevel);
 
-    void removeMappedToplevel(Toplevel* toplevel);
+    void onToplevelUnmap(Toplevel* toplevel);
 
-    const List& getMappedToplevelList() const { return m_mappedToplevelList; }
+    void onLayerMap(Layer* layer);
+
+    void onLayerUnmap(Layer* layer);
+
+    void cycleToplevel();
 
     static void maximizeRequest(Toplevel* toplevel, bool state, Output* output);
 
@@ -61,19 +65,8 @@ private:
     ~ShellManager();
 
 private:
-    struct FocusUnmap
-    {
-        // on focused toplevel unmap
-        Listener toplevel;
-
-        // on focused layer unmap
-        Listener layer;
-    };
-
-private:
     List       m_mappedToplevelList;
     FocusState m_focusState;
-    FocusUnmap m_focusUnmap;
 };
 
 NAMESPACE_SYCAMORE_END

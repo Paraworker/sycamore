@@ -38,14 +38,7 @@ struct CycleToplevel
 {
     void operator()() const
     {
-        if (ShellManager::instance.getMappedToplevelList().size() < 2)
-        {
-            return;
-        }
-
-        Toplevel* next = wl_container_of(ShellManager::instance.getMappedToplevelList().getHandle().prev, next, link);
-        ShellManager::instance.setFocus(next);
-        Core::instance.seat->getInput().rebasePointer();
+        ShellManager::instance.cycleToplevel();
     }
 };
 

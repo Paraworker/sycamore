@@ -9,7 +9,6 @@ Toplevel::Toplevel(wlr_surface* surface, wlr_scene_tree* tree)
 {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
-    wl_signal_init(&events.destroy);
 
     // Create SceneElement
     new ToplevelElement{&m_tree->node, this};
