@@ -113,6 +113,7 @@ private:
     OwnerHandler::SPtr m_owner;
 
 private:
+    Listener m_surfaceCommit;
     Listener m_reposition;
     Listener m_newPopup;
     Listener m_destroy;

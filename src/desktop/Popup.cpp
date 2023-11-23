@@ -12,7 +12,7 @@ Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const Ow
     if (!tree)
     {
         spdlog::error("Create scene tree for Popup failed");
-        return nullptr;
+        return {};
     }
 
     // Create Popup
@@ -22,6 +22,16 @@ Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const Ow
 Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner)
     : m_handle{handle}, m_tree{tree}, m_owner{std::move(owner)}
 {
+    m_surfaceCommit
+    .connect(handle->base->surface->events.commit)
+    .set([this](void*)
+    {
+        if (m_handle->base->initial_commit)
+        {
+            m_owner->unconstrain(*this);
+        }
+    });
+
     m_reposition
     .connect(handle->events.reposition)
     .set([this](void*) { m_owner->unconstrain(*this); });
@@ -36,8 +46,6 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
     m_destroy
     .connect(handle->base->events.destroy)
     .set([this](void*) { delete this; });
-
-    m_owner->unconstrain(*this);
 
     // Create SceneElement;
     new PopupElement{&tree->node, this};
