@@ -23,7 +23,7 @@ public:
         if (!handle)
         {
             spdlog::error("Create wlr_xdg_shell failed");
-            return nullptr;
+            return {};
         }
 
         return new XdgShell{handle};
@@ -37,16 +37,11 @@ public:
 private:
     explicit XdgShell(wlr_xdg_shell* handle) : m_handle{handle}
     {
-        m_newSurface
-        .connect(handle->events.new_surface)
+        m_newToplevel
+        .connect(handle->events.new_toplevel)
         .set([](void* data)
         {
-            auto xdgSurface = static_cast<wlr_xdg_surface*>(data);
-
-            if (xdgSurface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL)
-            {
-                XdgToplevel::create(xdgSurface->toplevel);
-            }
+            XdgToplevel::create(static_cast<wlr_xdg_toplevel*>(data));
         });
 
         m_destroy
@@ -60,7 +55,7 @@ private:
     wlr_xdg_shell* m_handle;
 
 private:
-    Listener m_newSurface;
+    Listener m_newToplevel;
     Listener m_destroy;
 };
 
