@@ -72,7 +72,7 @@ bool Core::init()
         return false;
     }
 
-    if (outputLayout = OutputLayout::create(); !outputLayout)
+    if (outputLayout = OutputLayout::create(display); !outputLayout)
     {
         spdlog::error("Create OutputLayout failed");
         return false;

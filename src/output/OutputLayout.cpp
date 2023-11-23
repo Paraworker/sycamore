@@ -6,24 +6,21 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-OutputLayout::UPtr OutputLayout::create()
+OutputLayout::UPtr OutputLayout::create(wl_display* display)
 {
-    auto layout = wlr_output_layout_create();
-    if (!layout)
+    auto handle = wlr_output_layout_create(display);
+    if (!handle)
     {
         spdlog::error("Create wlr_output_layout failed");
-        return nullptr;
+        return {};
     }
 
-    return UPtr{new OutputLayout{layout}};
+    return UPtr{new OutputLayout{handle}};
 }
 
 OutputLayout::OutputLayout(wlr_output_layout* handle) : m_handle{handle} {}
 
-OutputLayout::~OutputLayout()
-{
-    wlr_output_layout_destroy(m_handle);
-}
+OutputLayout::~OutputLayout() = default;
 
 bool OutputLayout::add(Output* output)
 {

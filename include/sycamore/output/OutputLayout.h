@@ -22,7 +22,7 @@ public:
      * @brief Create OutputLayout
      * @return nullptr on failure
      */
-    static OutputLayout::UPtr create();
+    static OutputLayout::UPtr create(wl_display* display);
 
     ~OutputLayout();
 
