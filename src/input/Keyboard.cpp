@@ -66,12 +66,12 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
         InputManager::instance.onDestroyDevice(this);
     });
 
-    applyConfig();
+    apply();
 }
 
 Keyboard::~Keyboard() = default;
 
-void Keyboard::applyConfig()
+void Keyboard::apply()
 {
     /* Compile an XKB keymap
     * We assume the defaults right now (e.g. layout = "us"). */

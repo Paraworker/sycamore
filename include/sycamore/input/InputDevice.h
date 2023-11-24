@@ -14,11 +14,11 @@ public:
     auto name() const { return m_deviceHandle->name; }
 
 public:
-    wl_list link{}; // InputManager::deviceList
+    wl_list link; // InputManager::deviceList
 
 protected:
     explicit InputDevice(wlr_input_device* handle)
-        : m_deviceHandle{handle} {}
+        : link{}, m_deviceHandle{handle} {}
 
     ~InputDevice() = default;
 

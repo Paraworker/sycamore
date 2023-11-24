@@ -10,19 +10,6 @@ NAMESPACE_SYCAMORE_BEGIN
 class Keyboard final : public InputDevice
 {
 public:
-    uint32_t getModifiers() const
-    {
-        return wlr_keyboard_get_modifiers(m_keyboardHandle);
-    }
-
-    void applyConfig();
-
-    Keyboard(const Keyboard&) = delete;
-    Keyboard(Keyboard&&) = delete;
-    Keyboard& operator=(const Keyboard&) = delete;
-    Keyboard& operator=(Keyboard&&) = delete;
-
-private:
     /**
      * @brief Constructor
      */
@@ -34,12 +21,26 @@ private:
     ~Keyboard();
 
     /**
+     * @brief Apply config
+     */
+    void apply();
+
+    /**
      * @brief Sync LEDs with other keyboards
      */
     void syncLeds();
 
+    uint32_t getModifiers() const
+    {
+        return wlr_keyboard_get_modifiers(m_keyboardHandle);
+    }
+
+    Keyboard(const Keyboard&) = delete;
+    Keyboard(Keyboard&&) = delete;
+    Keyboard& operator=(const Keyboard&) = delete;
+    Keyboard& operator=(Keyboard&&) = delete;
+
 private:
-    friend class InputManager;
     wlr_keyboard* m_keyboardHandle;
 
 private:

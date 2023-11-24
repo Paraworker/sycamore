@@ -10,14 +10,6 @@ NAMESPACE_SYCAMORE_BEGIN
 class Pointer final : public InputDevice
 {
 public:
-    void applyConfig();
-
-    Pointer(const Pointer&) = delete;
-    Pointer(Pointer&&) = delete;
-    Pointer& operator=(const Pointer&) = delete;
-    Pointer& operator=(Pointer&&) = delete;
-
-private:
     /**
      * @brief Constructor
      */
@@ -28,8 +20,44 @@ private:
      */
     ~Pointer();
 
+    /**
+     * @brief Whether the pointer device is a touchpad
+     */
+    bool isTouchpad() const;
+
+    /**
+     * @brief Set natural scroll
+     * @note Only available for touchpad
+     */
+    bool setNaturalScroll(bool enable);
+
+    /**
+     * @brief Set tap to click
+     * @note Only available for touchpad
+     */
+    bool setTapToClick(libinput_config_tap_state state);
+
+    /**
+     * @brief Set accel speed
+     */
+    bool setAccelSpeed(double speed);
+
+    /**
+     * @brief Set accel profile
+     */
+    bool setAccelProfile(libinput_config_accel_profile profile);
+
+    /**
+     * @brief Apply config
+     */
+    void apply();
+
+    Pointer(const Pointer&) = delete;
+    Pointer(Pointer&&) = delete;
+    Pointer& operator=(const Pointer&) = delete;
+    Pointer& operator=(Pointer&&) = delete;
+
 private:
-    friend class InputManager;
     wlr_pointer* m_pointerHandle;
 
 private:

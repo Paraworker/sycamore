@@ -1,6 +1,5 @@
 #include "sycamore/input/Pointer.h"
 #include "sycamore/input/InputManager.h"
-#include "sycamore/input/libinput.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
@@ -22,7 +21,7 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
         InputManager::instance.onDestroyDevice(this);
     });
 
-    applyConfig();
+    apply();
 }
 
 Pointer::~Pointer()
@@ -30,12 +29,106 @@ Pointer::~Pointer()
     Core::instance.seat->getCursor().detachDevice(m_deviceHandle);
 }
 
-void Pointer::applyConfig()
+bool Pointer::isTouchpad() const
+{
+    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    {
+        return false;
+    }
+
+    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    return libinput_device_config_tap_get_finger_count(handle) > 0;
+}
+
+bool Pointer::setNaturalScroll(bool enable)
+{
+    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    {
+        return false;
+    }
+
+    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+
+    if (!libinput_device_config_scroll_has_natural_scroll(handle) ||
+        libinput_device_config_scroll_get_natural_scroll_enabled(handle) == enable)
+    {
+        return false;
+    }
+
+    spdlog::debug("scroll_set_natural_scroll({})", enable);
+    libinput_device_config_scroll_set_natural_scroll_enabled(handle, enable);
+    return true;
+}
+
+bool Pointer::setTapToClick(libinput_config_tap_state state)
+{
+    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    {
+        return false;
+    }
+
+    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+
+    if (libinput_device_config_tap_get_finger_count(handle) <= 0 ||
+        libinput_device_config_tap_get_enabled(handle) == state)
+    {
+        return false;
+    }
+
+    spdlog::debug("tap_set_enabled({})", static_cast<int32_t>(state));
+    libinput_device_config_tap_set_enabled(handle, state);
+    return true;
+}
+
+bool Pointer::setAccelSpeed(double speed)
+{
+    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    {
+        return false;
+    }
+
+    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+
+    if (!libinput_device_config_accel_is_available(handle) ||
+        libinput_device_config_accel_get_speed(handle) == speed)
+    {
+        return false;
+    }
+
+    spdlog::debug("accel_set_speed({})", speed);
+    libinput_device_config_accel_set_speed(handle, speed);
+    return true;
+}
+
+bool Pointer::setAccelProfile(libinput_config_accel_profile profile)
+{
+    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    {
+        return false;
+    }
+
+    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+
+    if (!libinput_device_config_accel_is_available(handle) ||
+        libinput_device_config_accel_get_profile(handle) == profile)
+    {
+        return false;
+    }
+
+    spdlog::debug("accel_set_profile({})", static_cast<int32_t>(profile));
+    libinput_device_config_accel_set_profile(handle, profile);
+    return true;
+}
+
+void Pointer::apply()
 {
     // TODO: configurable
-    touchpadSetTapToClick(m_deviceHandle);
-    touchpadSetNaturalScroll(m_deviceHandle);
-    touchpadSetAccelSpeed(m_deviceHandle, 0.3);
+    if (isTouchpad())
+    {
+        setTapToClick(LIBINPUT_CONFIG_TAP_ENABLED);
+        setNaturalScroll(true);
+        setAccelSpeed(0.3);
+    }
 }
 
 NAMESPACE_SYCAMORE_END
