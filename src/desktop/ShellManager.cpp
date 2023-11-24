@@ -8,7 +8,7 @@ NAMESPACE_SYCAMORE_BEGIN
 
 ShellManager ShellManager::instance{};
 
-ShellManager::ShellManager() = default;
+ShellManager::ShellManager() : m_focusState{}, m_fullscreenCount{0} {}
 
 ShellManager::~ShellManager() = default;
 
@@ -161,12 +161,16 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
     if (!state)
     {
         // Restore from fullscreen mode
-        wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, true);
-
         toplevel.setSize(toplevel.restore.fullscreen.width, toplevel.restore.fullscreen.height);
         toplevel.moveTo({toplevel.restore.fullscreen.x, toplevel.restore.fullscreen.y});
         toplevel.setFullscreen(state);
         toplevel.state().fullscreen = state;
+
+        if (--m_fullscreenCount; m_fullscreenCount == 0)
+        {
+            wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, true);
+        }
+
         return;
     }
 
@@ -186,12 +190,15 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
     toplevel.restore.fullscreen.width  = toplevelGeo.width;
     toplevel.restore.fullscreen.height = toplevelGeo.height;
 
-    wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, false);
-
     toplevel.moveTo({outputGeo.x, outputGeo.y});
     toplevel.setSize(outputGeo.width, outputGeo.height);
     toplevel.setFullscreen(state);
     toplevel.state().fullscreen = state;
+
+    if (++m_fullscreenCount; m_fullscreenCount == 1)
+    {
+        wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, false);
+    }
 }
 
 NAMESPACE_SYCAMORE_END

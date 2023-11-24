@@ -16,8 +16,8 @@ class ShellManager
 public:
     struct FocusState
     {
-        Toplevel* toplevel = nullptr; // focused Toplevel
-        Layer*    layer    = nullptr; // focused Layer
+        Toplevel* toplevel; // focused Toplevel
+        Layer*    layer;    // focused Layer
     };
 
 public:
@@ -43,9 +43,9 @@ public:
 
     void cycleToplevel();
 
-    static void maximizeRequest(Toplevel& toplevel, bool state, Output* output);
+    void fullscreenRequest(Toplevel& toplevel, bool state, Output* output);
 
-    static void fullscreenRequest(Toplevel& toplevel, bool state, Output* output);
+    static void maximizeRequest(Toplevel& toplevel, bool state, Output* output);
 
 public:
     static ShellManager instance;
@@ -64,6 +64,7 @@ private:
 private:
     List       m_mappedToplevelList;
     FocusState m_focusState;
+    size_t     m_fullscreenCount;
 };
 
 NAMESPACE_SYCAMORE_END

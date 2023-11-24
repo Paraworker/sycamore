@@ -23,7 +23,7 @@ public:
         if (!handle)
         {
             spdlog::error("Create wlr_layer_shell_v1 failed");
-            return nullptr;
+            return {};
         }
 
         return new LayerShell{handle};

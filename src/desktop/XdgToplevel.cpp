@@ -60,7 +60,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         if (requested.fullscreen)
         {
-            ShellManager::fullscreenRequest(*this, true, output);
+            ShellManager::instance.fullscreenRequest(*this, true, output);
         }
 
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -143,7 +143,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             }
         }
 
-        ShellManager::fullscreenRequest(*this, state, output);
+        ShellManager::instance.fullscreenRequest(*this, state, output);
     });
 
     m_maximize.set([this](void*)
