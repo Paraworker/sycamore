@@ -15,7 +15,7 @@ Output* Output::create(wlr_output* handle)
     {
         spdlog::error("Output: {} init render failed", handle->name);
         wlr_output_destroy(handle);
-        return nullptr;
+        return {};
     }
 
     auto sceneOutput = wlr_scene_output_create(Core::instance.scene->getHandle(), handle);
@@ -23,7 +23,7 @@ Output* Output::create(wlr_output* handle)
     {
         spdlog::error("Output: {} create wlr_scene_output failed", handle->name);
         wlr_output_destroy(handle);
-        return nullptr;
+        return {};
     }
 
     auto output = new Output{handle, sceneOutput};

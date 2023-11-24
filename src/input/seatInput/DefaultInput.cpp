@@ -13,7 +13,7 @@ static inline void dragIconsUpdatePosition()
     wlr_scene_node* node;
     wl_list_for_each(node, &Core::instance.scene->dragIcons->children, link)
     {
-        static_cast<DragIconElement*>(node->data)->getIcon()->updatePosition();
+        static_cast<DragIconElement*>(node->data)->getIcon().updatePosition();
     }
 }
 
@@ -39,17 +39,15 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     Point<double> sCoords{};
     if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.getCursor().getPosition(), sCoords)); element)
     {
-        // If pressed on a toplevel, focus it.
+        // If pressed on a toplevel, focus it
         if (element->type() == SceneElement::TOPLEVEL)
         {
             ShellManager::instance.setFocus(static_cast<ToplevelElement*>(element)->getToplevel());
         }
     }
 
-    auto& state = m_seat.getHandle()->pointer_state;
-
     // Start an implicit grab if seat has a focused surface
-    if (state.focused_surface)
+    if (auto& state = m_seat.getHandle()->pointer_state; state.focused_surface)
     {
         m_seat.setInput(new ImplicitGrab{state.focused_surface, {state.sx, state.sy}, m_seat});
     }

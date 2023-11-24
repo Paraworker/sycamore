@@ -13,7 +13,7 @@ DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat)
     if (!tree)
     {
         spdlog::error("Create scene tree for DragIcon failed!");
-        return nullptr;
+        return {};
     }
 
     return new DragIcon(handle, tree, seat);

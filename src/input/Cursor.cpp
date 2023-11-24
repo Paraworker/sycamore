@@ -23,14 +23,14 @@ Cursor* Cursor::create(wlr_output_layout* layout)
     auto handle = wlr_cursor_create();
     if (!handle)
     {
-        return nullptr;
+        return {};
     }
 
     auto manager = xcursorManagerCreate(nullptr, 24);
     if (!manager)
     {
         wlr_cursor_destroy(handle);
-        return nullptr;
+        return {};
     }
 
     wlr_cursor_attach_output_layout(handle, layout);

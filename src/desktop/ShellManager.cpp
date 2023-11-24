@@ -12,10 +12,10 @@ ShellManager::ShellManager() = default;
 
 ShellManager::~ShellManager() = default;
 
-void ShellManager::setFocus(Toplevel* toplevel)
+void ShellManager::setFocus(Toplevel& toplevel)
 {
     // Note: this function only deals with keyboard focus.
-    if (m_focusState.toplevel == toplevel)
+    if (m_focusState.toplevel == &toplevel)
     {
         return;
     }
@@ -29,43 +29,43 @@ void ShellManager::setFocus(Toplevel* toplevel)
     }
 
     // Move the toplevel to the front
-    toplevel->toFront();
-    m_mappedToplevelList.reinsert(toplevel->link);
+    toplevel.toFront();
+    m_mappedToplevelList.reinsert(toplevel.link);
 
     // Activate the new toplevel
-    toplevel->setActivated(true);
+    toplevel.setActivated(true);
 
     if (!m_focusState.layer)
     {
-        Core::instance.seat->setKeyboardFocus(toplevel->getBaseSurface());
+        Core::instance.seat->setKeyboardFocus(toplevel.getBaseSurface());
     }
 
-    m_focusState.toplevel = toplevel;
+    m_focusState.toplevel = &toplevel;
 }
 
-void ShellManager::setFocus(Layer* layer)
+void ShellManager::setFocus(Layer& layer)
 {
-    if (m_focusState.layer == layer)
+    if (m_focusState.layer == &layer)
     {
         return;
     }
 
-    m_focusState.layer = layer;
+    m_focusState.layer = &layer;
 
-    Core::instance.seat->setKeyboardFocus(layer->getBaseSurface());
+    Core::instance.seat->setKeyboardFocus(layer.getBaseSurface());
 }
 
-void ShellManager::onToplevelMap(Toplevel* toplevel)
+void ShellManager::onToplevelMap(Toplevel& toplevel)
 {
-    m_mappedToplevelList.add(toplevel->link);
+    m_mappedToplevelList.add(toplevel.link);
     setFocus(toplevel);
 }
 
-void ShellManager::onToplevelUnmap(Toplevel* toplevel)
+void ShellManager::onToplevelUnmap(Toplevel& toplevel)
 {
-    m_mappedToplevelList.remove(toplevel->link);
+    m_mappedToplevelList.remove(toplevel.link);
 
-    if (m_focusState.toplevel == toplevel)
+    if (m_focusState.toplevel == &toplevel)
     {
         m_focusState.toplevel = nullptr;
 
@@ -73,27 +73,27 @@ void ShellManager::onToplevelUnmap(Toplevel* toplevel)
         if (m_mappedToplevelList.size() > 0)
         {
             Toplevel* newFocus = wl_container_of(m_mappedToplevelList.getHandle().next, newFocus, link);
-            setFocus(newFocus);
+            setFocus(*newFocus);
         }
     }
 }
 
-void ShellManager::onLayerMap(Layer* layer)
+void ShellManager::onLayerMap(Layer& layer)
 {
-    if (layer->isFocusable())
+    if (layer.isFocusable())
     {
         setFocus(layer);
     }
 }
 
-void ShellManager::onLayerUnmap(Layer* layer)
+void ShellManager::onLayerUnmap(Layer& layer)
 {
     if (m_focusState.toplevel)
     {
         Core::instance.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
     }
 
-    if (m_focusState.layer == layer)
+    if (m_focusState.layer == &layer)
     {
         m_focusState.layer = nullptr;
     }
@@ -107,14 +107,14 @@ void ShellManager::cycleToplevel()
     }
 
     Toplevel* next = wl_container_of(m_mappedToplevelList.getHandle().prev, next, link);
-    setFocus(next);
+    setFocus(*next);
 
     Core::instance.seat->getInput().rebasePointer();
 }
 
-void ShellManager::maximizeRequest(Toplevel* toplevel, bool state, Output* output)
+void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* output)
 {
-    if (state == toplevel->state().maximized)
+    if (state == toplevel.state().maximized)
     {
         return;
     }
@@ -122,10 +122,10 @@ void ShellManager::maximizeRequest(Toplevel* toplevel, bool state, Output* outpu
     if (!state)
     {
         // Restore from maximized mode
-        toplevel->setMaximized(state);
-        toplevel->setSize(toplevel->restore.maximize.width, toplevel->restore.maximize.height);
-        toplevel->moveTo({toplevel->restore.maximize.x, toplevel->restore.maximize.y});
-        toplevel->state().maximized = state;
+        toplevel.setMaximized(state);
+        toplevel.setSize(toplevel.restore.maximize.width, toplevel.restore.maximize.height);
+        toplevel.moveTo({toplevel.restore.maximize.x, toplevel.restore.maximize.y});
+        toplevel.state().maximized = state;
         return;
     }
 
@@ -135,25 +135,25 @@ void ShellManager::maximizeRequest(Toplevel* toplevel, bool state, Output* outpu
         return;
     }
 
-    auto& maxArea     = output->getUsableArea();
-    auto  toplevelPos = toplevel->getPosition();
-    auto  toplevelGeo = toplevel->getGeometry();
+    auto& maxBox      = output->getUsableArea();
+    auto  toplevelPos = toplevel.getPosition();
+    auto  toplevelGeo = toplevel.getGeometry();
 
-    toplevel->restore.maximize.x = toplevelPos.x;
-    toplevel->restore.maximize.y = toplevelPos.y;
+    toplevel.restore.maximize.x = toplevelPos.x;
+    toplevel.restore.maximize.y = toplevelPos.y;
 
-    toplevel->restore.maximize.width  = toplevelGeo.width;
-    toplevel->restore.maximize.height = toplevelGeo.height;
+    toplevel.restore.maximize.width  = toplevelGeo.width;
+    toplevel.restore.maximize.height = toplevelGeo.height;
 
-    toplevel->moveTo({maxArea.x, maxArea.y});
-    toplevel->setSize(maxArea.width, maxArea.height);
-    toplevel->setMaximized(state);
-    toplevel->state().maximized = state;
+    toplevel.moveTo({maxBox.x, maxBox.y});
+    toplevel.setSize(maxBox.width, maxBox.height);
+    toplevel.setMaximized(state);
+    toplevel.state().maximized = state;
 }
 
-void ShellManager::fullscreenRequest(Toplevel* toplevel, bool state, Output* output)
+void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* output)
 {
-    if (state == toplevel->state().fullscreen)
+    if (state == toplevel.state().fullscreen)
     {
         return;
     }
@@ -163,10 +163,10 @@ void ShellManager::fullscreenRequest(Toplevel* toplevel, bool state, Output* out
         // Restore from fullscreen mode
         wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, true);
 
-        toplevel->setSize(toplevel->restore.fullscreen.width, toplevel->restore.fullscreen.height);
-        toplevel->moveTo({toplevel->restore.fullscreen.x, toplevel->restore.fullscreen.y});
-        toplevel->setFullscreen(state);
-        toplevel->state().fullscreen = state;
+        toplevel.setSize(toplevel.restore.fullscreen.width, toplevel.restore.fullscreen.height);
+        toplevel.moveTo({toplevel.restore.fullscreen.x, toplevel.restore.fullscreen.y});
+        toplevel.setFullscreen(state);
+        toplevel.state().fullscreen = state;
         return;
     }
 
@@ -177,21 +177,21 @@ void ShellManager::fullscreenRequest(Toplevel* toplevel, bool state, Output* out
     }
 
     auto outputGeo   = output->getLayoutGeometry();
-    auto toplevelPos = toplevel->getPosition();
-    auto toplevelGeo = toplevel->getGeometry();
+    auto toplevelPos = toplevel.getPosition();
+    auto toplevelGeo = toplevel.getGeometry();
 
-    toplevel->restore.fullscreen.x = toplevelPos.x;
-    toplevel->restore.fullscreen.y = toplevelPos.y;
+    toplevel.restore.fullscreen.x = toplevelPos.x;
+    toplevel.restore.fullscreen.y = toplevelPos.y;
 
-    toplevel->restore.fullscreen.width  = toplevelGeo.width;
-    toplevel->restore.fullscreen.height = toplevelGeo.height;
+    toplevel.restore.fullscreen.width  = toplevelGeo.width;
+    toplevel.restore.fullscreen.height = toplevelGeo.height;
 
     wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, false);
 
-    toplevel->moveTo({outputGeo.x, outputGeo.y});
-    toplevel->setSize(outputGeo.width, outputGeo.height);
-    toplevel->setFullscreen(state);
-    toplevel->state().fullscreen = state;
+    toplevel.moveTo({outputGeo.x, outputGeo.y});
+    toplevel.setSize(outputGeo.width, outputGeo.height);
+    toplevel.setFullscreen(state);
+    toplevel.state().fullscreen = state;
 }
 
 NAMESPACE_SYCAMORE_END

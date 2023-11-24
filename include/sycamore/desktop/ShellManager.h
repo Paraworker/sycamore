@@ -16,39 +16,36 @@ class ShellManager
 public:
     struct FocusState
     {
-        // focused toplevel
-        Toplevel* toplevel = nullptr;
-
-        // focused layer
-        Layer* layer = nullptr;
+        Toplevel* toplevel = nullptr; // focused Toplevel
+        Layer*    layer    = nullptr; // focused Layer
     };
 
 public:
     /**
      * @brief Focus a toplevel
      */
-    void setFocus(Toplevel* toplevel);
+    void setFocus(Toplevel& toplevel);
 
     /**
      * @brief Focus a layer
      */
-    void setFocus(Layer* layer);
+    void setFocus(Layer& layer);
 
     const FocusState& getFocusState() const { return m_focusState; }
 
-    void onToplevelMap(Toplevel* toplevel);
+    void onToplevelMap(Toplevel& toplevel);
 
-    void onToplevelUnmap(Toplevel* toplevel);
+    void onToplevelUnmap(Toplevel& toplevel);
 
-    void onLayerMap(Layer* layer);
+    void onLayerMap(Layer& layer);
 
-    void onLayerUnmap(Layer* layer);
+    void onLayerUnmap(Layer& layer);
 
     void cycleToplevel();
 
-    static void maximizeRequest(Toplevel* toplevel, bool state, Output* output);
+    static void maximizeRequest(Toplevel& toplevel, bool state, Output* output);
 
-    static void fullscreenRequest(Toplevel* toplevel, bool state, Output* output);
+    static void fullscreenRequest(Toplevel& toplevel, bool state, Output* output);
 
 public:
     static ShellManager instance;

@@ -16,7 +16,7 @@ XdgToplevel* XdgToplevel::create(wlr_xdg_toplevel* toplevel)
     if (!tree)
     {
         spdlog::error("Create scene tree for XdgToplevel failed!");
-        return nullptr;
+        return {};
     }
 
     // Create XdgToplevel
@@ -35,7 +35,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     .connect(m_surface->events.map)
     .set([this](void*)
     {
-        ShellManager::instance.onToplevelMap(this);
+        ShellManager::instance.onToplevelMap(*this);
 
         // Connect signals
         m_commit.connect(m_surface->events.commit);
@@ -55,12 +55,12 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         if (requested.maximized)
         {
-            ShellManager::maximizeRequest(this, true, output);
+            ShellManager::maximizeRequest(*this, true, output);
         }
 
         if (requested.fullscreen)
         {
-            ShellManager::fullscreenRequest(this, true, output);
+            ShellManager::fullscreenRequest(*this, true, output);
         }
 
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -79,7 +79,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        ShellManager::instance.onToplevelUnmap(this);
+        ShellManager::instance.onToplevelUnmap(*this);
 
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
@@ -126,34 +126,30 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_fullscreen.set([this](void*)
     {
-        auto& requested = m_toplevel->requested;
+        auto&   requested = m_toplevel->requested;
+        bool    state     = requested.fullscreen;
+        Output* output    = nullptr;
 
-        if (!requested.fullscreen)
+        if (state)
         {
-            ShellManager::fullscreenRequest(this, false, nullptr);
-            return;
+            // If there is an output provided, try to satisfy it
+            if (auto fs = requested.fullscreen_output; fs && fs->data)
+            {
+                output = static_cast<Output*>(fs->data);
+            }
+            else
+            {
+                output = getOutput();
+            }
         }
 
-        // If there is an output provided, try to satisfy it
-        auto output = requested.fullscreen_output;
-        if (output && output->data)
-        {
-            ShellManager::fullscreenRequest(this, true, static_cast<Output*>(output->data));
-            return;
-        }
-
-        ShellManager::fullscreenRequest(this, true, getOutput());
+        ShellManager::fullscreenRequest(*this, state, output);
     });
 
     m_maximize.set([this](void*)
     {
-        if (!m_toplevel->requested.maximized)
-        {
-            ShellManager::maximizeRequest(this, false, nullptr);
-            return;
-        }
-
-        ShellManager::maximizeRequest(this, true, getOutput());
+        bool state = m_toplevel->requested.maximized;
+        ShellManager::maximizeRequest(*this, state, state ? getOutput() : nullptr);
     });
 
     m_minimize.set([](void*)

@@ -122,16 +122,15 @@ private:
 class PopupElement final : public SceneElement
 {
 public:
-    Popup* getPopup() const { return m_popup; }
-
-private:
     PopupElement(wlr_scene_node* node, Popup* popup)
-        : SceneElement{SceneElement::POPUP, node}, m_popup{popup} {}
+        : SceneElement{SceneElement::POPUP, node}
+        , m_popup{popup} {}
 
     ~PopupElement() override = default;
 
+    Popup& getPopup() const { return *m_popup; }
+
 private:
-    friend class Popup;
     Popup* m_popup;
 };
 

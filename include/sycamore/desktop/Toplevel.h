@@ -105,16 +105,15 @@ protected:
 class ToplevelElement final : public SceneElement
 {
 public:
-    Toplevel* getToplevel() const { return m_toplevel; }
-
-private:
     ToplevelElement(wlr_scene_node* node, Toplevel* toplevel)
-        : SceneElement{SceneElement::TOPLEVEL, node}, m_toplevel{toplevel} {}
+        : SceneElement{SceneElement::TOPLEVEL, node}
+        , m_toplevel{toplevel} {}
 
     ~ToplevelElement() override = default;
 
+    Toplevel& getToplevel() const { return *m_toplevel; }
+
 private:
-    friend class Toplevel;
     Toplevel* m_toplevel;
 };
 

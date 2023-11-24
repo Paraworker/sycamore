@@ -16,7 +16,7 @@ Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const ch
     if (!handle)
     {
         spdlog::error("Create wlr_seat failed");
-        return nullptr;
+        return {};
     }
 
     auto cursor = Cursor::create(layout);
@@ -24,7 +24,7 @@ Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const ch
     {
         spdlog::error("Create Cursor failed");
         wlr_seat_destroy(handle);
-        return nullptr;
+        return {};
     }
 
     return UPtr{new Seat{handle, cursor}};
@@ -150,7 +150,7 @@ void Seat::updateCapabilities()
 
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
-    Point<double> sCoords;
+    Point<double> sCoords{};
     auto surface = Scene::surfaceFromNode(Core::instance.scene->nodeAt(m_cursor->getPosition(), sCoords));
 
     if (!surface)

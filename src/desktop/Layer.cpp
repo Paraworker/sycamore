@@ -18,7 +18,7 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
         {
             spdlog::error("No output under cursor for layerSurface");
             wlr_layer_surface_v1_destroy(layerSurface);
-            return nullptr;
+            return {};
         }
 
         layerSurface->output = output->getHandle();
@@ -30,7 +30,7 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
     {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
         wlr_layer_surface_v1_destroy(layerSurface);
-        return nullptr;
+        return {};
     }
 
 
@@ -74,7 +74,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.map)
     .set([this](void*)
     {
-        ShellManager::instance.onLayerMap(this);
+        ShellManager::instance.onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
@@ -82,7 +82,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.unmap)
     .set([this](void*)
     {
-        ShellManager::instance.onLayerUnmap(this);
+        ShellManager::instance.onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 

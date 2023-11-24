@@ -48,7 +48,7 @@ Output* OutputLayout::findOutputAt(const Point<double>& coords) const
     auto output = wlr_output_layout_output_at(m_handle, coords.x, coords.y);
     if (!output)
     {
-        return nullptr;
+        return {};
     }
 
     return static_cast<Output*>(output->data);

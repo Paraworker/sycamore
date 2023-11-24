@@ -49,16 +49,15 @@ private:
 class DragIconElement final : public SceneElement
 {
 public:
-    DragIcon* getIcon() const { return m_icon; }
-
-private:
     DragIconElement(wlr_scene_node* node, DragIcon* icon)
-        : SceneElement(SceneElement::DRAG_ICON, node), m_icon(icon) {}
+        : SceneElement(SceneElement::DRAG_ICON, node)
+        , m_icon(icon) {}
 
     ~DragIconElement() override = default;
 
+    DragIcon& getIcon() const { return *m_icon; }
+
 private:
-    friend class DragIcon;
     DragIcon* m_icon;
 };
 

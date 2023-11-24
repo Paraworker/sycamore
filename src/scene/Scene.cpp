@@ -5,13 +5,11 @@ NAMESPACE_SYCAMORE_BEGIN
 
 class RootElement final : public SceneElement
 {
-private:
+public:
     explicit RootElement(wlr_scene_node* node)
         : SceneElement(SceneElement::ROOT, node) {}
 
     ~RootElement() override = default;
-
-    friend class Scene;
 };
 
 Scene::UPtr Scene::create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf)
@@ -20,14 +18,14 @@ Scene::UPtr Scene::create(wlr_output_layout* layout, wlr_presentation* presentat
     if (!handle)
     {
         spdlog::error("Create wlr_scene failed");
-        return nullptr;
+        return {};
     }
 
     auto sceneLayout = wlr_scene_attach_output_layout(handle, layout);
     if (!sceneLayout)
     {
         spdlog::error("wlr_scene attach wlr_output_layout failed");
-        return nullptr;
+        return {};
     }
 
     wlr_scene_set_presentation(handle, presentation);
@@ -72,7 +70,7 @@ wlr_scene_tree* Scene::getLayerTree(zwlr_layer_shell_v1_layer type) const
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
             return shell.overlay;
         default:
-            return nullptr;
+            return {};
     }
 }
 
@@ -80,13 +78,13 @@ wlr_surface* Scene::surfaceFromNode(wlr_scene_node* node)
 {
     if (!node || node->type != WLR_SCENE_NODE_BUFFER)
     {
-        return nullptr;
+        return {};
     }
 
     auto sceneSurface = wlr_scene_surface_try_from_buffer(wlr_scene_buffer_from_node(node));
     if (!sceneSurface)
     {
-        return nullptr;
+        return {};
     }
 
     return sceneSurface->surface;
@@ -96,7 +94,7 @@ SceneElement* Scene::elementFromNode(wlr_scene_node* node)
 {
     if (!node)
     {
-        return nullptr;
+        return {};
     }
 
     wlr_scene_tree* tree;

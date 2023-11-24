@@ -72,17 +72,15 @@ private:
 class LayerElement final : public SceneElement
 {
 public:
-    Layer* getLayer() const { return m_layer; }
-
-private:
     LayerElement(wlr_scene_node* node, Layer* layer)
         : SceneElement{SceneElement::LAYER, node}
         , m_layer{layer} {}
 
     ~LayerElement() override = default;
 
+    Layer& getLayer() const { return *m_layer; }
+
 private:
-    friend class Layer;
     Layer* m_layer;
 };
 
