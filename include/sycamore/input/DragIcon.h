@@ -55,7 +55,10 @@ public:
 
     ~DragIconElement() override = default;
 
-    DragIcon& getIcon() const { return *m_icon; }
+    DragIcon& getIcon() const
+    {
+        return *m_icon;
+    }
 
 private:
     DragIcon* m_icon;

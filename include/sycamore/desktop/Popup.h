@@ -128,7 +128,10 @@ public:
 
     ~PopupElement() override = default;
 
-    Popup& getPopup() const { return *m_popup; }
+    Popup& getPopup() const
+    {
+        return *m_popup;
+    }
 
 private:
     Popup* m_popup;

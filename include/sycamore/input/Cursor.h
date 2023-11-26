@@ -26,7 +26,10 @@ public:
 
     void disable();
 
-    bool isEnabled() const { return m_enabled; }
+    bool isEnabled() const
+    {
+        return m_enabled;
+    }
 
     /**
      * @brief Set cursor image by xcursor name
@@ -57,9 +60,15 @@ public:
         wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
     }
 
-    Point<double> getPosition() const { return {m_handle->x, m_handle->y}; }
+    Point<double> getPosition() const
+    {
+        return {m_handle->x, m_handle->y};
+    }
 
-    size_t getPointerButtonCount() const { return m_pointerButtonCount; }
+    size_t getPointerButtonCount() const
+    {
+        return m_pointerButtonCount;
+    }
 
     void attachDevice(wlr_input_device* device) const
     {
@@ -71,7 +80,10 @@ public:
         wlr_cursor_detach_input_device(m_handle, device);
     }
 
-    void attachSeat(Seat* seat) { m_seat = seat; }
+    void attachSeat(Seat* seat)
+    {
+        m_seat = seat;
+    }
 
     Cursor(const Cursor&) = delete;
     Cursor(Cursor&&) = delete;

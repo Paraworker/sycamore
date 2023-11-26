@@ -20,7 +20,10 @@ public:
     };
 
 public:
-    Type type() const { return m_type; }
+    Type type() const
+    {
+        return m_type;
+    }
 
 protected:
     SceneElement(Type type, wlr_scene_node* node) : m_type{type}
@@ -29,7 +32,10 @@ protected:
 
         m_destroy
         .connect(node->events.destroy)
-        .set([this](void*) { delete this; });
+        .set([this](void*)
+        {
+            delete this;
+        });
     }
 
     virtual ~SceneElement() = default;

@@ -18,11 +18,12 @@ OutputLayout::UPtr OutputLayout::create(wl_display* display)
     return UPtr{new OutputLayout{handle}};
 }
 
-OutputLayout::OutputLayout(wlr_output_layout* handle) : m_handle{handle} {}
+OutputLayout::OutputLayout(wlr_output_layout* handle)
+    : m_handle{handle}, m_outputCount{0} {}
 
 OutputLayout::~OutputLayout() = default;
 
-bool OutputLayout::add(Output* output)
+bool OutputLayout::addAuto(Output* output)
 {
     auto layoutOutput = wlr_output_layout_add_auto(m_handle, output->getHandle());
     if (!layoutOutput)
@@ -32,15 +33,15 @@ bool OutputLayout::add(Output* output)
     }
 
     wlr_scene_output_layout_add_output(Core::instance.scene->getLayout(), layoutOutput, output->getSceneOutput());
-    m_outputList.add(output->link);
+    ++m_outputCount;
 
     return true;
 }
 
 void OutputLayout::remove(Output* output)
 {
-    m_outputList.remove(output->link);
     wlr_output_layout_remove(m_handle, output->getHandle());
+    --m_outputCount;
 }
 
 Output* OutputLayout::findOutputAt(const Point<double>& coords) const

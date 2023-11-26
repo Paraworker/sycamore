@@ -22,17 +22,15 @@ void ShellManager::setFocus(Toplevel& toplevel)
 
     if (m_focusState.toplevel)
     {
-        /* Deactivate the previously focused toplevel. This lets the client know
-         * it no longer has focus and the client will repaint accordingly, e.g.
-         * stop displaying a caret. */
+        // Deactivate prev toplevel
         m_focusState.toplevel->setActivated(false);
     }
 
-    // Move the toplevel to the front
+    // Bring new toplevel to front
     toplevel.toFront();
-    m_mappedToplevelList.reinsert(toplevel.link);
+    m_mappedToplevels.splice(m_mappedToplevels.end(), m_mappedToplevels, toplevel.iter());
 
-    // Activate the new toplevel
+    // Activate new toplevel
     toplevel.setActivated(true);
 
     if (!m_focusState.layer)
@@ -57,23 +55,22 @@ void ShellManager::setFocus(Layer& layer)
 
 void ShellManager::onToplevelMap(Toplevel& toplevel)
 {
-    m_mappedToplevelList.add(toplevel.link);
+    toplevel.iter(m_mappedToplevels.emplace(m_mappedToplevels.end(), &toplevel));
     setFocus(toplevel);
 }
 
 void ShellManager::onToplevelUnmap(Toplevel& toplevel)
 {
-    m_mappedToplevelList.remove(toplevel.link);
+    m_mappedToplevels.erase(toplevel.iter());
 
     if (m_focusState.toplevel == &toplevel)
     {
         m_focusState.toplevel = nullptr;
 
         // Focus the topmost toplevel if there is one
-        if (m_mappedToplevelList.size() > 0)
+        if (!m_mappedToplevels.empty())
         {
-            Toplevel* newFocus = wl_container_of(m_mappedToplevelList.getHandle().next, newFocus, link);
-            setFocus(*newFocus);
+            setFocus(*m_mappedToplevels.back());
         }
     }
 }
@@ -101,13 +98,12 @@ void ShellManager::onLayerUnmap(Layer& layer)
 
 void ShellManager::cycleToplevel()
 {
-    if (m_mappedToplevelList.size() < 2)
+    if (m_mappedToplevels.size() < 2)
     {
         return;
     }
 
-    Toplevel* next = wl_container_of(m_mappedToplevelList.getHandle().prev, next, link);
-    setFocus(*next);
+    setFocus(*m_mappedToplevels.front());
 
     Core::instance.seat->getInput().rebasePointer();
 }

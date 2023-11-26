@@ -34,7 +34,10 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 
     m_reposition
     .connect(handle->events.reposition)
-    .set([this](void*) { m_owner->unconstrain(*this); });
+    .set([this](void*)
+    {
+        m_owner->unconstrain(*this);
+    });
 
     m_newPopup
     .connect(handle->base->events.new_popup)
@@ -45,7 +48,10 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 
     m_destroy
     .connect(handle->base->events.destroy)
-    .set([this](void*) { delete this; });
+    .set([this](void*)
+    {
+        delete this;
+    });
 
     // Create SceneElement;
     new PopupElement{&tree->node, this};

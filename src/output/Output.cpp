@@ -28,7 +28,7 @@ Output* Output::create(wlr_output* handle)
 
     auto output = new Output{handle, sceneOutput};
 
-    Core::instance.outputLayout->add(output);
+    Core::instance.outputLayout->addAuto(output);
 
     // TODO: configurable
     output->apply();
@@ -42,11 +42,6 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
     , m_usableArea{getLayoutGeometry()}
 {
     wl_signal_init(&events.destroy);
-
-    for (auto& layer : layers)
-    {
-        wl_list_init(&layer);
-    }
 
     handle->data = this;
 
@@ -105,8 +100,8 @@ bool Output::apply()
 
     wlr_output_state_finish(&state);
 
-    // If this is the first output, center cursor.
-    if (Core::instance.outputLayout->getOutputNum() == 1)
+    // Center cursor if this is the first output
+    if (Core::instance.outputLayout->getOutputCount() == 1)
     {
         ensureCursor();
     }
@@ -147,13 +142,12 @@ void Output::ensureCursor() const
 
 void Output::arrangeLayers()
 {
-    wlr_box fullArea   = getLayoutGeometry();
-    wlr_box usableArea = fullArea;
+    auto fullArea   = getLayoutGeometry();
+    auto usableArea = fullArea;
 
     for (auto& list : layers)
     {
-        Layer* layer;
-        wl_list_for_each(layer, &list, link)
+        for (auto layer : list)
         {
             layer->configure(fullArea, usableArea);
         }

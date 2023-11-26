@@ -2,8 +2,9 @@
 #define SYCAMORE_SHELL_MANAGER_H
 
 #include "sycamore/defines.h"
-#include "sycamore/utils/List.h"
 #include "sycamore/utils/Listener.h"
+
+#include <list>
 
 NAMESPACE_SYCAMORE_BEGIN
 
@@ -31,7 +32,10 @@ public:
      */
     void setFocus(Layer& layer);
 
-    const FocusState& getFocusState() const { return m_focusState; }
+    const FocusState& getFocusState() const
+    {
+        return m_focusState;
+    }
 
     void onToplevelMap(Toplevel& toplevel);
 
@@ -62,9 +66,9 @@ private:
     ~ShellManager();
 
 private:
-    List       m_mappedToplevelList;
-    FocusState m_focusState;
-    size_t     m_fullscreenCount;
+    std::list<Toplevel*> m_mappedToplevels;
+    FocusState           m_focusState;
+    size_t               m_fullscreenCount;
 };
 
 NAMESPACE_SYCAMORE_END

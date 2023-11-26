@@ -111,14 +111,13 @@ void Keyboard::syncLeds()
         }
     }
 
-    Keyboard* keyboard;
-    wl_list_for_each(keyboard, &InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_KEYBOARD).getHandle(), link)
+    InputManager::instance.forEachKeyboard([this, leds](const Keyboard& keyboard)
     {
-        if (keyboard->m_keyboardHandle != m_keyboardHandle)
+        if (keyboard.m_keyboardHandle != m_keyboardHandle)
         {
-            wlr_keyboard_led_update(keyboard->m_keyboardHandle, leds);
+            wlr_keyboard_led_update(keyboard.m_keyboardHandle, leds);
         }
-    }
+    });
 }
 
 NAMESPACE_SYCAMORE_END
