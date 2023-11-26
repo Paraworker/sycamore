@@ -7,7 +7,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-class Keyboard final : public InputDevice
+class Keyboard final : public InputDevice<Keyboard>
 {
 public:
     /**

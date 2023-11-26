@@ -119,26 +119,8 @@ Seat::~Seat()
     delete m_cursor;
 }
 
-void Seat::updateCapabilities()
+void Seat::setCapabilities(uint32_t caps)
 {
-    uint32_t caps = 0;
-
-    if (InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_POINTER).size() > 0 |
-        InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_TABLET_TOOL).size() > 0)
-    {
-        caps |= WL_SEAT_CAPABILITY_POINTER;
-    }
-
-    if (InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_KEYBOARD).size() > 0)
-    {
-        caps |= WL_SEAT_CAPABILITY_KEYBOARD;
-    }
-
-    if (InputManager::instance.getDeviceList(WLR_INPUT_DEVICE_TOUCH).size() > 0)
-    {
-        caps |= WL_SEAT_CAPABILITY_TOUCH;
-    }
-
     wlr_seat_set_capabilities(m_handle, caps);
 
     // Disable cursor if seat doesn't have pointer capability.

@@ -3,29 +3,41 @@
 
 #include "sycamore/defines.h"
 #include "sycamore/input/InputDevice.h"
-#include "sycamore/utils/List.h"
+#include "sycamore/input/Keyboard.h"
+#include "sycamore/input/Pointer.h"
 #include "sycamore/Core.h"
+
+#include <list>
 
 NAMESPACE_SYCAMORE_BEGIN
 
 class InputManager
 {
 public:
-    /**
-     * @brief Get the list of a certain type device
-     */
-    const List& getDeviceList(wlr_input_device_type type) const { return m_deviceList[type]; }
-
     void onNewDevice(wlr_input_device* handle);
 
-    template<typename T>
-    requires std::is_base_of_v<InputDevice, T>
-    void onDestroyDevice(T* device)
-    {
-        m_deviceList[device->type()].remove(device->link);
-        delete device;
+    void onDestroyDevice(Keyboard* keyboard);
 
-        Core::instance.seat->updateCapabilities();
+    void onDestroyDevice(Pointer* pointer);
+
+    uint32_t capabilities() const;
+
+    template<typename Func>
+    void forEachKeyboard(Func&& func)
+    {
+        for (auto& keyboard : m_keyboards)
+        {
+            func(keyboard);
+        }
+    }
+
+    template<typename Func>
+    void forEachPointer(Func&& func)
+    {
+        for (auto& pointer : m_pointers)
+        {
+            func(pointer);
+        }
     }
 
 public:
@@ -42,18 +54,13 @@ private:
      */
     ~InputManager() = default;
 
-    template<typename T>
-    requires std::is_base_of_v<InputDevice, T>
-    void newDevice(wlr_input_device* handle)
-    {
-        auto device = new T{handle};
-        m_deviceList[device->type()].add(device->link);
+    void newKeyboard(wlr_input_device* handle);
 
-        Core::instance.seat->updateCapabilities();
-    }
+    void newPointer(wlr_input_device* handle);
 
 private:
-    List m_deviceList[INPUT_DEVICE_TYPE_NUM];
+    std::list<Keyboard> m_keyboards;
+    std::list<Pointer>  m_pointers;
 };
 
 NAMESPACE_SYCAMORE_END

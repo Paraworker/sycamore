@@ -7,6 +7,7 @@
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
+#include <list>
 #include <memory>
 
 NAMESPACE_SYCAMORE_BEGIN
@@ -36,6 +37,8 @@ public:
         wl_signal unmap;
     };
 
+    using Iter = std::list<Toplevel*>::iterator;
+
 public:
     Output* getOutput() const;
 
@@ -56,13 +59,35 @@ public:
         wlr_scene_node_raise_to_top(&m_tree->node);
     }
 
-    auto getBaseSurface() const { return m_surface; }
+    auto getBaseSurface() const
+    {
+        return m_surface;
+    }
 
-    bool isMapped() const { return m_surface->mapped; }
+    bool isMapped() const
+    {
+        return m_surface->mapped;
+    }
 
-    bool isPinned() const { return m_state.maximized || m_state.fullscreen; }
+    bool isPinned() const
+    {
+        return m_state.maximized || m_state.fullscreen;
+    }
 
-    State& state() { return m_state; }
+    State& state()
+    {
+        return m_state;
+    }
+
+    Iter& iter()
+    {
+        return m_iter;
+    }
+
+    void iter(const Iter& iter)
+    {
+        m_iter = iter;
+    }
 
     virtual Role role() const = 0;
 
@@ -83,7 +108,6 @@ public:
 public:
     Events      events;
     RestoreData restore;
-    wl_list     link{}; // ShellManager::m_mappedToplevelList
 
 protected:
     /**
@@ -100,6 +124,7 @@ protected:
     wlr_surface*    m_surface;
     wlr_scene_tree* m_tree;
     State           m_state;
+    Iter            m_iter;
 };
 
 class ToplevelElement final : public SceneElement
@@ -111,7 +136,10 @@ public:
 
     ~ToplevelElement() override = default;
 
-    Toplevel& getToplevel() const { return *m_toplevel; }
+    Toplevel& getToplevel() const
+    {
+        return *m_toplevel;
+    }
 
 private:
     Toplevel* m_toplevel;

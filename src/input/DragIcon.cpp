@@ -24,7 +24,10 @@ DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)
 {
     m_destroy
     .connect(handle->events.destroy)
-    .set([this](void*) { delete this; });
+    .set([this](void*)
+    {
+        delete this;
+    });
 
     updatePosition();
 

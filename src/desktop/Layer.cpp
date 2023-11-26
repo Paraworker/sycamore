@@ -41,14 +41,16 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
 Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* helper)
     : m_layerSurface{layerSurface}
     , m_sceneHelper{helper}
-    , m_output{static_cast<Output*>(layerSurface->output->data)}
+    , m_layer{m_layerSurface->pending.layer}
     , m_lastMapState{false}
+    , m_output{static_cast<Output*>(layerSurface->output->data)}
  {
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
 
     // Link to output
-    wl_list_insert(&m_output->layers[m_layerSurface->pending.layer], &link);
+    auto& layerList = m_output->layers[m_layer];
+    m_iter = layerList.emplace(layerList.end(), this);
 
     m_outputDestroy
     .connect(m_output->events.destroy)
@@ -57,10 +59,9 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         m_layerSurface->output = nullptr;
 
         // Unlink output
-        wl_list_remove(&link);
-
-        m_output = nullptr;
         m_outputDestroy.disconnect();
+        m_output->layers[m_layer].erase(m_iter);
+        m_output = nullptr;
     });
 
     m_newPopup
@@ -97,17 +98,18 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
         if (committed)
         {
-            // layer type changed
+            // Layer type changed
             if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER)
             {
-                auto newLayer = m_layerSurface->current.layer;
-                wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::instance.scene->getLayerTree(newLayer));
+                auto& oldList = m_output->layers[m_layer];
+                m_layer = m_layerSurface->current.layer;
+                auto& newList = m_output->layers[m_layer];
 
-                wl_list_remove(&link);
-                wl_list_insert(&m_output->layers[newLayer], &link);
+                wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::instance.scene->getLayerTree(m_layer));
+                newList.splice(newList.end(), oldList, m_iter);
             }
 
-            // only need rebase after mapped
+            // Only need rebase after mapping
             if (mapped)
             {
                 needRebase = true;
@@ -139,13 +141,6 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->events.destroy)
     .set([this](void*)
     {
-        if (m_output)
-        {
-            // Unlink output
-            wl_list_remove(&link);
-            m_output->arrangeLayers();
-        }
-
         delete this;
     });
 
@@ -153,7 +148,15 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     new LayerElement{&helper->tree->node, this};
 }
 
-Layer::~Layer() = default;
+Layer::~Layer()
+{
+    if (m_output)
+    {
+        // Unlink output
+        m_output->layers[m_layer].erase(m_iter);
+        m_output->arrangeLayers();
+    }
+}
 
 void Layer::configure(const wlr_box& fullArea, wlr_box& usableArea)
 {

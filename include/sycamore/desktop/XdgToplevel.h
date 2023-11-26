@@ -16,7 +16,10 @@ public:
      */
     static XdgToplevel* create(wlr_xdg_toplevel* toplevel);
 
-    Role role() const override { return XDG; }
+    Role role() const override
+    {
+        return XDG;
+    }
 
     uint32_t setMaximized(bool maximized) override;
 

@@ -30,10 +30,16 @@ private:
     {
         m_destroy
         .connect(handle->events.destroy)
-        .set([this](void*) { delete this; });
+        .set([this](void*)
+        {
+            delete this;
+        });
     }
 
-    ~Surface() { Core::instance.seat->getInput().rebasePointer(); }
+    ~Surface()
+    {
+        Core::instance.seat->getInput().rebasePointer();
+    }
 
 private:
     wlr_surface* m_handle;

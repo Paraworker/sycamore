@@ -46,7 +46,10 @@ private:
 
         m_destroy
         .connect(handle->events.destroy)
-        .set([this](void*) { delete this; });
+        .set([this](void*)
+        {
+            delete this;
+        });
     }
 
     ~XdgShell() = default;

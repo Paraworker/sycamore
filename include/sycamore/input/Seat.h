@@ -27,11 +27,20 @@ public:
 
     ~Seat();
 
-    auto getHandle() const { return m_handle; }
+    auto getHandle() const
+    {
+        return m_handle;
+    }
 
-    Cursor& getCursor() const { return *m_cursor; }
+    Cursor& getCursor() const
+    {
+        return *m_cursor;
+    }
 
-    SeatInput& getInput() const { return *m_input; }
+    SeatInput& getInput() const
+    {
+        return *m_input;
+    }
 
     void setInput(SeatInput* newInput)
     {
@@ -46,7 +55,7 @@ public:
 
     void setKeyboardFocus(wlr_surface* surface) const;
 
-    void updateCapabilities();
+    void setCapabilities(uint32_t caps);
 
     bool bindingEnterCheck(Toplevel* toplevel) const;
 

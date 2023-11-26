@@ -5,6 +5,8 @@
 #include "sycamore/wlroots.h"
 #include "sycamore/utils/Listener.h"
 
+#include <list>
+
 NAMESPACE_SYCAMORE_BEGIN
 
 class Layer;
@@ -12,13 +14,25 @@ class Layer;
 class Output
 {
 public:
+    struct Events
+    {
+        wl_signal destroy;
+    };
+
+public:
     /**
      * @brief Create Output
      * @return nullptr on failure
      */
     static Output* create(wlr_output* handle);
 
-    const char* name() const { return m_handle->name; }
+    /**
+     * @brief Return the output name
+     */
+    auto name() const
+    {
+        return m_handle->name;
+    }
 
     bool apply();
 
@@ -41,11 +55,20 @@ public:
 
     void arrangeLayers();
 
-    auto* getHandle() const { return m_handle; }
+    auto* getHandle() const
+    {
+        return m_handle;
+    }
 
-    auto* getSceneOutput() const { return m_sceneOutput; }
+    auto getSceneOutput() const
+    {
+        return m_sceneOutput;
+    }
 
-    const wlr_box& getUsableArea() const { return m_usableArea; }
+    const wlr_box& getUsableArea() const
+    {
+        return m_usableArea;
+    }
 
     Output(const Output&) = delete;
     Output(Output&&) = delete;
@@ -53,19 +76,19 @@ public:
     Output& operator=(Output&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     Output(wlr_output* handle, wlr_scene_output* sceneOutput);
 
+    /**
+     * @brief Destructor
+     */
     ~Output();
 
 public:
-    struct
-    {
-        wl_signal destroy;
-    } events{};
-
-public:
-    wl_list layers[LAYER_SHELL_LAYER_NUM]{}; // Layer::link
-    wl_list link{};
+    Events            events;
+    std::list<Layer*> layers[LAYER_SHELL_LAYER_COUNT];
 
 private:
     wlr_output*       m_handle;

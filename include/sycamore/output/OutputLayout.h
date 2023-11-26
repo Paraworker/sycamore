@@ -2,7 +2,6 @@
 #define SYCAMORE_OUTPUT_LAYOUT_H
 
 #include "sycamore/defines.h"
-#include "sycamore/utils/List.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
@@ -26,11 +25,17 @@ public:
 
     ~OutputLayout();
 
-    auto getHandle() const { return m_handle; }
+    auto getHandle() const
+    {
+        return m_handle;
+    }
 
-    size_t getOutputNum() const { return m_outputList.size(); }
+    size_t getOutputCount() const
+    {
+        return m_outputCount;
+    }
 
-    bool add(Output* output);
+    bool addAuto(Output* output);
 
     void remove(Output* output);
 
@@ -46,7 +51,7 @@ private:
 
 private:
     wlr_output_layout* m_handle;
-    List               m_outputList;
+    size_t             m_outputCount;
 };
 
 NAMESPACE_SYCAMORE_END

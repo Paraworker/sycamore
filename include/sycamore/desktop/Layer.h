@@ -7,6 +7,8 @@
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
+#include <list>
+
 NAMESPACE_SYCAMORE_BEGIN
 
 class Output;
@@ -31,14 +33,20 @@ public:
 
     bool isFocusable() const;
 
-    auto getBaseSurface() const { return m_layerSurface->surface; }
+    auto getBaseSurface() const
+    {
+        return m_layerSurface->surface;
+    }
 
     Point<int32_t> getPosition() const
     {
         return {m_sceneHelper->tree->node.x, m_sceneHelper->tree->node.y};
     }
 
-    Output* getOutput() const { return m_output; }
+    Output* getOutput() const
+    {
+        return m_output;
+    }
 
     Layer(const Layer&) = delete;
     Layer(Layer&&) = delete;
@@ -46,8 +54,7 @@ public:
     Layer& operator=(Layer&&) = delete;
 
 public:
-    Events  events;
-    wl_list link{};
+    Events events;
 
 private:
     Layer(wlr_layer_surface_v1* surface, wlr_scene_layer_surface_v1* helper);
@@ -57,9 +64,12 @@ private:
 private:
     wlr_layer_surface_v1*       m_layerSurface;
     wlr_scene_layer_surface_v1* m_sceneHelper;
+    zwlr_layer_shell_v1_layer   m_layer;
     bool                        m_lastMapState; // Update on commit
+
     Output*                     m_output;
     Listener                    m_outputDestroy;
+    std::list<Layer*>::iterator m_iter;
 
 private:
     Listener m_newPopup;
@@ -78,7 +88,10 @@ public:
 
     ~LayerElement() override = default;
 
-    Layer& getLayer() const { return *m_layer; }
+    Layer& getLayer() const
+    {
+        return *m_layer;
+    }
 
 private:
     Layer* m_layer;
