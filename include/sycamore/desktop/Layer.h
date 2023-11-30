@@ -57,8 +57,14 @@ public:
     Events events;
 
 private:
+    /**
+     * @brief Constructor
+     */
     Layer(wlr_layer_surface_v1* surface, wlr_scene_layer_surface_v1* helper);
 
+    /**
+     * @brief Destructor
+     */
     ~Layer();
 
 private:

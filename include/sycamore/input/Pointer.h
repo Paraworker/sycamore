@@ -21,7 +21,7 @@ public:
     ~Pointer();
 
     /**
-     * @brief Whether the pointer device is a touchpad
+     * @brief Return ture if this is a touchpad
      */
     bool isTouchpad() const;
 

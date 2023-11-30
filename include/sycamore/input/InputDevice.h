@@ -15,19 +15,25 @@ public:
     using Iter = std::list<ConcreteType>::iterator;
 
 public:
+    /**
+     * @brief Get wlr_input_device_type
+     */
     auto type() const
     {
         return m_deviceHandle->type;
     }
 
+    /**
+     * @brief Get device name
+     */
     auto name() const
     {
         return m_deviceHandle->name;
     }
 
-    void iter(const Iter& itr)
+    void iter(const Iter& iter)
     {
-        m_iter = itr;
+        m_iter = iter;
     }
 
     Iter& iter()
