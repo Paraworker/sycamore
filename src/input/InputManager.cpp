@@ -1,4 +1,5 @@
 #include "sycamore/input/InputManager.h"
+#include "sycamore/Core.h"
 
 NAMESPACE_SYCAMORE_BEGIN
 
@@ -19,7 +20,7 @@ uint32_t InputManager::capabilities() const
     }
 
     /*
-    if (!m_touchs.empty() > 0)
+    if (!m_touchs.empty())
     {
         caps |= WL_SEAT_CAPABILITY_TOUCH;
     }

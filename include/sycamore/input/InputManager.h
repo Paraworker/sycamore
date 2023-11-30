@@ -5,7 +5,6 @@
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/input/Keyboard.h"
 #include "sycamore/input/Pointer.h"
-#include "sycamore/Core.h"
 
 #include <list>
 
@@ -14,12 +13,9 @@ NAMESPACE_SYCAMORE_BEGIN
 class InputManager
 {
 public:
-    void onNewDevice(wlr_input_device* handle);
-
-    void onDestroyDevice(Keyboard* keyboard);
-
-    void onDestroyDevice(Pointer* pointer);
-
+    /**
+     * @brief Return seat capabilities according to current devices
+     */
     uint32_t capabilities() const;
 
     template<typename Func>
@@ -40,6 +36,10 @@ public:
         }
     }
 
+    void onNewDevice(wlr_input_device* handle);
+    void onDestroyDevice(Keyboard* keyboard);
+    void onDestroyDevice(Pointer* pointer);
+
 public:
     static InputManager instance;
 
@@ -55,7 +55,6 @@ private:
     ~InputManager() = default;
 
     void newKeyboard(wlr_input_device* handle);
-
     void newPointer(wlr_input_device* handle);
 
 private:
