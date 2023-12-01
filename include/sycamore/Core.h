@@ -49,9 +49,9 @@ public:
     wlr_linux_dmabuf_v1*     dmabuf       = nullptr;
     wlr_pointer_gestures_v1* gestures     = nullptr;
 
-    OutputLayout::UPtr       outputLayout;
-    Scene::UPtr              scene;
+    OutputLayout*            outputLayout;
     Seat*                    seat;
+    Scene::UPtr              scene;
 
 public:
     static Core instance;

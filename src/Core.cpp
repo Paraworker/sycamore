@@ -78,15 +78,15 @@ bool Core::init()
         return false;
     }
 
-    if (scene = Scene::create(outputLayout->getHandle(), presentation, dmabuf); !scene)
-    {
-        spdlog::error("Create Scene failed");
-        return false;
-    }
-
     if (seat = Seat::create(display, outputLayout->getHandle(), "seat0"); !seat)
     {
         spdlog::error("Create Seat failed");
+        return false;
+    }
+
+    if (scene = Scene::create(outputLayout->getHandle(), presentation, dmabuf); !scene)
+    {
+        spdlog::error("Create Scene failed");
         return false;
     }
 
@@ -158,7 +158,9 @@ void Core::uninit()
     m_socket.clear();
 
     scene.reset();
-    outputLayout.reset();
+
+    seat         = nullptr;
+    outputLayout = nullptr;
 }
 
 bool Core::start() const

@@ -6,7 +6,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-OutputLayout::UPtr OutputLayout::create(wl_display* display)
+OutputLayout* OutputLayout::create(wl_display* display)
 {
     auto handle = wlr_output_layout_create(display);
     if (!handle)
@@ -15,11 +15,20 @@ OutputLayout::UPtr OutputLayout::create(wl_display* display)
         return {};
     }
 
-    return UPtr{new OutputLayout{handle}};
+    return new OutputLayout{handle};
 }
 
 OutputLayout::OutputLayout(wlr_output_layout* handle)
-    : m_handle{handle}, m_outputCount{0} {}
+    : m_handle{handle}
+    , m_outputCount{0}
+{
+    m_destroy
+    .connect(handle->events.destroy)
+    .set([this](void*)
+    {
+        delete this;
+    });
+}
 
 OutputLayout::~OutputLayout() = default;
 

@@ -2,10 +2,9 @@
 #define SYCAMORE_OUTPUT_LAYOUT_H
 
 #include "sycamore/defines.h"
+#include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
-
-#include <memory>
 
 NAMESPACE_SYCAMORE_BEGIN
 
@@ -14,16 +13,17 @@ class Output;
 class OutputLayout
 {
 public:
-    using UPtr = std::unique_ptr<OutputLayout>;
-
-public:
     /**
      * @brief Create OutputLayout
      * @return nullptr on failure
      */
-    static OutputLayout::UPtr create(wl_display* display);
+    static OutputLayout* create(wl_display* display);
 
-    ~OutputLayout();
+    bool addAuto(Output* output);
+
+    void remove(Output* output);
+
+    Output* findOutputAt(const Point<double>& coords) const;
 
     auto getHandle() const
     {
@@ -35,23 +35,28 @@ public:
         return m_outputCount;
     }
 
-    bool addAuto(Output* output);
-
-    void remove(Output* output);
-
-    Output* findOutputAt(const Point<double>& coords) const;
-
     OutputLayout(const OutputLayout&) = delete;
     OutputLayout(OutputLayout&&) = delete;
     OutputLayout& operator=(const OutputLayout&) = delete;
     OutputLayout& operator=(OutputLayout&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     explicit OutputLayout(wlr_output_layout* handle);
+
+    /**
+     * @brief Destructor
+     */
+    ~OutputLayout();
 
 private:
     wlr_output_layout* m_handle;
     size_t             m_outputCount;
+
+private:
+    Listener m_destroy;
 };
 
 NAMESPACE_SYCAMORE_END
