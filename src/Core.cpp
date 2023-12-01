@@ -78,7 +78,7 @@ bool Core::init()
         return false;
     }
 
-    if (seat = Seat::create(display, outputLayout->getHandle(), "seat0"); !seat)
+    if (seat = Seat::create(display, outputLayout->getHandle(), DEFAULT_SEAT); !seat)
     {
         spdlog::error("Create Seat failed");
         return false;

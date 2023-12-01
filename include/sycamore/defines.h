@@ -8,5 +8,6 @@
 #define LAYER_SHELL_VERSION     4
 #define XDG_SHELL_VERSION       3
 #define LAYER_SHELL_LAYER_COUNT 4
+#define DEFAULT_SEAT            "seat0"
 
 #endif //SYCAMORE_DEFINES_H
