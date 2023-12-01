@@ -157,7 +157,6 @@ void Core::uninit()
 
     m_socket.clear();
 
-    seat.reset();
     scene.reset();
     outputLayout.reset();
 }

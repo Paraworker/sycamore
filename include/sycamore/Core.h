@@ -51,7 +51,7 @@ public:
 
     OutputLayout::UPtr       outputLayout;
     Scene::UPtr              scene;
-    Seat::UPtr               seat;
+    Seat*                    seat;
 
 public:
     static Core instance;

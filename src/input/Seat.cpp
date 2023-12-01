@@ -10,7 +10,7 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const char* name)
+Seat* Seat::create(wl_display* display, wlr_output_layout* layout, const char* name)
 {
     auto handle = wlr_seat_create(display, name);
     if (!handle)
@@ -27,7 +27,7 @@ Seat::UPtr Seat::create(wl_display* display, wlr_output_layout* layout, const ch
         return {};
     }
 
-    return UPtr{new Seat{handle, cursor}};
+    return new Seat{handle, cursor};
 }
 
 Seat::Seat(wlr_seat* handle, Cursor* cursor)
@@ -109,6 +109,13 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
         }
 
         setInput(new DefaultInput{*this});
+    });
+
+    m_destroy
+    .connect(handle->events.destroy)
+    .set([this](void*)
+    {
+        delete this;
     });
 }
 

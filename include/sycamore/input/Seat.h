@@ -7,8 +7,6 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-#include <memory>
-
 NAMESPACE_SYCAMORE_BEGIN
 
 class Toplevel;
@@ -16,16 +14,11 @@ class Toplevel;
 class Seat
 {
 public:
-    using UPtr = std::unique_ptr<Seat>;
-    
-public:
     /**
      * @brief Create Seat
      * @return nullptr on failure
      */
-    static Seat::UPtr create(wl_display* display, wlr_output_layout* layout, const char* name);
-
-    ~Seat();
+    static Seat* create(wl_display* display, wlr_output_layout* layout, const char* name);
 
     auto getHandle() const
     {
@@ -65,7 +58,15 @@ public:
     Seat& operator=(Seat&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     Seat(wlr_seat* handle, Cursor* cursor);
+
+    /**
+     * @brief Destructor
+     */
+    ~Seat();
 
 private:
     wlr_seat*  m_handle;
@@ -78,6 +79,7 @@ private:
     Listener m_setPrimarySelection;
     Listener m_requestStartDrag;
     Listener m_startDrag;
+    Listener m_destroy;
 };
 
 NAMESPACE_SYCAMORE_END
