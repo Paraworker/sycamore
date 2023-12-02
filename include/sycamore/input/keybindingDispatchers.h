@@ -56,7 +56,10 @@ struct SwitchVT
 {
     void operator()() const
     {
-        wlr_session_change_vt(Core::instance.session, vt);
+        if (auto session = Core::instance.backend->session; session)
+        {
+            wlr_session_change_vt(session, vt);
+        }
     }
 };
 

@@ -12,9 +12,72 @@ NAMESPACE_SYCAMORE_BEGIN
 
 Core Core::instance{};
 
-bool Core::init()
+static Core::Backend* backendAutoCreate(wl_display* display)
 {
-    spdlog::info("Init Core");
+    auto backend = new Core::Backend{};
+
+    if (backend->handle = wlr_backend_autocreate(display, &backend->session); !backend->handle)
+    {
+        spdlog::error("Create wlr_backend failed");
+        delete backend;
+        return {};
+    }
+
+    backend->newInput
+    .connect(backend->handle->events.new_input)
+    .set([](void* data)
+    {
+        InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
+    });
+
+    backend->newOutput
+    .connect(backend->handle->events.new_output)
+    .set([](void* data)
+    {
+        Output::create(static_cast<wlr_output*>(data));
+    });
+
+    backend->destroy
+    .connect(backend->handle->events.destroy)
+    .set([=](void*)
+    {
+        delete backend;
+    });
+
+    return backend;
+}
+
+static Core::Compositor* compositorCreate(wl_display* display, uint32_t version, wlr_renderer* renderer)
+{
+    auto compositor = new Core::Compositor{};
+
+    if (compositor->handle = wlr_compositor_create(display, version, renderer); !compositor->handle)
+    {
+        spdlog::error("Create wlr_compositor failed");
+        delete compositor;
+        return {};
+    }
+
+    compositor->newSurface
+    .connect(compositor->handle->events.new_surface)
+    .set([](void* data)
+    {
+        Surface::create(static_cast<wlr_surface*>(data));
+    });
+
+    compositor->destroy
+    .connect(compositor->handle->events.destroy)
+    .set([=](void*)
+    {
+        delete compositor;
+    });
+
+    return compositor;
+}
+
+bool Core::setup()
+{
+    spdlog::info("Setup Server");
 
     wlr_log_init(WLR_DEBUG, nullptr);
 
@@ -26,13 +89,13 @@ bool Core::init()
 
     eventLoop = wl_display_get_event_loop(display);
 
-    if (backend = wlr_backend_autocreate(display, &session); !backend)
+    if (backend = backendAutoCreate(display); !backend)
     {
-        spdlog::error("Create wlr_backend failed");
+        spdlog::error("Create Backend failed");
         return false;
     }
 
-    if (renderer = wlr_renderer_autocreate(backend); !renderer)
+    if (renderer = wlr_renderer_autocreate(backend->handle); !renderer)
     {
         spdlog::error("Create wlr_renderer failed");
         return false;
@@ -43,24 +106,24 @@ bool Core::init()
     if (wlr_renderer_get_dmabuf_texture_formats(renderer))
     {
         wlr_drm_create(display, renderer);
-        dmabuf = wlr_linux_dmabuf_v1_create_with_renderer(display, 4, renderer);
+        linuxDmabuf = wlr_linux_dmabuf_v1_create_with_renderer(display, 4, renderer);
     }
 
-    if (allocator = wlr_allocator_autocreate(backend, renderer); !allocator)
+    if (allocator = wlr_allocator_autocreate(backend->handle, renderer); !allocator)
     {
         spdlog::error("Create wlr_allocator failed");
         return false;
     }
 
-    if (compositor = wlr_compositor_create(display, WLR_COMPOSITOR_VERSION, renderer); !compositor)
+    if (compositor = compositorCreate(display, WLR_COMPOSITOR_VERSION, renderer); !compositor)
     {
-        spdlog::error("Create wlr_compositor failed");
+        spdlog::error("Create Compositor failed");
         return false;
     }
 
     wlr_subcompositor_create(display);
 
-    if (presentation = wlr_presentation_create(display, backend); !presentation)
+    if (presentation = wlr_presentation_create(display, backend->handle); !presentation)
     {
         spdlog::error("Create wlr_presentation failed");
         return false;
@@ -84,7 +147,7 @@ bool Core::init()
         return false;
     }
 
-    if (scene = Scene::create(outputLayout->getHandle(), presentation, dmabuf); !scene)
+    if (scene = Scene::create(outputLayout->getHandle(), presentation, linuxDmabuf); !scene)
     {
         spdlog::error("Create Scene failed");
         return false;
@@ -102,7 +165,7 @@ bool Core::init()
         return false;
     }
 
-    if (m_socket = wl_display_add_socket_auto(display); m_socket.empty())
+    if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
         spdlog::error("Open Wayland socket failed");
         return false;
@@ -119,55 +182,23 @@ bool Core::init()
     wlr_gamma_control_manager_v1_create(display);
     wlr_single_pixel_buffer_manager_v1_create(display);
 
-    m_newInput
-    .connect(backend->events.new_input)
-    .set([](void* data)
-    {
-        InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
-    });
-
-    m_newOutput
-    .connect(backend->events.new_output)
-    .set([](void* data)
-    {
-        Output::create(static_cast<wlr_output*>(data));
-    });
-
-    m_newSurface
-    .connect(compositor->events.new_surface)
-    .set([](void* data)
-    {
-        Surface::create(static_cast<wlr_surface*>(data));
-    });
-
-    setenv("WAYLAND_DISPLAY", m_socket.c_str(), true);
+    setenv("WAYLAND_DISPLAY", socket.c_str(), true);
     setenv("XDG_CURRENT_DESKTOP", "Sycamore", true);
 
     return true;
 }
 
-void Core::uninit()
+void Core::teardown()
 {
-    m_newInput.disconnect();
-    m_newOutput.disconnect();
-    m_newSurface.disconnect();
-
     wl_display_destroy_clients(display);
     wl_display_destroy(display);
-
-    m_socket.clear();
-
-    scene.reset();
-
-    seat         = nullptr;
-    outputLayout = nullptr;
 }
 
 bool Core::start() const
 {
     spdlog::info("Starting Backend");
 
-    if (!wlr_backend_start(backend))
+    if (!wlr_backend_start(backend->handle))
     {
         spdlog::error("Start Backend failed");
         return false;
@@ -178,7 +209,7 @@ bool Core::start() const
 
 void Core::run() const
 {
-    spdlog::info("Running Compositor on WAYLAND_DISPLAY: {}", m_socket);
+    spdlog::info("Running Compositor on WAYLAND_DISPLAY: {}", socket);
     wl_display_run(display);
 }
 

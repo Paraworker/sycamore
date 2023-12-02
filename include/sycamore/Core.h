@@ -16,15 +16,34 @@ NAMESPACE_SYCAMORE_BEGIN
 class Core
 {
 public:
+    struct Backend
+    {
+        wlr_backend* handle;
+        wlr_session* session;
+
+        Listener     newInput;
+        Listener     newOutput;
+        Listener     destroy;
+    };
+
+    struct Compositor
+    {
+        wlr_compositor* handle;
+
+        Listener        newSurface;
+        Listener        destroy;
+    };
+
+public:
     /**
-     * @brief Initialize
+     * @brief Setup server
      */
-    bool init();
+    bool setup();
 
     /**
-     * @brief Uninitialize
+     * @brief Teardown server
      */
-    void uninit();
+    void teardown();
 
     /**
      * @brief Start backend
@@ -40,18 +59,19 @@ public:
     wl_display*              display      = nullptr;
     wl_event_loop*           eventLoop    = nullptr;
 
-    wlr_backend*             backend      = nullptr;
-    wlr_allocator*           allocator    = nullptr;
-    wlr_compositor*          compositor   = nullptr;
+    Backend*                 backend      = nullptr;
+    Compositor*              compositor   = nullptr;
+    OutputLayout*            outputLayout = nullptr;
+    Seat*                    seat         = nullptr;
+    Scene::UPtr              scene;
+
     wlr_renderer*            renderer     = nullptr;
-    wlr_session*             session      = nullptr;
+    wlr_allocator*           allocator    = nullptr;
     wlr_presentation*        presentation = nullptr;
-    wlr_linux_dmabuf_v1*     dmabuf       = nullptr;
+    wlr_linux_dmabuf_v1*     linuxDmabuf  = nullptr;
     wlr_pointer_gestures_v1* gestures     = nullptr;
 
-    OutputLayout*            outputLayout;
-    Seat*                    seat;
-    Scene::UPtr              scene;
+    std::string              socket;
 
 public:
     static Core instance;
@@ -66,14 +86,6 @@ private:
      * @brief Destructor
      */
     ~Core() = default;
-
-private:
-    std::string m_socket;
-
-private:
-    Listener m_newInput;
-    Listener m_newOutput;
-    Listener m_newSurface;
 };
 
 NAMESPACE_SYCAMORE_END

@@ -43,14 +43,14 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    if (!sycamore::Core::instance.init())
+    if (!sycamore::Core::instance.setup())
     {
         exit(EXIT_FAILURE);
     }
 
     if (!sycamore::Core::instance.start())
     {
-        sycamore::Core::instance.uninit();
+        sycamore::Core::instance.teardown();
         exit(EXIT_FAILURE);
     }
 
@@ -61,6 +61,6 @@ int main(int argc, char **argv)
 
     sycamore::Core::instance.run();
 
-    sycamore::Core::instance.uninit();
+    sycamore::Core::instance.teardown();
     return EXIT_SUCCESS;
 }
