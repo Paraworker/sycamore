@@ -25,7 +25,10 @@ public:
      * @brief Destructor
      * @note Disconnect automatically
      */
-    ~Listener() { disconnect(); }
+    ~Listener()
+    {
+        disconnect();
+    }
 
     /**
      * @brief Set callback
