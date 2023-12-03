@@ -6,8 +6,6 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-ShellManager ShellManager::instance{};
-
 ShellManager::ShellManager() : m_focusState{}, m_fullscreenCount{0} {}
 
 ShellManager::~ShellManager() = default;
@@ -35,7 +33,7 @@ void ShellManager::setFocus(Toplevel& toplevel)
 
     if (!m_focusState.layer)
     {
-        Core::instance.seat->setKeyboardFocus(toplevel.getBaseSurface());
+        Core::get().seat->setKeyboardFocus(toplevel.getBaseSurface());
     }
 
     m_focusState.toplevel = &toplevel;
@@ -50,7 +48,7 @@ void ShellManager::setFocus(Layer& layer)
 
     m_focusState.layer = &layer;
 
-    Core::instance.seat->setKeyboardFocus(layer.getBaseSurface());
+    Core::get().seat->setKeyboardFocus(layer.getBaseSurface());
 }
 
 void ShellManager::onToplevelMap(Toplevel& toplevel)
@@ -87,7 +85,7 @@ void ShellManager::onLayerUnmap(Layer& layer)
 {
     if (m_focusState.toplevel)
     {
-        Core::instance.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
+        Core::get().seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
     }
 
     if (m_focusState.layer == &layer)
@@ -105,7 +103,7 @@ void ShellManager::cycleToplevel()
 
     setFocus(*m_mappedToplevels.front());
 
-    Core::instance.seat->getInput().rebasePointer();
+    Core::get().seat->getInput().rebasePointer();
 }
 
 void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* output)
@@ -164,7 +162,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
         if (--m_fullscreenCount; m_fullscreenCount == 0)
         {
-            wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, true);
+            wlr_scene_node_set_enabled(&Core::get().scene->shell.top->node, true);
         }
 
         return;
@@ -193,7 +191,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
     if (++m_fullscreenCount; m_fullscreenCount == 1)
     {
-        wlr_scene_node_set_enabled(&Core::instance.scene->shell.top->node, false);
+        wlr_scene_node_set_enabled(&Core::get().scene->shell.top->node, false);
     }
 }
 

@@ -3,8 +3,6 @@
 
 NAMESPACE_SYCAMORE_BEGIN
 
-KeybindingManager KeybindingManager::instance{};
-
 KeybindingManager::KeybindingManager()
 {
     add({WLR_MODIFIER_LOGO, XKB_KEY_d}, Spawn{"fuzzel -i Papirus"});

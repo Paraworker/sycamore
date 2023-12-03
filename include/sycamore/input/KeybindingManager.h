@@ -4,6 +4,7 @@
 #include "sycamore/defines.h"
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <xkbcommon/xkbcommon.h>
 
@@ -34,18 +35,9 @@ class KeybindingManager
 {
 public:
     using Dispatcher = std::function<void(void)>;
+    using UPtr       = std::unique_ptr<KeybindingManager>;
 
 public:
-    bool add(const KeyInfo& info, Dispatcher&& dispatcher);
-
-    bool remove(const KeyInfo& info);
-
-    bool dispatch(const KeyInfo& info);
-
-public:
-    static KeybindingManager instance;
-
-private:
     /**
      * @brief Constructor
      */
@@ -55,6 +47,17 @@ private:
      * @brief Destructor
      */
     ~KeybindingManager();
+
+    bool add(const KeyInfo& info, Dispatcher&& dispatcher);
+
+    bool remove(const KeyInfo& info);
+
+    bool dispatch(const KeyInfo& info);
+
+    KeybindingManager(const KeybindingManager&) = delete;
+    KeybindingManager(KeybindingManager&&) = delete;
+    KeybindingManager& operator=(const KeybindingManager&) = delete;
+    KeybindingManager& operator=(KeybindingManager&&) = delete;
 
 private:
     std::unordered_map<KeyInfo, Dispatcher, KeyInfo::Hash> m_bindingMap;

@@ -2,6 +2,9 @@
 #define SYCAMORE_CORE_H
 
 #include "sycamore/defines.h"
+#include "sycamore/desktop/ShellManager.h"
+#include "sycamore/input/InputManager.h"
+#include "sycamore/input/KeybindingManager.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/output/OutputLayout.h"
 #include "sycamore/scene/Scene.h"
@@ -36,6 +39,15 @@ public:
 
 public:
     /**
+     * @brief Get instance
+     */
+    static Core& get()
+    {
+        static Core instance{};
+        return instance;
+    }
+
+    /**
      * @brief Setup server
      */
     bool setup();
@@ -63,7 +75,6 @@ public:
     Compositor*              compositor   = nullptr;
     OutputLayout*            outputLayout = nullptr;
     Seat*                    seat         = nullptr;
-    Scene::UPtr              scene;
 
     wlr_renderer*            renderer     = nullptr;
     wlr_allocator*           allocator    = nullptr;
@@ -71,10 +82,12 @@ public:
     wlr_linux_dmabuf_v1*     linuxDmabuf  = nullptr;
     wlr_pointer_gestures_v1* gestures     = nullptr;
 
-    std::string              socket;
+    Scene::UPtr              scene;
+    ShellManager::UPtr       shell;
+    InputManager::UPtr       input;
+    KeybindingManager::UPtr  keybinding;
 
-public:
-    static Core instance;
+    std::string              socket;
 
 private:
     /**

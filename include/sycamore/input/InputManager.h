@@ -6,6 +6,7 @@
 #include "sycamore/input/Keyboard.h"
 #include "sycamore/input/Pointer.h"
 
+#include <memory>
 #include <list>
 
 NAMESPACE_SYCAMORE_BEGIN
@@ -13,6 +14,19 @@ NAMESPACE_SYCAMORE_BEGIN
 class InputManager
 {
 public:
+    using UPtr = std::unique_ptr<InputManager>;
+
+public:
+    /**
+     * @brief Constructor
+     */
+    InputManager() = default;
+
+    /**
+     * @brief Destructor
+     */
+    ~InputManager() = default;
+
     /**
      * @brief Return seat capabilities according to current devices
      */
@@ -40,20 +54,12 @@ public:
     void onDestroyDevice(Keyboard* keyboard);
     void onDestroyDevice(Pointer* pointer);
 
-public:
-    static InputManager instance;
+    InputManager(const InputManager&) = delete;
+    InputManager(InputManager&&) = delete;
+    InputManager& operator=(const InputManager&) = delete;
+    InputManager& operator=(InputManager&&) = delete;
 
 private:
-    /**
-     * @brief Constructor
-     */
-    InputManager() = default;
-
-    /**
-     * @brief Destructor
-     */
-    ~InputManager() = default;
-
     void newKeyboard(wlr_input_device* handle);
     void newPointer(wlr_input_device* handle);
 

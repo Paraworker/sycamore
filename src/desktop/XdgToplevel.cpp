@@ -1,4 +1,3 @@
-#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/desktop/XdgToplevel.h"
 #include "sycamore/input/seatInput/PointerMove.h"
@@ -12,7 +11,7 @@ NAMESPACE_SYCAMORE_BEGIN
 XdgToplevel* XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
     // Create tree
-    auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.toplevel, toplevel->base);
+    auto tree = wlr_scene_xdg_surface_create(Core::get().scene->shell.toplevel, toplevel->base);
     if (!tree)
     {
         spdlog::error("Create scene tree for XdgToplevel failed!");
@@ -38,7 +37,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     .connect(m_surface->events.map)
     .set([this](void*)
     {
-        ShellManager::instance.onToplevelMap(*this);
+        Core::get().shell->onToplevelMap(*this);
 
         // Connect signals
         m_commit.connect(m_surface->events.commit);
@@ -52,7 +51,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         // Layout stuff
         auto& requested = m_toplevel->requested;
 
-        auto output = Core::instance.seat->getCursor().atOutput();
+        auto output = Core::get().seat->getCursor().atOutput();
 
         setToOutputCenter(output);
 
@@ -63,7 +62,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         if (requested.fullscreen)
         {
-            ShellManager::instance.fullscreenRequest(*this, true, output);
+            Core::get().shell->fullscreenRequest(*this, true, output);
         }
 
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -82,7 +81,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        ShellManager::instance.onToplevelUnmap(*this);
+        Core::get().shell->onToplevelUnmap(*this);
 
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
@@ -97,7 +96,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         if (memcmp(&m_committedGeometry, &newGeometry, sizeof(wlr_box)) != 0)
         {
             m_committedGeometry = newGeometry;
-            Core::instance.seat->getInput().rebasePointer();
+            Core::get().seat->getInput().rebasePointer();
         }
     });
 
@@ -108,23 +107,23 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_move.set([this](void*)
     {
-        if (!Core::instance.seat->bindingEnterCheck(this))
+        if (!Core::get().seat->bindingEnterCheck(this))
         {
             return;
         }
 
-        Core::instance.seat->setInput(new PointerMove{this, *Core::instance.seat});
+        Core::get().seat->setInput(new PointerMove{this, *Core::get().seat});
     });
 
     m_resize.set([this](void* data)
     {
-        if (!Core::instance.seat->bindingEnterCheck(this))
+        if (!Core::get().seat->bindingEnterCheck(this))
         {
             return;
         }
 
         auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
-        Core::instance.seat->setInput(new PointerResize{this, event->edges, *Core::instance.seat});
+        Core::get().seat->setInput(new PointerResize{this, event->edges, *Core::get().seat});
     });
 
     m_fullscreen.set([this](void*)
@@ -146,7 +145,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             }
         }
 
-        ShellManager::instance.fullscreenRequest(*this, state, output);
+        Core::get().shell->fullscreenRequest(*this, state, output);
     });
 
     m_maximize.set([this](void*)

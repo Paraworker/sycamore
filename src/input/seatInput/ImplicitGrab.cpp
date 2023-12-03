@@ -52,35 +52,35 @@ void ImplicitGrab::onPointerAxis(wlr_pointer_axis_event* event)
 
 void ImplicitGrab::onPointerSwipeBegin(wlr_pointer_swipe_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_begin(Core::get().gestures,
                                              m_seat.getHandle(),
                                              event->time_msec, event->fingers);
 }
 
 void ImplicitGrab::onPointerSwipeUpdate(wlr_pointer_swipe_update_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_update(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_update(Core::get().gestures,
                                               m_seat.getHandle(),
                                               event->time_msec, event->dx, event->dy);
 }
 
 void ImplicitGrab::onPointerSwipeEnd(wlr_pointer_swipe_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_end(Core::get().gestures,
                                            m_seat.getHandle(),
                                            event->time_msec, event->cancelled);
 }
 
 void ImplicitGrab::onPointerPinchBegin(wlr_pointer_pinch_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_begin(Core::get().gestures,
                                              m_seat.getHandle(),
                                              event->time_msec, event->fingers);
 }
 
 void ImplicitGrab::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_update(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_update(Core::get().gestures,
                                               m_seat.getHandle(),
                                               event->time_msec, event->dx, event->dy,
                                               event->scale, event->rotation);
@@ -88,21 +88,21 @@ void ImplicitGrab::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 
 void ImplicitGrab::onPointerPinchEnd(wlr_pointer_pinch_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_end(Core::get().gestures,
                                            m_seat.getHandle(),
                                            event->time_msec, event->cancelled);
 }
 
 void ImplicitGrab::onPointerHoldBegin(wlr_pointer_hold_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_hold_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_hold_begin(Core::get().gestures,
                                             m_seat.getHandle(),
                                             event->time_msec, event->fingers);
 }
 
 void ImplicitGrab::onPointerHoldEnd(wlr_pointer_hold_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_hold_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_hold_end(Core::get().gestures,
                                           m_seat.getHandle(),
                                           event->time_msec, event->cancelled);
 }

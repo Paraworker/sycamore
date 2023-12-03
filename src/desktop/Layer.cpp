@@ -1,4 +1,3 @@
-#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/output/Output.h"
@@ -13,7 +12,7 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
     // Confirm output
     if (!layerSurface->output)
     {
-        auto output = Core::instance.seat->getCursor().atOutput();
+        auto output = Core::get().seat->getCursor().atOutput();
         if (!output)
         {
             spdlog::error("No output under cursor for layerSurface");
@@ -25,7 +24,7 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
     }
 
     // Create scene helper
-    auto helper = wlr_scene_layer_surface_v1_create(Core::instance.scene->getLayerTree(layerSurface->pending.layer), layerSurface);
+    auto helper = wlr_scene_layer_surface_v1_create(Core::get().scene->getLayerTree(layerSurface->pending.layer), layerSurface);
     if (!helper)
     {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
@@ -75,7 +74,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.map)
     .set([this](void*)
     {
-        ShellManager::instance.onLayerMap(*this);
+        Core::get().shell->onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
@@ -83,7 +82,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     .connect(layerSurface->surface->events.unmap)
     .set([this](void*)
     {
-        ShellManager::instance.onLayerUnmap(*this);
+        Core::get().shell->onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 
@@ -105,7 +104,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
                 m_layer = m_layerSurface->current.layer;
                 auto& newList = m_output->layers[m_layer];
 
-                wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::instance.scene->getLayerTree(m_layer));
+                wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::get().scene->getLayerTree(m_layer));
                 newList.splice(newList.end(), oldList, m_iter);
             }
 
@@ -133,7 +132,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
         if (needRebase)
         {
-            Core::instance.seat->getInput().rebasePointer();
+            Core::get().seat->getInput().rebasePointer();
         }
     });
 

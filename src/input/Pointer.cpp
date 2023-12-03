@@ -1,5 +1,4 @@
 #include "sycamore/input/Pointer.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
@@ -12,13 +11,13 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 {
     spdlog::info("New Pointer: {}", deviceHandle->name);
 
-    Core::instance.seat->getCursor().attachDevice(deviceHandle);
+    Core::get().seat->getCursor().attachDevice(deviceHandle);
 
     m_destroy
     .connect(deviceHandle->events.destroy)
     .set([this](void*)
     {
-        InputManager::instance.onDestroyDevice(this);
+        Core::get().input->onDestroyDevice(this);
     });
 
     apply();
@@ -26,7 +25,7 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 
 Pointer::~Pointer()
 {
-    Core::instance.seat->getCursor().detachDevice(m_deviceHandle);
+    Core::get().seat->getCursor().detachDevice(m_deviceHandle);
 }
 
 bool Pointer::isTouchpad() const

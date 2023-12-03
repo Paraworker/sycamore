@@ -41,7 +41,7 @@ bool OutputLayout::addAuto(Output* output)
         return false;
     }
 
-    wlr_scene_output_layout_add_output(Core::instance.scene->getLayout(), layoutOutput, output->getSceneOutput());
+    wlr_scene_output_layout_add_output(Core::get().scene->getLayout(), layoutOutput, output->getSceneOutput());
     ++m_outputCount;
 
     return true;

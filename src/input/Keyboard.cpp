@@ -1,6 +1,4 @@
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/Keyboard.h"
-#include "sycamore/input/KeybindingManager.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
@@ -17,7 +15,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
     .connect(m_keyboardHandle->events.modifiers)
     .set([this](void*)
     {
-        auto seatHandle = Core::instance.seat->getHandle();
+        auto seatHandle = Core::get().seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
 
@@ -45,13 +43,13 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
             for (int i = 0; i < nsyms; ++i)
             {
                 info.sym = syms[i];
-                handled = KeybindingManager::instance.dispatch(info);
+                handled = Core::get().keybinding->dispatch(info);
             }
         }
 
         if (!handled)
         {
-            auto seatHandle = Core::instance.seat->getHandle();
+            auto seatHandle = Core::get().seat->getHandle();
             wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
             wlr_seat_keyboard_notify_key(seatHandle, event->time_msec, event->keycode, event->state);
 
@@ -63,7 +61,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
     .connect(deviceHandle->events.destroy)
     .set([this](void*)
     {
-        InputManager::instance.onDestroyDevice(this);
+        Core::get().input->onDestroyDevice(this);
     });
 
     apply();
@@ -111,7 +109,7 @@ void Keyboard::syncLeds()
         }
     }
 
-    InputManager::instance.forEachKeyboard([this, leds](const Keyboard& keyboard)
+    Core::get().input->forEachKeyboard([this, leds](const Keyboard& keyboard)
     {
         if (keyboard.m_keyboardHandle != m_keyboardHandle)
         {

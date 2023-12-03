@@ -1,8 +1,6 @@
-#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/InputDevice.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
@@ -140,7 +138,7 @@ void Seat::setCapabilities(uint32_t caps)
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
     Point<double> sCoords{};
-    auto surface = Scene::surfaceFromNode(Core::instance.scene->nodeAt(m_cursor->getPosition(), sCoords));
+    auto surface = Scene::surfaceFromNode(Core::get().scene->nodeAt(m_cursor->getPosition(), sCoords));
 
     if (!surface)
     {
@@ -185,7 +183,7 @@ bool Seat::bindingEnterCheck(Toplevel* toplevel) const
     }
 
     // Deny pointerMove/pointerResize from unfocused toplevel or there is no focused toplevel.
-    if (toplevel != ShellManager::instance.getFocusState().toplevel)
+    if (toplevel != Core::get().shell->getFocusState().toplevel)
     {
         return false;
     }

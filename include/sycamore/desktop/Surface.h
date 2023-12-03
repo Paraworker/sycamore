@@ -2,7 +2,6 @@
 #define SYCAMORE_SURFACE_H
 
 #include "sycamore/defines.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 #include "sycamore/Core.h"
@@ -38,7 +37,7 @@ private:
 
     ~Surface()
     {
-        Core::instance.seat->getInput().rebasePointer();
+        Core::get().seat->getInput().rebasePointer();
     }
 
 private:

@@ -288,7 +288,7 @@ bool Cursor::updateXcursorTheme(const char* theme, uint32_t size)
 
 Output* Cursor::atOutput() const
 {
-    return Core::instance.outputLayout->findOutputAt(getPosition());
+    return Core::get().outputLayout->findOutputAt(getPosition());
 }
 
 NAMESPACE_SYCAMORE_END

@@ -1,16 +1,12 @@
 #include "sycamore/desktop/shell/LayerShell.h"
 #include "sycamore/desktop/shell/XdgShell.h"
 #include "sycamore/desktop/Surface.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/output/Output.h"
-#include "sycamore/output/OutputLayout.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
 
 NAMESPACE_SYCAMORE_BEGIN
-
-Core Core::instance{};
 
 static Core::Backend* backendAutoCreate(wl_display* display)
 {
@@ -27,7 +23,7 @@ static Core::Backend* backendAutoCreate(wl_display* display)
     .connect(backend->handle->events.new_input)
     .set([](void* data)
     {
-        InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
+        Core::get().input->onNewDevice(static_cast<wlr_input_device*>(data));
     });
 
     backend->newOutput
@@ -152,6 +148,10 @@ bool Core::setup()
         spdlog::error("Create Scene failed");
         return false;
     }
+
+    shell      = std::make_unique<ShellManager>();
+    input      = std::make_unique<InputManager>();
+    keybinding = std::make_unique<KeybindingManager>();
 
     if (!XdgShell::create(display, XDG_SHELL_VERSION))
     {

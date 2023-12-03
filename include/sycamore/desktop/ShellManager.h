@@ -5,6 +5,7 @@
 #include "sycamore/utils/Listener.h"
 
 #include <list>
+#include <memory>
 
 NAMESPACE_SYCAMORE_BEGIN
 
@@ -21,7 +22,19 @@ public:
         Layer*    layer;    // focused Layer
     };
 
+    using UPtr = std::unique_ptr<ShellManager>;
+
 public:
+    /**
+     * @brief Constructor
+     */
+    ShellManager();
+
+    /**
+     * @brief Destructor
+     */
+    ~ShellManager();
+
     /**
      * @brief Focus a toplevel
      */
@@ -51,19 +64,10 @@ public:
 
     static void maximizeRequest(Toplevel& toplevel, bool state, Output* output);
 
-public:
-    static ShellManager instance;
-
-private:
-    /**
-     * @brief Constructor
-     */
-    ShellManager();
-
-    /**
-     * @brief Destructor
-     */
-    ~ShellManager();
+    ShellManager(const ShellManager&) = delete;
+    ShellManager(ShellManager&&) = delete;
+    ShellManager& operator=(const ShellManager&) = delete;
+    ShellManager& operator=(ShellManager&&) = delete;
 
 private:
     std::list<Toplevel*> m_mappedToplevels;

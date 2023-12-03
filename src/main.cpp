@@ -43,14 +43,14 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    if (!sycamore::Core::instance.setup())
+    if (!sycamore::Core::get().setup())
     {
         exit(EXIT_FAILURE);
     }
 
-    if (!sycamore::Core::instance.start())
+    if (!sycamore::Core::get().start())
     {
-        sycamore::Core::instance.teardown();
+        sycamore::Core::get().teardown();
         exit(EXIT_FAILURE);
     }
 
@@ -59,8 +59,8 @@ int main(int argc, char **argv)
         sycamore::spawn(startupCmd);
     }
 
-    sycamore::Core::instance.run();
+    sycamore::Core::get().run();
 
-    sycamore::Core::instance.teardown();
+    sycamore::Core::get().teardown();
     return EXIT_SUCCESS;
 }
