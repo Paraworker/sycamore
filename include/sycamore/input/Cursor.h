@@ -1,12 +1,12 @@
 #ifndef SYCAMORE_CURSOR_H
 #define SYCAMORE_CURSOR_H
 
-#include "sycamore/defines.h"
-#include "sycamore/wlroots.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
+#include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Output;
 class Seat;
@@ -123,6 +123,6 @@ private:
     Listener m_holdEnd;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_CURSOR_H

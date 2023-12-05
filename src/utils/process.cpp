@@ -3,7 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <sys/wait.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 uint64_t spawn(const char* cmd)
 {
@@ -68,4 +69,4 @@ uint64_t spawn(const char* cmd)
     return grandchild;
 }
 
-NAMESPACE_SYCAMORE_END
+}

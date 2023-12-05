@@ -1,11 +1,11 @@
 #ifndef SYCAMORE_POINTER_H
 #define SYCAMORE_POINTER_H
 
-#include "sycamore/defines.h"
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/utils/Listener.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Pointer final : public InputDevice<Pointer>
 {
@@ -64,6 +64,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_POINTER_H

@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_KEYBINDING_DISPATCHERS_H
 #define SYCAMORE_KEYBINDING_DISPATCHERS_H
 
-#include "sycamore/defines.h"
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/InputManager.h"
@@ -11,7 +10,8 @@
 
 #include <string>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 struct Spawn
 {
@@ -63,6 +63,6 @@ struct SwitchVT
     }
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_KEYBINDING_DISPATCHERS_H

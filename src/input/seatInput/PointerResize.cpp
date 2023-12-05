@@ -1,8 +1,8 @@
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/seatInput/PointerResize.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
     : m_toplevel(toplevel)
@@ -108,4 +108,4 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
     m_toplevel->setSize(newRight - newLeft, newBottom - newTop);
 }
 
-NAMESPACE_SYCAMORE_END
+}

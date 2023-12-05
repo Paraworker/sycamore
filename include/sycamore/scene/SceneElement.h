@@ -1,11 +1,11 @@
 #ifndef SYCAMORE_SCENE_ELEMENT_H
 #define SYCAMORE_SCENE_ELEMENT_H
 
-#include "sycamore/defines.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class SceneElement
 {
@@ -45,6 +45,6 @@ protected:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_SCENE_ELEMENT_H

@@ -6,7 +6,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
 {
@@ -169,4 +170,4 @@ bool Layer::isFocusable() const
            (m_layerSurface->current.layer > ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM);
 }
 
-NAMESPACE_SYCAMORE_END
+}

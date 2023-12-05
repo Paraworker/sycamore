@@ -1,12 +1,12 @@
 #ifndef SYCAMORE_OUTPUT_LAYOUT_H
 #define SYCAMORE_OUTPUT_LAYOUT_H
 
-#include "sycamore/defines.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Output;
 
@@ -59,6 +59,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_OUTPUT_LAYOUT_H

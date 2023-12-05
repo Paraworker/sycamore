@@ -1,14 +1,14 @@
 #ifndef SYCAMORE_LAYER_SHELL_H
 #define SYCAMORE_LAYER_SHELL_H
 
-#include "sycamore/defines.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class LayerShell
 {
@@ -62,6 +62,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_LAYER_SHELL_H

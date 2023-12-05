@@ -1,12 +1,12 @@
 #ifndef SYCAMORE_SHELL_MANAGER_H
 #define SYCAMORE_SHELL_MANAGER_H
 
-#include "sycamore/defines.h"
 #include "sycamore/utils/Listener.h"
 
 #include <list>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Layer;
 class Output;
@@ -71,6 +71,6 @@ private:
     size_t               m_fullscreenCount;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_SHELL_MANAGER_H

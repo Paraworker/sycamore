@@ -6,7 +6,8 @@
 #include "sycamore/input/Seat.h"
 #include "SeatInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class PointerResize : public SeatInput
 {
@@ -34,6 +35,6 @@ private:
     Seat&         m_seat;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_POINTER_RESIZE_H

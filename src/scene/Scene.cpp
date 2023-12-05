@@ -1,7 +1,8 @@
 #include "sycamore/scene/Scene.h"
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class RootElement final : public SceneElement
 {
@@ -118,4 +119,4 @@ SceneElement* Scene::elementFromNode(wlr_scene_node* node)
     return static_cast<SceneElement*>(tree->node.data);
 }
 
-NAMESPACE_SYCAMORE_END
+}

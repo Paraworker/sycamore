@@ -1,8 +1,8 @@
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/seatInput/PointerMove.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
     : m_toplevel(toplevel)
@@ -43,4 +43,4 @@ void PointerMove::onPointerMotion(uint32_t timeMsec)
     m_toplevel->moveTo((m_seat.getCursor().getPosition() - m_delta).into<int32_t>());
 }
 
-NAMESPACE_SYCAMORE_END
+}

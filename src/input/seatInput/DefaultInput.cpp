@@ -6,7 +6,8 @@
 #include "sycamore/utils/time.h"
 #include "sycamore/Core.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 static inline void dragIconsUpdatePosition()
 {
@@ -130,4 +131,4 @@ void DefaultInput::rebasePointer()
     }
 }
 
-NAMESPACE_SYCAMORE_END
+}

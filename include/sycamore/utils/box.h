@@ -1,17 +1,17 @@
 #ifndef SYCAMORE_BOX_H
 #define SYCAMORE_BOX_H
 
-#include "sycamore/defines.h"
-#include "sycamore/wlroots.h"
 #include "sycamore/utils/Point.h"
+#include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 inline constexpr Point<int32_t> boxGetCenterCoords(const wlr_box& box)
 {
     return {box.x + (box.width / 2), box.y + (box.height / 2)};
 }
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_BOX_H

@@ -5,7 +5,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Keyboard::Keyboard(wlr_input_device* deviceHandle)
     : InputDevice{deviceHandle}
@@ -120,4 +121,4 @@ void Keyboard::syncLeds()
     });
 }
 
-NAMESPACE_SYCAMORE_END
+}

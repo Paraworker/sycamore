@@ -1,14 +1,14 @@
 #ifndef SYCAMORE_POPUP_H
 #define SYCAMORE_POPUP_H
 
-#include "sycamore/defines.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Popup
 {
@@ -137,6 +137,6 @@ private:
     Popup* m_popup;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_POPUP_H

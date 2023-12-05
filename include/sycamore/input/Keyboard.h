@@ -1,11 +1,11 @@
 #ifndef SYCAMORE_KEYBOARD_H
 #define SYCAMORE_KEYBOARD_H
 
-#include "sycamore/defines.h"
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/utils/Listener.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Keyboard final : public InputDevice<Keyboard>
 {
@@ -49,6 +49,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_KEYBOARD_H

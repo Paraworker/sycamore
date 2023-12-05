@@ -4,7 +4,8 @@
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 ShellManager ShellManager::instance{};
 
@@ -197,4 +198,4 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
     }
 }
 
-NAMESPACE_SYCAMORE_END
+}

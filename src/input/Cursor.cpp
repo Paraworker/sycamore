@@ -4,7 +4,8 @@
 
 #include <string>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t size)
 {
@@ -291,4 +292,4 @@ Output* Cursor::atOutput() const
     return Core::instance.outputLayout->findOutputAt(getPosition());
 }
 
-NAMESPACE_SYCAMORE_END
+}

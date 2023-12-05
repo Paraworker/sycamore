@@ -1,9 +1,10 @@
 #ifndef SYCAMORE_SEAT_INPUT_H
 #define SYCAMORE_SEAT_INPUT_H
 
-#include "sycamore/defines.h"
+#include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class SeatInput
 {
@@ -44,6 +45,6 @@ public:
     virtual Type type() const = 0;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_SEAT_INPUT_H

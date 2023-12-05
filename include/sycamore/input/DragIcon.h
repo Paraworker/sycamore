@@ -1,13 +1,13 @@
 #ifndef SYCAMORE_DRAG_ICON_H
 #define SYCAMORE_DRAG_ICON_H
 
-#include "sycamore/defines.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Seat;
 
@@ -64,6 +64,6 @@ private:
     DragIcon* m_icon;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_DRAG_ICON_H

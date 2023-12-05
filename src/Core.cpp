@@ -8,7 +8,13 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+#define WLR_COMPOSITOR_VERSION  6
+#define LAYER_SHELL_VERSION     4
+#define XDG_SHELL_VERSION       3
+#define DEFAULT_SEAT            "seat0"
+
+namespace sycamore
+{
 
 Core Core::instance{};
 
@@ -213,4 +219,4 @@ void Core::run() const
     wl_display_run(display);
 }
 
-NAMESPACE_SYCAMORE_END
+}

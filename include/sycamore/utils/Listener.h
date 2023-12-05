@@ -1,13 +1,12 @@
 #ifndef SYCAMORE_LISTENER_H
 #define SYCAMORE_LISTENER_H
 
-#include "sycamore/defines.h"
-
 #include <cassert>
 #include <functional>
 #include <wayland-server-core.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 // A wrapper for wl_listener
 class Listener
@@ -91,6 +90,6 @@ private:
     Callback    m_callback;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_LISTENER_H

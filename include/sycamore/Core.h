@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_CORE_H
 #define SYCAMORE_CORE_H
 
-#include "sycamore/defines.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/output/OutputLayout.h"
 #include "sycamore/scene/Scene.h"
@@ -11,7 +10,8 @@
 #include <memory>
 #include <string>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Core
 {
@@ -88,6 +88,6 @@ private:
     ~Core() = default;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_CORE_H

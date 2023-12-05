@@ -5,7 +5,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Output* Output::create(wlr_output* handle)
 {
@@ -156,4 +157,4 @@ void Output::arrangeLayers()
     m_usableArea = usableArea;
 }
 
-NAMESPACE_SYCAMORE_END
+}

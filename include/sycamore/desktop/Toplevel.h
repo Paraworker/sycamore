@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_TOPLEVEL_H
 #define SYCAMORE_TOPLEVEL_H
 
-#include "sycamore/defines.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Point.h"
@@ -10,7 +9,8 @@
 #include <list>
 #include <memory>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Output;
 
@@ -145,6 +145,6 @@ private:
     Toplevel* m_toplevel;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_TOPLEVEL_H

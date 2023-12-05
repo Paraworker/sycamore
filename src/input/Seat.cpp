@@ -1,14 +1,13 @@
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
-#include "sycamore/input/InputDevice.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Seat* Seat::create(wl_display* display, wlr_output_layout* layout, const char* name)
 {
@@ -193,4 +192,4 @@ bool Seat::bindingEnterCheck(Toplevel* toplevel) const
     return true;
 }
 
-NAMESPACE_SYCAMORE_END
+}

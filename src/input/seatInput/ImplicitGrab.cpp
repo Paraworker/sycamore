@@ -1,9 +1,9 @@
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/seatInput/ImplicitGrab.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 ImplicitGrab::ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat)
     : m_surface(surface)
@@ -107,4 +107,4 @@ void ImplicitGrab::onPointerHoldEnd(wlr_pointer_hold_end_event* event)
                                           event->time_msec, event->cancelled);
 }
 
-NAMESPACE_SYCAMORE_END
+}

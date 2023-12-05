@@ -4,7 +4,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 OutputLayout* OutputLayout::create(wl_display* display)
 {
@@ -64,4 +65,4 @@ Output* OutputLayout::findOutputAt(const Point<double>& coords) const
     return static_cast<Output*>(output->data);
 }
 
-NAMESPACE_SYCAMORE_END
+}

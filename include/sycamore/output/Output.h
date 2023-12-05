@@ -1,13 +1,15 @@
 #ifndef SYCAMORE_OUTPUT_H
 #define SYCAMORE_OUTPUT_H
 
-#include "sycamore/defines.h"
-#include "sycamore/wlroots.h"
 #include "sycamore/utils/Listener.h"
+#include "sycamore/wlroots.h"
 
 #include <list>
 
-NAMESPACE_SYCAMORE_BEGIN
+#define LAYER_COUNT 4
+
+namespace sycamore
+{
 
 class Layer;
 
@@ -88,7 +90,7 @@ private:
 
 public:
     Events            events;
-    std::list<Layer*> layers[LAYER_SHELL_LAYER_COUNT];
+    std::list<Layer*> layers[LAYER_COUNT];
 
 private:
     wlr_output*       m_handle;
@@ -101,6 +103,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_OUTPUT_H

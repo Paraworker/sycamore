@@ -3,7 +3,8 @@
 
 #include "SeatInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class DefaultInput : public SeatInput
 {
@@ -46,6 +47,6 @@ private:
     Seat& m_seat;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_DEFAULT_INPUT_H

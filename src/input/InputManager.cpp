@@ -1,7 +1,8 @@
 #include "sycamore/input/InputManager.h"
 #include "sycamore/Core.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 InputManager InputManager::instance{};
 
@@ -76,4 +77,4 @@ void InputManager::newPointer(wlr_input_device* handle)
     Core::instance.seat->setCapabilities(capabilities());
 }
 
-NAMESPACE_SYCAMORE_END
+}

@@ -1,11 +1,11 @@
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/Seat.h"
-#include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat)
 {
@@ -50,4 +50,4 @@ void DragIcon::updatePosition() const
     }
 }
 
-NAMESPACE_SYCAMORE_END
+}

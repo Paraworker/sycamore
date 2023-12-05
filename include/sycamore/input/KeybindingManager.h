@@ -1,13 +1,12 @@
 #ifndef SYCAMORE_KEYBINDING_MANAGER_H
 #define SYCAMORE_KEYBINDING_MANAGER_H
 
-#include "sycamore/defines.h"
-
 #include <functional>
 #include <unordered_map>
 #include <xkbcommon/xkbcommon.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 struct KeyInfo
 {
@@ -60,6 +59,6 @@ private:
     std::unordered_map<KeyInfo, Dispatcher, KeyInfo::Hash> m_bindingMap;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_KEYBINDING_MANAGER_H

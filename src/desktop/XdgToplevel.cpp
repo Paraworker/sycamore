@@ -7,7 +7,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 XdgToplevel* XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
@@ -200,4 +201,4 @@ void XdgToplevel::close()
     wlr_xdg_toplevel_send_close(m_toplevel);
 }
 
-NAMESPACE_SYCAMORE_END
+}

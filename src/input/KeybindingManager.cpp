@@ -1,7 +1,8 @@
 #include "sycamore/input/KeybindingManager.h"
 #include "sycamore/input/keybindingDispatchers.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 KeybindingManager KeybindingManager::instance{};
 
@@ -55,4 +56,4 @@ bool KeybindingManager::dispatch(const KeyInfo& info)
     return true;
 }
 
-NAMESPACE_SYCAMORE_END
+}

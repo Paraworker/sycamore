@@ -1,14 +1,14 @@
 #ifndef SYCAMORE_SCENE_H
 #define SYCAMORE_SCENE_H
 
-#include "sycamore/defines.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/wlroots.h"
 
 #include <memory>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Scene
 {
@@ -74,6 +74,6 @@ private:
     wlr_scene_output_layout* m_sceneLayout;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_SCENE_H

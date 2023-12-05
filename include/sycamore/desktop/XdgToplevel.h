@@ -1,11 +1,11 @@
 #ifndef SYCAMORE_XDG_TOPLEVEL_H
 #define SYCAMORE_XDG_TOPLEVEL_H
 
-#include "sycamore/defines.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/utils/Listener.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class XdgToplevel final : public Toplevel
 {
@@ -62,6 +62,6 @@ private:
     Listener m_minimize;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_XDG_TOPLEVEL_H

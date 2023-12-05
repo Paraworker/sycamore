@@ -2,7 +2,8 @@
 #include "sycamore/utils/box.h"
 #include "sycamore/Core.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Toplevel::Toplevel(wlr_surface* surface, wlr_scene_tree* tree)
     : m_surface{surface}, m_tree{tree}
@@ -45,4 +46,4 @@ void Toplevel::setToOutputCenter(Output* output)
     moveTo({toplevelGeo.x, toplevelGeo.y});
 }
 
-NAMESPACE_SYCAMORE_END
+}

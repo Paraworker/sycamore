@@ -3,7 +3,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner)
 {
@@ -59,4 +60,4 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 
 Popup::~Popup() = default;
 
-NAMESPACE_SYCAMORE_END
+}

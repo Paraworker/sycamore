@@ -7,7 +7,8 @@
 #include "sycamore/utils/Point.h"
 #include "SeatInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class ImplicitGrab : public SeatInput
 {
@@ -51,6 +52,6 @@ private:
     Seat&         m_seat;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_IMPLICIT_GRAB_H

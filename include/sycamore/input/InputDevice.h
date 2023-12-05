@@ -1,12 +1,12 @@
 #ifndef SYCAMORE_INPUT_DEVICE_H
 #define SYCAMORE_INPUT_DEVICE_H
 
-#include "sycamore/defines.h"
 #include "sycamore/wlroots.h"
 
 #include <list>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 template<typename ConcreteType>
 class InputDevice
@@ -58,6 +58,6 @@ protected:
     Iter              m_iter;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_INPUT_DEVICE_H

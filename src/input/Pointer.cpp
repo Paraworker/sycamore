@@ -4,7 +4,8 @@
 
 #include <spdlog/spdlog.h>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 Pointer::Pointer(wlr_input_device* deviceHandle)
     : InputDevice{deviceHandle}
@@ -131,4 +132,4 @@ void Pointer::apply()
     }
 }
 
-NAMESPACE_SYCAMORE_END
+}

@@ -7,7 +7,8 @@
 #include "sycamore/utils/Listener.h"
 #include "SeatInput.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class PointerMove : public SeatInput
 {
@@ -33,6 +34,6 @@ private:
     Seat&         m_seat;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_POINTER_MOVE_H

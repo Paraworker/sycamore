@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_LAYER_H
 #define SYCAMORE_LAYER_H
 
-#include "sycamore/defines.h"
 #include "sycamore/scene/SceneElement.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
@@ -9,7 +8,8 @@
 
 #include <list>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Output;
 
@@ -103,6 +103,6 @@ private:
     Layer* m_layer;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_LAYER_H

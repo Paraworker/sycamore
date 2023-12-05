@@ -1,13 +1,13 @@
 #ifndef SYCAMORE_SEAT_H
 #define SYCAMORE_SEAT_H
 
-#include "sycamore/defines.h"
 #include "sycamore/input/Cursor.h"
 #include "sycamore/input/seatInput/SeatInput.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 class Toplevel;
 
@@ -82,6 +82,6 @@ private:
     Listener m_destroy;
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_SEAT_H

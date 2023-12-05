@@ -1,10 +1,10 @@
 #ifndef SYCAMORE_POINT_H
 #define SYCAMORE_POINT_H
 
-#include "sycamore/defines.h"
 #include <type_traits>
 
-NAMESPACE_SYCAMORE_BEGIN
+namespace sycamore
+{
 
 template<typename T>
 struct Point
@@ -30,6 +30,6 @@ struct Point
     }
 };
 
-NAMESPACE_SYCAMORE_END
+}
 
 #endif //SYCAMORE_POINT_H
