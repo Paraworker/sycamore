@@ -16,68 +16,97 @@ namespace sycamore
 
 Core Core::instance{};
 
-static Core::Backend* backendAutoCreate(wl_display* display)
+// wlr_backend helper
+struct Backend
 {
-    auto backend = new Core::Backend{};
-
-    if (backend->handle = wlr_backend_autocreate(display, &backend->session); !backend->handle)
+    static wlr_backend* autocreate(wl_display* display, wlr_session*& session)
     {
-        spdlog::error("Create wlr_backend failed");
-        delete backend;
-        return {};
+        auto handle = wlr_backend_autocreate(display, &session);
+        if (!handle)
+        {
+            return {};
+        }
+
+        // Be destroyed by listener
+        new Backend{handle};
+
+        return handle;
     }
 
-    backend->newInput
-    .connect(backend->handle->events.new_input)
-    .set([](void* data)
+    explicit Backend(wlr_backend* handle) : handle{handle}
     {
-        InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
-    });
+        newInput
+        .connect(handle->events.new_input)
+        .set([](void* data)
+        {
+            InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
+        });
 
-    backend->newOutput
-    .connect(backend->handle->events.new_output)
-    .set([](void* data)
-    {
-        Output::create(static_cast<wlr_output*>(data));
-    });
+        newOutput
+        .connect(handle->events.new_output)
+        .set([](void* data)
+        {
+            Output::create(static_cast<wlr_output*>(data));
+        });
 
-    backend->destroy
-    .connect(backend->handle->events.destroy)
-    .set([=](void*)
-    {
-        delete backend;
-    });
-
-    return backend;
-}
-
-static Core::Compositor* compositorCreate(wl_display* display, uint32_t version, wlr_renderer* renderer)
-{
-    auto compositor = new Core::Compositor{};
-
-    if (compositor->handle = wlr_compositor_create(display, version, renderer); !compositor->handle)
-    {
-        spdlog::error("Create wlr_compositor failed");
-        delete compositor;
-        return {};
+        destroy
+        .connect(handle->events.destroy)
+        .set([this](void*)
+        {
+            delete this;
+        });
     }
 
-    compositor->newSurface
-    .connect(compositor->handle->events.new_surface)
-    .set([](void* data)
-    {
-        Surface::create(static_cast<wlr_surface*>(data));
-    });
+    ~Backend() = default;
 
-    compositor->destroy
-    .connect(compositor->handle->events.destroy)
-    .set([=](void*)
-    {
-        delete compositor;
-    });
+    wlr_backend* handle;
 
-    return compositor;
-}
+    Listener     newInput;
+    Listener     newOutput;
+    Listener     destroy;
+};
+
+// wlr_compositor helper
+struct Compositor
+{
+    static wlr_compositor* create(wl_display* display, wlr_renderer* renderer)
+    {
+        auto handle = wlr_compositor_create(display, WLR_COMPOSITOR_VERSION, renderer);
+        if (!handle)
+        {
+            return {};
+        }
+
+        // Be destroyed by listener
+        new Compositor{handle};
+
+        return handle;
+    }
+
+    explicit Compositor(wlr_compositor* handle) : handle{handle}
+    {
+        newSurface
+        .connect(handle->events.new_surface)
+        .set([](void* data)
+        {
+            Surface::create(static_cast<wlr_surface*>(data));
+        });
+
+        destroy
+        .connect(handle->events.destroy)
+        .set([this](void*)
+        {
+            delete this;
+        });
+    }
+
+    ~Compositor() = default;
+
+    wlr_compositor* handle;
+
+    Listener        newSurface;
+    Listener        destroy;
+};
 
 bool Core::setup()
 {
@@ -93,13 +122,13 @@ bool Core::setup()
 
     eventLoop = wl_display_get_event_loop(display);
 
-    if (backend = backendAutoCreate(display); !backend)
+    if (backend = Backend::autocreate(display, session); !backend)
     {
-        spdlog::error("Create Backend failed");
+        spdlog::error("Create wlr_backend failed");
         return false;
     }
 
-    if (renderer = wlr_renderer_autocreate(backend->handle); !renderer)
+    if (renderer = wlr_renderer_autocreate(backend); !renderer)
     {
         spdlog::error("Create wlr_renderer failed");
         return false;
@@ -113,21 +142,21 @@ bool Core::setup()
         linuxDmabuf = wlr_linux_dmabuf_v1_create_with_renderer(display, 4, renderer);
     }
 
-    if (allocator = wlr_allocator_autocreate(backend->handle, renderer); !allocator)
+    if (allocator = wlr_allocator_autocreate(backend, renderer); !allocator)
     {
         spdlog::error("Create wlr_allocator failed");
         return false;
     }
 
-    if (compositor = compositorCreate(display, WLR_COMPOSITOR_VERSION, renderer); !compositor)
+    if (compositor = Compositor::create(display, renderer); !compositor)
     {
-        spdlog::error("Create Compositor failed");
+        spdlog::error("Create wlr_compositor failed");
         return false;
     }
 
     wlr_subcompositor_create(display);
 
-    if (presentation = wlr_presentation_create(display, backend->handle); !presentation)
+    if (presentation = wlr_presentation_create(display, backend); !presentation)
     {
         spdlog::error("Create wlr_presentation failed");
         return false;
@@ -202,7 +231,7 @@ bool Core::start() const
 {
     spdlog::info("Starting Backend");
 
-    if (!wlr_backend_start(backend->handle))
+    if (!wlr_backend_start(backend))
     {
         spdlog::error("Start Backend failed");
         return false;
