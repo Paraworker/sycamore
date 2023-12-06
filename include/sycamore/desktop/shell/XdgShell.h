@@ -7,7 +7,7 @@
 
 #include <spdlog/spdlog.h>
 
-#define XDG_SHELL_VERSION 3
+#define XDG_SHELL_VERSION 6
 
 namespace sycamore
 {
