@@ -7,6 +7,8 @@
 
 #include <spdlog/spdlog.h>
 
+#define LAYER_SHELL_VERSION 4
+
 namespace sycamore
 {
 
@@ -14,19 +16,20 @@ class LayerShell
 {
 public:
     /**
-     * @brief Create LayerShell
-     * @return nullptr on failure
+     * @brief Init wlr layer shell
      */
-    static LayerShell* create(wl_display* display, uint32_t version)
+    static bool init(wl_display* display)
     {
-        auto handle = wlr_layer_shell_v1_create(display, version);
+        auto handle = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
         if (!handle)
         {
             spdlog::error("Create wlr_layer_shell_v1 failed");
-            return {};
+            return false;
         }
 
-        return new LayerShell{handle};
+        new LayerShell{handle};
+
+        return true;
     }
 
     LayerShell(const LayerShell&) = delete;

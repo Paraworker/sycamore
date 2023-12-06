@@ -9,8 +9,6 @@
 #include <spdlog/spdlog.h>
 
 #define WLR_COMPOSITOR_VERSION  6
-#define LAYER_SHELL_VERSION     4
-#define XDG_SHELL_VERSION       3
 #define DEFAULT_SEAT            "seat0"
 
 namespace sycamore
@@ -159,15 +157,15 @@ bool Core::setup()
         return false;
     }
 
-    if (!XdgShell::create(display, XDG_SHELL_VERSION))
+    if (!XdgShell::init(display))
     {
-        spdlog::error("Create XdgShell failed");
+        spdlog::error("Init XDG shell failed");
         return false;
     }
 
-    if (!LayerShell::create(display, LAYER_SHELL_VERSION))
+    if (!LayerShell::init(display))
     {
-        spdlog::error("Create LayerShell failed");
+        spdlog::error("Init wlr layer shell failed");
         return false;
     }
 

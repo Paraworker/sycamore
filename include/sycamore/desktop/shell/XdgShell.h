@@ -7,6 +7,8 @@
 
 #include <spdlog/spdlog.h>
 
+#define XDG_SHELL_VERSION 3
+
 namespace sycamore
 {
 
@@ -14,19 +16,20 @@ class XdgShell
 {
 public:
     /**
-     * @brief Create XdgShell
-     * @return nullptr on failure
+     * @brief Init XDG shell
      */
-    static XdgShell* create(wl_display* display, uint32_t version)
+    static bool init(wl_display* display)
     {
-        auto handle = wlr_xdg_shell_create(display, version);
+        auto handle = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
         if (!handle)
         {
             spdlog::error("Create wlr_xdg_shell failed");
-            return {};
+            return false;
         }
 
-        return new XdgShell{handle};
+        new XdgShell{handle};
+
+        return true;
     }
 
     XdgShell(const XdgShell&) = delete;
