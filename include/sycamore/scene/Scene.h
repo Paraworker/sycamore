@@ -13,22 +13,28 @@ namespace sycamore
 class Scene
 {
 public:
-    using UPtr = std::unique_ptr<Scene>;
-
-public:
     /**
      * @brief Create Scene
      * @return nullptr on failure
      */
-    static Scene::UPtr create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
+    static std::unique_ptr<Scene> create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
 
+    /**
+     * @brief Destructor
+     */
     ~Scene();
 
-    auto getHandle() { return m_handle; }
+    auto getHandle()
+    {
+        return m_handle;
+    }
 
-    auto getLayout() { return m_sceneLayout; }
+    auto getLayout()
+    {
+        return m_sceneLayout;
+    }
 
-    wlr_scene_tree* getLayerTree(zwlr_layer_shell_v1_layer type) const;
+    wlr_scene_tree* treeForLayer(zwlr_layer_shell_v1_layer type) const;
 
     wlr_scene_node* nodeAt(const Point<double>& lCoords, Point<double>& sCoords) const
     {
@@ -67,6 +73,9 @@ public:
     wlr_scene_tree* dragIcons{};
 
 private:
+    /**
+     * @brief Constructor
+     */
     Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout);
 
 private:

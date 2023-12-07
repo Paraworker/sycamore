@@ -52,7 +52,7 @@ public:
     OutputLayout*            outputLayout = nullptr;
     Seat*                    seat         = nullptr;
 
-    Scene::UPtr              scene;
+    std::unique_ptr<Scene>   scene;
 
     std::string              socket;
 
