@@ -11,10 +11,10 @@ static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t siz
 {
     if (theme)
     {
-        setenv("XCURSOR_THEME", theme, 1);
+        setenv("XCURSOR_THEME", theme, true);
     }
 
-    setenv("XCURSOR_SIZE", std::to_string(size).c_str(), 1);
+    setenv("XCURSOR_SIZE", std::to_string(size).c_str(), true);
 
     return wlr_xcursor_manager_create(theme, size);
 }
@@ -217,10 +217,14 @@ void Cursor::disable()
         return;
     }
 
-    m_enabled = false;
+    // Clear image
+    m_xcursor = nullptr;
+    wlr_cursor_unset_image(m_handle);
 
-    hide();
+    // Clear pointer focus
     wlr_seat_pointer_notify_clear_focus(m_seat->getHandle());
+
+    m_enabled = false;
 }
 
 void Cursor::setXcursor(const char* name)
@@ -230,14 +234,7 @@ void Cursor::setXcursor(const char* name)
         return;
     }
 
-    if (!name)
-    {
-        hide();
-        return;
-    }
-
     m_xcursor = name;
-
     wlr_cursor_set_xcursor(m_handle, m_xcursorManager, name);
 }
 
@@ -249,8 +246,18 @@ void Cursor::setSurface(wlr_surface* surface, const Point<int32_t>& hotspot)
     }
 
     m_xcursor = nullptr;
-
     wlr_cursor_set_surface(m_handle, surface, hotspot.x, hotspot.y);
+}
+
+void Cursor::hide()
+{
+    if (!m_enabled)
+    {
+        return;
+    }
+
+    m_xcursor = nullptr;
+    wlr_cursor_unset_image(m_handle);
 }
 
 void Cursor::refreshXcursor()

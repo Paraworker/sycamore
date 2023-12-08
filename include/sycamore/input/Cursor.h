@@ -20,6 +20,9 @@ public:
      */
     static Cursor* create(wlr_output_layout* layout);
 
+    /**
+     * @brief Destructor
+     */
     ~Cursor();
 
     void enable();
@@ -33,8 +36,6 @@ public:
 
     /**
      * @brief Set cursor image by xcursor name
-     *
-     * Pass nullptr will hide cursor
      */
     void setXcursor(const char* name);
 
@@ -42,6 +43,11 @@ public:
      * @brief Set cursor image by surface
      */
     void setSurface(wlr_surface* surface, const Point<int32_t>& hotspot);
+
+    /**
+     * @brief Hide cursor
+     */
+    void hide();
 
     /**
      * @brief Warp and reset xcursor image again
@@ -91,13 +97,10 @@ public:
     Cursor& operator=(Cursor&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager);
-
-    void hide()
-    {
-        m_xcursor = nullptr;
-        wlr_cursor_unset_image(m_handle);
-    }
 
 private:
     wlr_cursor*          m_handle;
