@@ -2,6 +2,7 @@
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
+#include <stdexcept>
 #include <spdlog/spdlog.h>
 
 namespace sycamore
@@ -9,22 +10,20 @@ namespace sycamore
 
 OutputLayout* OutputLayout::create(wl_display* display)
 {
-    auto handle = wlr_output_layout_create(display);
-    if (!handle)
-    {
-        spdlog::error("Create wlr_output_layout failed");
-        return {};
-    }
-
-    return new OutputLayout{handle};
+    return new OutputLayout{display};
 }
 
-OutputLayout::OutputLayout(wlr_output_layout* handle)
-    : m_handle{handle}
+OutputLayout::OutputLayout(wl_display* display)
+    : m_handle{wlr_output_layout_create(display)}
     , m_outputCount{0}
 {
+    if (!m_handle)
+    {
+        throw std::runtime_error("Create wlr_output_layout failed!");
+    }
+
     m_destroy
-    .connect(handle->events.destroy)
+    .connect(m_handle->events.destroy)
     .set([this](void*)
     {
         delete this;

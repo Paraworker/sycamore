@@ -15,7 +15,8 @@ class OutputLayout
 public:
     /**
      * @brief Create OutputLayout
-     * @return nullptr on failure
+     * @throw std::runtime_error on failure
+     * @lifetime Be destroyed by listener
      */
     static OutputLayout* create(wl_display* display);
 
@@ -44,7 +45,7 @@ private:
     /**
      * @brief Constructor
      */
-    explicit OutputLayout(wlr_output_layout* handle);
+    explicit OutputLayout(wl_display* display);
 
     /**
      * @brief Destructor

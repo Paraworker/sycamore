@@ -14,10 +14,10 @@ class Scene
 {
 public:
     /**
-     * @brief Create Scene
-     * @return nullptr on failure
+     * @brief Constructor
+     * @throw std::runtime_error on failure
      */
-    static std::unique_ptr<Scene> create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
+    Scene(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
 
     /**
      * @brief Destructor
@@ -71,12 +71,6 @@ public:
     } shell{};
 
     wlr_scene_tree* dragIcons{};
-
-private:
-    /**
-     * @brief Constructor
-     */
-    Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout);
 
 private:
     wlr_scene*               m_handle;

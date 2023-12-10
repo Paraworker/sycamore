@@ -15,22 +15,23 @@ class Seat
 {
 public:
     /**
-     * @brief Create Seat
-     * @return nullptr on failure
+     * @brief Create default Seat
+     * @throw std::runtime_error on failure
+     * @lifetime Be destroyed by listener
      */
-    static Seat* create(wl_display* display, wlr_output_layout* layout, const char* name);
+    static Seat* createDefault(wl_display* display, wlr_output_layout* layout);
 
     auto getHandle() const
     {
         return m_handle;
     }
 
-    Cursor& getCursor() const
+    Cursor& getCursor()
     {
-        return *m_cursor;
+        return m_cursor;
     }
 
-    SeatInput& getInput() const
+    SeatInput& getInput()
     {
         return *m_input;
     }
@@ -61,7 +62,7 @@ private:
     /**
      * @brief Constructor
      */
-    Seat(wlr_seat* handle, Cursor* cursor);
+    Seat(wl_display* display, wlr_output_layout* layout, const char* name);
 
     /**
      * @brief Destructor
@@ -70,8 +71,8 @@ private:
 
 private:
     wlr_seat*  m_handle;
-    Cursor*    m_cursor;
     SeatInput* m_input;
+    Cursor     m_cursor;
 
 private:
     Listener m_setCursor;

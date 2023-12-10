@@ -2,8 +2,11 @@
 #define SYCAMORE_CURSOR_H
 
 #include "sycamore/utils/Listener.h"
+#include "sycamore/utils/CHandle.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
+
+#include <memory>
 
 namespace sycamore
 {
@@ -15,10 +18,10 @@ class Cursor
 {
 public:
     /**
-     * @brief Create Cursor
-     * @return nullptr on failure
+     * @brief Constructor
+     * @throw std::runtime_error on failure
      */
-    static Cursor* create(wlr_output_layout* layout);
+    Cursor(wlr_output_layout* layout, Seat& seat);
 
     /**
      * @brief Destructor
@@ -63,7 +66,7 @@ public:
 
     void warp(const Point<double>& coords) const
     {
-        wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
+        wlr_cursor_warp(m_handle.get(), nullptr, coords.x, coords.y);
     }
 
     Point<double> getPosition() const
@@ -78,17 +81,12 @@ public:
 
     void attachDevice(wlr_input_device* device) const
     {
-        wlr_cursor_attach_input_device(m_handle, device);
+        wlr_cursor_attach_input_device(m_handle.get(), device);
     }
 
     void detachDevice(wlr_input_device* device) const
     {
-        wlr_cursor_detach_input_device(m_handle, device);
-    }
-
-    void attachSeat(Seat* seat)
-    {
-        m_seat = seat;
+        wlr_cursor_detach_input_device(m_handle.get(), device);
     }
 
     Cursor(const Cursor&) = delete;
@@ -97,20 +95,18 @@ public:
     Cursor& operator=(Cursor&&) = delete;
 
 private:
-    /**
-     * @brief Constructor
-     */
-    Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager);
+    using Handle               = CHandle<wlr_cursor, wlr_cursor_destroy>;
+    using XcursorManagerHandle = CHandle<wlr_xcursor_manager, wlr_xcursor_manager_destroy>;
 
 private:
-    wlr_cursor*          m_handle;
-    wlr_xcursor_manager* m_xcursorManager;
+    Handle               m_handle;
+    XcursorManagerHandle m_xcursorManager;
     bool                 m_enabled;
     const char*          m_xcursor;
     size_t               m_pointerButtonCount;
-    Seat*                m_seat;
+    Seat&                m_seat;
 
-private:
+private: // Declare listeners at last, so they can destruct first
     Listener m_motion;
     Listener m_motionAbsolute;
     Listener m_button;

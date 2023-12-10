@@ -5,7 +5,7 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-#include <spdlog/spdlog.h>
+#include <stdexcept>
 
 #define LAYER_SHELL_VERSION 4
 
@@ -17,19 +17,18 @@ class LayerShell
 public:
     /**
      * @brief Init wlr layer shell
+     * @throw std::runtime_error on failure
      */
-    static bool init(wl_display* display)
+    static void init(wl_display* display)
     {
         auto handle = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
         if (!handle)
         {
-            spdlog::error("Create wlr_layer_shell_v1 failed");
-            return false;
+            throw std::runtime_error("Create wlr_layer_shell_v1 failed!");
         }
 
+        // Be destroyed by listener
         new LayerShell{handle};
-
-        return true;
     }
 
     LayerShell(const LayerShell&) = delete;
@@ -38,7 +37,7 @@ public:
     LayerShell& operator=(LayerShell&&) = delete;
 
 private:
-    explicit LayerShell(wlr_layer_shell_v1* handle) : m_handle{handle}
+    explicit LayerShell(wlr_layer_shell_v1* handle)
     {
         m_newSurface
         .connect(handle->events.new_surface)
@@ -56,9 +55,6 @@ private:
     }
 
     ~LayerShell() = default;
-
-private:
-    wlr_layer_shell_v1* m_handle;
 
 private:
     Listener m_newSurface;

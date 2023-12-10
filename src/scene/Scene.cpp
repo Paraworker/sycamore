@@ -1,6 +1,6 @@
 #include "sycamore/scene/Scene.h"
 
-#include <spdlog/spdlog.h>
+#include <stdexcept>
 
 namespace sycamore
 {
@@ -14,34 +14,25 @@ public:
     ~RootElement() override = default;
 };
 
-std::unique_ptr<Scene> Scene::create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf)
+Scene::Scene(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf)
+    : m_handle{}, m_sceneLayout{}
 {
-    auto handle = wlr_scene_create();
-    if (!handle)
+    if (m_handle = wlr_scene_create(); !m_handle)
     {
-        spdlog::error("Create wlr_scene failed!");
-        return {};
+        throw std::runtime_error("Create wlr_scene failed!");
     }
 
-    auto sceneLayout = wlr_scene_attach_output_layout(handle, layout);
-    if (!sceneLayout)
+    if (m_sceneLayout = wlr_scene_attach_output_layout(m_handle, layout); !m_sceneLayout)
     {
-        spdlog::error("wlr_scene attach wlr_output_layout failed!");
-        wlr_scene_node_destroy(&handle->tree.node);
-        return {};
+        wlr_scene_node_destroy(&m_handle->tree.node);
+        throw std::runtime_error("wlr_scene attach wlr_output_layout failed!");
     }
 
-    wlr_scene_set_presentation(handle, presentation);
-    wlr_scene_set_linux_dmabuf_v1(handle, dmabuf);
+    wlr_scene_set_presentation(m_handle, presentation);
+    wlr_scene_set_linux_dmabuf_v1(m_handle, dmabuf);
 
-    return std::unique_ptr<Scene>{new Scene{handle, sceneLayout}};
-}
-
-Scene::Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout)
-    : m_handle{handle}, m_sceneLayout{sceneLayout}
-{
     // Create trees
-    shell.root = wlr_scene_tree_create(&handle->tree);
+    shell.root = wlr_scene_tree_create(&m_handle->tree);
 
     shell.background = wlr_scene_tree_create(shell.root);
     shell.bottom     = wlr_scene_tree_create(shell.root);
@@ -49,10 +40,10 @@ Scene::Scene(wlr_scene* handle, wlr_scene_output_layout* sceneLayout)
     shell.top        = wlr_scene_tree_create(shell.root);
     shell.overlay    = wlr_scene_tree_create(shell.root);
 
-    dragIcons = wlr_scene_tree_create(&handle->tree);
+    dragIcons = wlr_scene_tree_create(&m_handle->tree);
 
     // Create RootElement
-    new RootElement{&handle->tree.node};
+    new RootElement{&m_handle->tree.node};
 }
 
 Scene::~Scene()

@@ -9,7 +9,6 @@
 #include <spdlog/spdlog.h>
 
 #define WLR_COMPOSITOR_VERSION  6
-#define DEFAULT_SEAT            "seat0"
 
 namespace sycamore
 {
@@ -168,35 +167,12 @@ bool Core::setup()
         return false;
     }
 
-    if (outputLayout = OutputLayout::create(display); !outputLayout)
-    {
-        spdlog::error("Create OutputLayout failed");
-        return false;
-    }
+    outputLayout = OutputLayout::create(display);
+    seat         = Seat::createDefault(display, outputLayout->getHandle());
+    scene        = std::make_unique<Scene>(outputLayout->getHandle(), presentation, linuxDmabuf);
 
-    if (seat = Seat::create(display, outputLayout->getHandle(), DEFAULT_SEAT); !seat)
-    {
-        spdlog::error("Create Seat failed");
-        return false;
-    }
-
-    if (scene = Scene::create(outputLayout->getHandle(), presentation, linuxDmabuf); !scene)
-    {
-        spdlog::error("Create Scene failed");
-        return false;
-    }
-
-    if (!XdgShell::init(display))
-    {
-        spdlog::error("Init XDG shell failed");
-        return false;
-    }
-
-    if (!LayerShell::init(display))
-    {
-        spdlog::error("Init wlr layer shell failed");
-        return false;
-    }
+    XdgShell::init(display);
+    LayerShell::init(display);
 
     if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
