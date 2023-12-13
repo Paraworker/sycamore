@@ -15,7 +15,7 @@ public:
     /**
      * @brief Constructor
      */
-    Listener() : m_wrapped{{}, onSignal}
+    Listener() noexcept : m_wrapped{{}, onSignal}
     {
         wl_list_init(&m_wrapped.link);
     }
@@ -24,7 +24,7 @@ public:
      * @brief Destructor
      * @note Disconnect automatically
      */
-    ~Listener()
+    ~Listener() noexcept
     {
         disconnect();
     }
@@ -32,17 +32,17 @@ public:
     /**
      * @brief Set callback
      */
-    template<typename Func>
-    Listener& set(Func&& callback)
+    template<typename Fn>
+    Listener& set(Fn&& callback) noexcept
     {
-        m_callback = std::forward<Func>(callback);
+        m_callback = std::forward<Fn>(callback);
         return *this;
     }
 
     /**
      * @brief Connect to signal
      */
-    Listener& connect(wl_signal& signal)
+    Listener& connect(wl_signal& signal) noexcept
     {
         assert(!isConnected() && "connect() on a connected listener!");
         wl_signal_add(&signal, &m_wrapped);
@@ -53,7 +53,7 @@ public:
      * @brief Disconnect form signal
      * @note No-op if signal isn't connected
      */
-    Listener& disconnect()
+    Listener& disconnect() noexcept
     {
         if (isConnected())
         {
@@ -67,7 +67,7 @@ public:
     /**
      * @brief Is signal connected
      */
-    bool isConnected() const
+    bool isConnected() const noexcept
     {
         return !wl_list_empty(&m_wrapped.link);
     }
@@ -78,7 +78,7 @@ public:
     Listener& operator=(Listener&&) = delete;
 
 private:
-    static void onSignal(wl_listener* listener, void* data)
+    static void onSignal(wl_listener* listener, void* data) noexcept
     {
         reinterpret_cast<Listener*>(listener)->m_callback(data);
     }
