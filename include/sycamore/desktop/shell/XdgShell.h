@@ -5,7 +5,7 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-#include <spdlog/spdlog.h>
+#include <stdexcept>
 
 #define XDG_SHELL_VERSION 6
 
@@ -18,18 +18,16 @@ public:
     /**
      * @brief Init XDG shell
      */
-    static bool init(wl_display* display)
+    static void init(wl_display* display)
     {
         auto handle = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
         if (!handle)
         {
-            spdlog::error("Create wlr_xdg_shell failed");
-            return false;
+            throw std::runtime_error("Create wlr_xdg_shell failed");
         }
 
+        // Be destroyed by listener
         new XdgShell{handle};
-
-        return true;
     }
 
     XdgShell(const XdgShell&) = delete;
@@ -38,7 +36,7 @@ public:
     XdgShell& operator=(XdgShell&&) = delete;
 
 private:
-    explicit XdgShell(wlr_xdg_shell* handle) : m_handle{handle}
+    explicit XdgShell(wlr_xdg_shell* handle) noexcept
     {
         m_newToplevel
         .connect(handle->events.new_toplevel)
@@ -56,9 +54,6 @@ private:
     }
 
     ~XdgShell() = default;
-
-private:
-    wlr_xdg_shell* m_handle;
 
 private:
     Listener m_newToplevel;

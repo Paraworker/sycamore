@@ -186,12 +186,7 @@ bool Core::setup()
         return false;
     }
 
-    if (!XdgShell::init(display))
-    {
-        spdlog::error("Init XDG shell failed");
-        return false;
-    }
-
+    XdgShell::init(display);
     LayerShell::init(display);
 
     if (socket = wl_display_add_socket_auto(display); socket.empty())
