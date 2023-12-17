@@ -192,11 +192,7 @@ bool Core::setup()
         return false;
     }
 
-    if (!LayerShell::init(display))
-    {
-        spdlog::error("Init wlr layer shell failed");
-        return false;
-    }
+    LayerShell::init(display);
 
     if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
