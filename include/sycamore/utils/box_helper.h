@@ -1,5 +1,5 @@
-#ifndef SYCAMORE_BOX_H
-#define SYCAMORE_BOX_H
+#ifndef SYCAMORE_BOX_HELPER_H
+#define SYCAMORE_BOX_HELPER_H
 
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
@@ -14,4 +14,4 @@ inline constexpr Point<int32_t> boxGetCenterCoords(const wlr_box& box)
 
 }
 
-#endif //SYCAMORE_BOX_H
+#endif //SYCAMORE_BOX_HELPER_H
