@@ -1,8 +1,8 @@
 #ifndef SYCAMORE_LISTENER_H
 #define SYCAMORE_LISTENER_H
 
-#include <cassert>
 #include <functional>
+#include <stdexcept>
 #include <wayland-server-core.h>
 
 namespace sycamore
@@ -33,7 +33,7 @@ public:
      * @brief Set callback
      */
     template<typename Fn>
-    Listener& set(Fn&& callback) noexcept
+    Listener& set(Fn&& callback)
     {
         m_callback = std::forward<Fn>(callback);
         return *this;
@@ -42,10 +42,15 @@ public:
     /**
      * @brief Connect to signal
      */
-    Listener& connect(wl_signal& signal) noexcept
+    Listener& connect(wl_signal& signal)
     {
-        assert(!isConnected() && "connect() on a connected listener!");
+        if (isConnected())
+        {
+            throw std::logic_error("connect() on a connected listener!");
+        }
+
         wl_signal_add(&signal, &m_wrapped);
+        
         return *this;
     }
 
@@ -78,7 +83,7 @@ public:
     Listener& operator=(Listener&&) = delete;
 
 private:
-    static void onSignal(wl_listener* listener, void* data) noexcept
+    static void onSignal(wl_listener* listener, void* data)
     {
         reinterpret_cast<Listener*>(listener)->m_callback(data);
     }
