@@ -6,18 +6,18 @@
 namespace sycamore
 {
 
-Popup* Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner)
+void Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner)
 {
     // Create tree
     auto tree = wlr_scene_xdg_surface_create(parentTree, handle->base);
     if (!tree)
     {
         spdlog::error("Create scene tree for Popup failed");
-        return {};
+        return;
     }
 
-    // Create Popup
-    return new Popup{handle, tree, owner};
+    // Be destroyed by listener
+    new Popup{handle, tree, owner};
 }
 
 Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner)

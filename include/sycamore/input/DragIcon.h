@@ -16,9 +16,8 @@ class DragIcon
 public:
     /**
      * @brief Create DragIcon
-     * @return nullptr on failure
      */
-    static DragIcon* create(wlr_drag_icon* handle, Seat& seat);
+    static void create(wlr_drag_icon* handle, Seat& seat);
 
     void updatePosition() const;
 

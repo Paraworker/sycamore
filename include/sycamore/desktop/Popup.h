@@ -82,9 +82,8 @@ public:
 public:
     /**
      * @brief Create Popup
-     * @return nullptr on failure
      */
-    static Popup* create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner);
+    static void create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner);
 
     void unconstrainFromBox(const wlr_box& box)
     {

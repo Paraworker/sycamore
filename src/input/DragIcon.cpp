@@ -7,16 +7,17 @@
 namespace sycamore
 {
 
-DragIcon* DragIcon::create(wlr_drag_icon* handle, Seat& seat)
+void DragIcon::create(wlr_drag_icon* handle, Seat& seat)
 {
     auto tree = wlr_scene_drag_icon_create(Core::instance.scene->dragIcons, handle);
     if (!tree)
     {
         spdlog::error("Create scene tree for DragIcon failed!");
-        return {};
+        return;
     }
 
-    return new DragIcon(handle, tree, seat);
+    // Be destroyed by listener
+    new DragIcon(handle, tree, seat);
 }
 
 DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)

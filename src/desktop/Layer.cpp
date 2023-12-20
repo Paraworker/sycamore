@@ -9,7 +9,7 @@
 namespace sycamore
 {
 
-Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
+void Layer::create(wlr_layer_surface_v1* layerSurface)
 {
     // Confirm output
     if (!layerSurface->output)
@@ -19,7 +19,7 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
         {
             spdlog::error("No output under cursor for layerSurface");
             wlr_layer_surface_v1_destroy(layerSurface);
-            return {};
+            return;
         }
 
         layerSurface->output = output->getHandle();
@@ -31,12 +31,11 @@ Layer* Layer::create(wlr_layer_surface_v1* layerSurface)
     {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
         wlr_layer_surface_v1_destroy(layerSurface);
-        return {};
+        return;
     }
 
-
-    // Create Layer
-    return new Layer{layerSurface, helper};
+    // Be destroyed by listener
+    new Layer{layerSurface, helper};
 }
 
 Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* helper)

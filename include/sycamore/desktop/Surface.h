@@ -15,9 +15,10 @@ public:
     /**
      * @brief Create Surface
      */
-    static Surface* create(wlr_surface* handle)
+    static void create(wlr_surface* handle)
     {
-        return new Surface{handle};
+        // Be destroyed by listener
+        new Surface{handle};
     }
 
     Surface(const Surface&) = delete;
@@ -26,7 +27,7 @@ public:
     Surface& operator=(Surface&&) = delete;
 
 private:
-    explicit Surface(wlr_surface* handle) : m_handle{handle}
+    explicit Surface(wlr_surface* handle)
     {
         m_destroy
         .connect(handle->events.destroy)
@@ -40,9 +41,6 @@ private:
     {
         Core::instance.seat->getInput().rebasePointer();
     }
-
-private:
-    wlr_surface* m_handle;
 
 private:
     Listener m_destroy;

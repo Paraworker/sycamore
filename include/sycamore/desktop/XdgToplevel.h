@@ -12,9 +12,8 @@ class XdgToplevel final : public Toplevel
 public:
     /**
      * @brief Create XdgToplevel
-     * @return nullptr on failure
      */
-    static XdgToplevel* create(wlr_xdg_toplevel* toplevel);
+    static void create(wlr_xdg_toplevel* toplevel);
 
     Role role() const override
     {

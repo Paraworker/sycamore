@@ -25,9 +25,8 @@ public:
 public:
     /**
      * @brief Create Layer
-     * @return nullptr on failure
      */
-    static Layer* create(wlr_layer_surface_v1* layerSurface);
+    static void create(wlr_layer_surface_v1* layerSurface);
 
     void configure(const wlr_box& fullArea, wlr_box& usableArea);
 
