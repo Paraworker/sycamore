@@ -4,6 +4,16 @@
 #include <fmt/core.h>
 #include <getopt.h>
 
+static void loadBackground()
+{
+    sycamore::spawn("swaybg -m fill -i /home/ha/Pictures/wallpaper.jpg");
+}
+
+static void loadBar()
+{
+    sycamore::spawn("waybar");
+}
+
 static constexpr auto usage
 {
     "Usage: sycamore [options] [command]\n"
@@ -56,6 +66,9 @@ int main(int argc, char **argv)
     {
         sycamore::spawn(command);
     }
+
+    loadBackground();
+    loadBar();
 
     sycamore::core.run();
 
