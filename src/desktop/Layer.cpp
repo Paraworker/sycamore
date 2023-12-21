@@ -54,7 +54,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_outputDestroy
     .connect(m_output->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         m_layerSurface->output = nullptr;
 
@@ -73,7 +73,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_map
     .connect(layerSurface->surface->events.map)
-    .set([this](void*)
+    .set([this](auto)
     {
         ShellManager::instance.onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -81,7 +81,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_unmap
     .connect(layerSurface->surface->events.unmap)
-    .set([this](void*)
+    .set([this](auto)
     {
         ShellManager::instance.onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
@@ -89,7 +89,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_commit
     .connect(layerSurface->surface->events.commit)
-    .set([this](void*)
+    .set([this](auto)
     {
         uint32_t committed   = m_layerSurface->current.committed;
         bool     mapped      = m_layerSurface->surface->mapped;
@@ -139,7 +139,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_destroy
     .connect(layerSurface->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         delete this;
     });

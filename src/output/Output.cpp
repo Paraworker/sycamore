@@ -48,7 +48,7 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
 
     m_frame
     .connect(handle->events.frame)
-    .set([this](void*)
+    .set([this](auto)
     {
         // Render the scene if needed and commit the output
         wlr_scene_output_commit(m_sceneOutput, nullptr);
@@ -67,7 +67,7 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
 
     m_destroy
     .connect(handle->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         wl_signal_emit_mutable(&events.destroy, nullptr);
         Core::instance.outputLayout->remove(this);

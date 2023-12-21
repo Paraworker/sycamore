@@ -51,7 +51,7 @@ struct Backend
 
         destroy
         .connect(handle->events.destroy)
-        .set([this](void*)
+        .set([this](auto)
         {
             delete this;
         });
@@ -94,7 +94,7 @@ struct Compositor
 
         destroy
         .connect(handle->events.destroy)
-        .set([this](void*)
+        .set([this](auto)
         {
             delete this;
         });

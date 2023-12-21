@@ -5,10 +5,10 @@ namespace sycamore
 {
 
 PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
-    : m_toplevel(toplevel)
-    , m_edges(edges)
-    , m_grabGeo(toplevel->getGeometry())
-    , m_seat(seat)
+    : m_toplevel{toplevel}
+    , m_edges{edges}
+    , m_grabGeo{toplevel->getGeometry()}
+    , m_seat{seat}
 {
     auto toplevelPos = toplevel->getPosition();
     m_grabGeo.x += toplevelPos.x;
@@ -24,7 +24,10 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
 
     m_toplevelUnmap
     .connect(toplevel->events.unmap)
-    .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
+    .set([this](auto)
+    {
+        m_seat.setInput(new DefaultInput{m_seat});
+    });
 }
 
 PointerResize::~PointerResize() = default;

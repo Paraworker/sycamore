@@ -16,7 +16,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_modifiers
     .connect(m_keyboardHandle->events.modifiers)
-    .set([this](void*)
+    .set([this](auto)
     {
         auto seatHandle = Core::instance.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
@@ -62,7 +62,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_destroy
     .connect(deviceHandle->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         InputManager::instance.onDestroyDevice(this);
     });

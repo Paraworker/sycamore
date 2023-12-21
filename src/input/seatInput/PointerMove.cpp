@@ -5,13 +5,16 @@ namespace sycamore
 {
 
 PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
-    : m_toplevel(toplevel)
-    , m_delta(seat.getCursor().getPosition() - toplevel->getPosition().into<double>())
-    , m_seat(seat)
+    : m_toplevel{toplevel}
+    , m_delta{seat.getCursor().getPosition() - toplevel->getPosition().into<double>()}
+    , m_seat{seat}
 {
     m_toplevelUnmap
     .connect(toplevel->events.unmap)
-    .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
+    .set([this](auto)
+    {
+        m_seat.setInput(new DefaultInput{m_seat});
+    });
 }
 
 PointerMove::~PointerMove() = default;

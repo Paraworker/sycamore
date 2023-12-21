@@ -6,13 +6,16 @@ namespace sycamore
 {
 
 ImplicitGrab::ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat)
-    : m_surface(surface)
-    , m_delta(sCoords - seat.getCursor().getPosition())
-    , m_seat(seat)
+    : m_surface{surface}
+    , m_delta{sCoords - seat.getCursor().getPosition()}
+    , m_seat{seat}
 {
     m_surfaceUnmap
     .connect(m_surface->events.unmap)
-    .set([this](void*) { m_seat.setInput(new DefaultInput{m_seat}); });
+    .set([this](auto)
+    {
+        m_seat.setInput(new DefaultInput{m_seat});
+    });
 }
 
 ImplicitGrab::~ImplicitGrab() = default;

@@ -30,14 +30,14 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     // On creation, we only connect destroy, map, unmap
     m_destroy
     .connect(toplevel->base->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         delete this;
     });
 
     m_map
     .connect(m_surface->events.map)
-    .set([this](void*)
+    .set([this](auto)
     {
         ShellManager::instance.onToplevelMap(*this);
 
@@ -72,7 +72,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_unmap
     .connect(m_surface->events.unmap)
-    .set([this](void*)
+    .set([this](auto)
     {
         // Disconnect signals
         m_commit.disconnect();
@@ -90,7 +90,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     // All listeners below are not connected util map
 
-    m_commit.set([this](void*)
+    m_commit.set([this](auto)
     {
         auto newGeometry = getGeometry();
 
@@ -107,7 +107,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ToplevelHandler>(this));
     });
 
-    m_move.set([this](void*)
+    m_move.set([this](auto)
     {
         if (!Core::instance.seat->bindingEnterCheck(this))
         {
@@ -128,7 +128,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         Core::instance.seat->setInput(new PointerResize{this, event->edges, *Core::instance.seat});
     });
 
-    m_fullscreen.set([this](void*)
+    m_fullscreen.set([this](auto)
     {
         auto&   requested = m_toplevel->requested;
         bool    state     = requested.fullscreen;
@@ -150,13 +150,13 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         ShellManager::instance.fullscreenRequest(*this, state, output);
     });
 
-    m_maximize.set([this](void*)
+    m_maximize.set([this](auto)
     {
         bool state = m_toplevel->requested.maximized;
         ShellManager::maximizeRequest(*this, state, state ? getOutput() : nullptr);
     });
 
-    m_minimize.set([](void*)
+    m_minimize.set([](auto)
     {
         // TODO
     });

@@ -32,7 +32,7 @@ protected:
 
         m_destroy
         .connect(node->events.destroy)
-        .set([this](void*)
+        .set([this](auto)
         {
             delete this;
         });

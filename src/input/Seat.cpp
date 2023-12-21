@@ -112,7 +112,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
 
     m_destroy
     .connect(handle->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         delete this;
     });

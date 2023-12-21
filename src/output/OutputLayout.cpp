@@ -25,7 +25,7 @@ OutputLayout::OutputLayout(wlr_output_layout* handle)
 {
     m_destroy
     .connect(handle->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         delete this;
     });

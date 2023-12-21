@@ -25,7 +25,7 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 {
     m_surfaceCommit
     .connect(handle->base->surface->events.commit)
-    .set([this](void*)
+    .set([this](auto)
     {
         if (m_handle->base->initial_commit)
         {
@@ -35,7 +35,7 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 
     m_reposition
     .connect(handle->events.reposition)
-    .set([this](void*)
+    .set([this](auto)
     {
         m_owner->unconstrain(*this);
     });
@@ -49,7 +49,7 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
 
     m_destroy
     .connect(handle->base->events.destroy)
-    .set([this](void*)
+    .set([this](auto)
     {
         delete this;
     });
