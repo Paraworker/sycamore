@@ -45,7 +45,6 @@ public:
     wlr_renderer*            renderer     = nullptr;
     wlr_allocator*           allocator    = nullptr;
     wlr_compositor*          compositor   = nullptr;
-    wlr_presentation*        presentation = nullptr;
     wlr_linux_dmabuf_v1*     linuxDmabuf  = nullptr;
     wlr_pointer_gestures_v1* gestures     = nullptr;
 

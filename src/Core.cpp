@@ -156,11 +156,7 @@ bool Core::setup()
 
     wlr_subcompositor_create(display);
 
-    if (presentation = wlr_presentation_create(display, backend); !presentation)
-    {
-        spdlog::error("Create wlr_presentation failed");
-        return false;
-    }
+    wlr_presentation_create(display, backend);
 
     if (gestures = wlr_pointer_gestures_v1_create(display); !gestures)
     {
@@ -180,7 +176,7 @@ bool Core::setup()
         return false;
     }
 
-    if (scene = Scene::create(outputLayout->getHandle(), presentation, linuxDmabuf); !scene)
+    if (scene = Scene::create(outputLayout->getHandle(), linuxDmabuf); !scene)
     {
         spdlog::error("Create Scene failed");
         return false;

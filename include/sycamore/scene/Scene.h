@@ -17,7 +17,7 @@ public:
      * @brief Create Scene
      * @return nullptr on failure
      */
-    static std::unique_ptr<Scene> create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf);
+    static std::unique_ptr<Scene> create(wlr_output_layout* layout, wlr_linux_dmabuf_v1* dmabuf);
 
     /**
      * @brief Destructor

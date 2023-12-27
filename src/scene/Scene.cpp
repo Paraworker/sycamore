@@ -14,7 +14,7 @@ public:
     ~RootElement() override = default;
 };
 
-std::unique_ptr<Scene> Scene::create(wlr_output_layout* layout, wlr_presentation* presentation, wlr_linux_dmabuf_v1* dmabuf)
+std::unique_ptr<Scene> Scene::create(wlr_output_layout* layout, wlr_linux_dmabuf_v1* dmabuf)
 {
     auto handle = wlr_scene_create();
     if (!handle)
@@ -31,7 +31,6 @@ std::unique_ptr<Scene> Scene::create(wlr_output_layout* layout, wlr_presentation
         return {};
     }
 
-    wlr_scene_set_presentation(handle, presentation);
     wlr_scene_set_linux_dmabuf_v1(handle, dmabuf);
 
     return std::unique_ptr<Scene>{new Scene{handle, sceneLayout}};
