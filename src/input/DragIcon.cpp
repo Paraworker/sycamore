@@ -43,7 +43,7 @@ void DragIcon::updatePosition() const
         case WLR_DRAG_GRAB_KEYBOARD:
             return;
         case WLR_DRAG_GRAB_KEYBOARD_POINTER:
-            setPosition(m_seat.getCursor().getPosition().into<int32_t>());
+            setPosition(m_seat.cursor.getPosition().into<int32_t>());
             break;
         case WLR_DRAG_GRAB_KEYBOARD_TOUCH:
             // TODO

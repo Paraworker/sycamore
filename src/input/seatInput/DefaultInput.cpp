@@ -38,7 +38,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     }
 
     Point<double> sCoords{};
-    if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.getCursor().getPosition(), sCoords)); element)
+    if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.cursor.getPosition(), sCoords)); element)
     {
         // If pressed on a toplevel, focus it
         if (element->type() == SceneElement::TOPLEVEL)
@@ -125,7 +125,7 @@ void DefaultInput::onPointerHoldEnd(wlr_pointer_hold_end_event* event)
 
 void DefaultInput::rebasePointer()
 {
-    if (m_seat.getCursor().isEnabled())
+    if (m_seat.cursor.isEnabled())
     {
         m_seat.updatePointerFocus(getTimeMsec());
     }

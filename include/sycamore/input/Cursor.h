@@ -15,10 +15,9 @@ class Cursor
 {
 public:
     /**
-     * @brief Create Cursor
-     * @return nullptr on failure
+     * @brief Constructor
      */
-    static Cursor* create(wlr_output_layout* layout);
+    Cursor(wlr_output_layout* layout, Seat& seat);
 
     /**
      * @brief Destructor
@@ -57,7 +56,7 @@ public:
     /**
      * @brief Update xcursor theme
      */
-    bool updateXcursorTheme(const char* theme, uint32_t size);
+    void updateXcursorTheme(const char* theme, uint32_t size);
 
     Output* atOutput() const;
 
@@ -86,21 +85,10 @@ public:
         wlr_cursor_detach_input_device(m_handle, device);
     }
 
-    void attachSeat(Seat* seat)
-    {
-        m_seat = seat;
-    }
-
     Cursor(const Cursor&) = delete;
     Cursor(Cursor&&) = delete;
     Cursor& operator=(const Cursor&) = delete;
     Cursor& operator=(Cursor&&) = delete;
-
-private:
-    /**
-     * @brief Constructor
-     */
-    Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager);
 
 private:
     wlr_cursor*          m_handle;
@@ -108,7 +96,7 @@ private:
     bool                 m_enabled;
     const char*          m_xcursor;
     size_t               m_pointerButtonCount;
-    Seat*                m_seat;
+    Seat&                m_seat;
 
 private:
     Listener m_motion;

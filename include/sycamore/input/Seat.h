@@ -16,18 +16,12 @@ class Seat
 public:
     /**
      * @brief Create Seat
-     * @return nullptr on failure
      */
-    static Seat* create(wl_display* display, wlr_output_layout* layout, const char* name);
+    static Seat* create(wl_display* display, const char* name, wlr_output_layout* layout);
 
     auto getHandle() const
     {
         return m_handle;
-    }
-
-    Cursor& getCursor() const
-    {
-        return *m_cursor;
     }
 
     SeatInput& getInput() const
@@ -61,17 +55,19 @@ private:
     /**
      * @brief Constructor
      */
-    Seat(wlr_seat* handle, Cursor* cursor);
+    Seat(wl_display* display, const char* name, wlr_output_layout* layout);
 
     /**
      * @brief Destructor
      */
     ~Seat();
 
+public:
+    Cursor cursor;
+
 private:
-    wlr_seat*  m_handle;
-    Cursor*    m_cursor;
     SeatInput* m_input;
+    wlr_seat*  m_handle;
 
 private:
     Listener m_setCursor;

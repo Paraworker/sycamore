@@ -137,7 +137,7 @@ wlr_box Output::getLayoutGeometry() const
 
 void Output::ensureCursor() const
 {
-    Core::instance.seat->getCursor().warp(boxGetCenterCoords(getLayoutGeometry()).into<double>());
+    Core::instance.seat->cursor.warp(boxGetCenterCoords(getLayoutGeometry()).into<double>());
     Core::instance.seat->getInput().rebasePointer();
 }
 

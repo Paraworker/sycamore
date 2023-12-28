@@ -4,44 +4,29 @@
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
-#include <spdlog/spdlog.h>
+#include <stdexcept>
 
 namespace sycamore
 {
 
-Seat* Seat::create(wl_display* display, wlr_output_layout* layout, const char* name)
+Seat* Seat::create(wl_display* display, const char* name, wlr_output_layout* layout)
 {
-    auto handle = wlr_seat_create(display, name);
-    if (!handle)
-    {
-        spdlog::error("Create wlr_seat failed");
-        return {};
-    }
-
-    auto cursor = Cursor::create(layout);
-    if (!cursor)
-    {
-        spdlog::error("Create Cursor failed");
-        wlr_seat_destroy(handle);
-        return {};
-    }
-
-    return new Seat{handle, cursor};
+    // Will be destroyed by listener
+    return new Seat{display, name, layout};
 }
 
-Seat::Seat(wlr_seat* handle, Cursor* cursor)
-    : m_handle{handle}
-    , m_cursor{cursor}
+Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
+    : cursor{layout, *this}
     , m_input{new DefaultInput{*this}}
+    , m_handle{nullptr}
 {
-    // Attach cursor
-    m_cursor->attachSeat(this);
-
-    // Enable DefaultInput
-    m_input->onEnable();
+    if (m_handle = wlr_seat_create(display, name); !m_handle)
+    {
+        throw std::runtime_error("Create wlr_seat failed!");
+    }
 
     m_setCursor
-    .connect(handle->events.request_set_cursor)
+    .connect(m_handle->events.request_set_cursor)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
@@ -52,11 +37,11 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
             return;
         }
 
-        m_cursor->setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
+        cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
     });
 
     m_setSelection
-    .connect(handle->events.request_set_selection)
+    .connect(m_handle->events.request_set_selection)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_selection_event*>(data);
@@ -64,7 +49,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
     });
 
     m_setPrimarySelection
-    .connect(handle->events.request_set_primary_selection)
+    .connect(m_handle->events.request_set_primary_selection)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_primary_selection_event*>(data);
@@ -72,7 +57,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
     });
 
     m_requestStartDrag
-    .connect(handle->events.request_start_drag)
+    .connect(m_handle->events.request_start_drag)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_start_drag_event*>(data);
@@ -96,7 +81,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
     });
 
     m_startDrag
-    .connect(handle->events.start_drag)
+    .connect(m_handle->events.start_drag)
     .set([this](void* data)
     {
         auto drag = static_cast<wlr_drag*>(data);
@@ -111,7 +96,7 @@ Seat::Seat(wlr_seat* handle, Cursor* cursor)
     });
 
     m_destroy
-    .connect(handle->events.destroy)
+    .connect(m_handle->events.destroy)
     .set([this](auto)
     {
         delete this;
@@ -122,7 +107,6 @@ Seat::~Seat()
 {
     m_input->onDisable();
     delete m_input;
-    delete m_cursor;
 }
 
 void Seat::setCapabilities(uint32_t caps)
@@ -132,19 +116,19 @@ void Seat::setCapabilities(uint32_t caps)
     // Disable cursor if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0)
     {
-        m_cursor->disable();
+        cursor.disable();
     }
 }
 
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
     Point<double> sCoords{};
-    auto surface = Scene::surfaceFromNode(Core::instance.scene->nodeAt(m_cursor->getPosition(), sCoords));
+    auto surface = Scene::surfaceFromNode(Core::instance.scene->nodeAt(cursor.getPosition(), sCoords));
 
     if (!surface)
     {
         wlr_seat_pointer_clear_focus(m_handle);
-        m_cursor->setXcursor("left_ptr");
+        cursor.setXcursor("left_ptr");
         return;
     }
 

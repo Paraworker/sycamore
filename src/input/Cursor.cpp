@@ -2,12 +2,13 @@
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
+#include <stdexcept>
 #include <string>
 
 namespace sycamore
 {
 
-static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t size)
+static wlr_xcursor_manager* createXcursorManager(const char* theme = nullptr, uint32_t size = 24)
 {
     if (theme)
     {
@@ -19,36 +20,29 @@ static wlr_xcursor_manager* xcursorManagerCreate(const char* theme, uint32_t siz
     return wlr_xcursor_manager_create(theme, size);
 }
 
-Cursor* Cursor::create(wlr_output_layout* layout)
-{
-    auto handle = wlr_cursor_create();
-    if (!handle)
-    {
-        return {};
-    }
-
-    auto manager = xcursorManagerCreate(nullptr, 24);
-    if (!manager)
-    {
-        wlr_cursor_destroy(handle);
-        return {};
-    }
-
-    wlr_cursor_attach_output_layout(handle, layout);
-
-    return new Cursor{handle, manager};
-}
-
-Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
-    : m_handle{handle}
-    , m_xcursorManager{manager}
+Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
+    : m_handle{nullptr}
+    , m_xcursorManager{nullptr}
     , m_enabled{false}
     , m_xcursor{nullptr}
     , m_pointerButtonCount{0}
-    , m_seat{nullptr}
+    , m_seat{seat}
 {
+    if (m_handle = wlr_cursor_create(); !m_handle)
+    {
+        throw std::runtime_error("Create wlr_cursor failed!");
+    }
+
+    if (m_xcursorManager = createXcursorManager(); !m_xcursorManager)
+    {
+        wlr_cursor_destroy(m_handle);
+        throw std::runtime_error("Create wlr_xcursor_manager failed!");
+    }
+
+    wlr_cursor_attach_output_layout(m_handle, layout);
+
     m_motion
-    .connect(handle->events.motion)
+    .connect(m_handle->events.motion)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_pointer_motion_event*>(data);
@@ -56,11 +50,11 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
         enable();
 
         wlr_cursor_move(m_handle, &event->pointer->base, event->delta_x, event->delta_y);
-        m_seat->getInput().onPointerMotion(event->time_msec);
+        m_seat.getInput().onPointerMotion(event->time_msec);
     });
 
     m_motionAbsolute
-    .connect(handle->events.motion_absolute)
+    .connect(m_handle->events.motion_absolute)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_pointer_motion_absolute_event*>(data);
@@ -68,11 +62,11 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
         enable();
 
         wlr_cursor_warp_absolute(m_handle, &event->pointer->base, event->x, event->y);
-        m_seat->getInput().onPointerMotion(event->time_msec);
+        m_seat.getInput().onPointerMotion(event->time_msec);
     });
 
     m_button
-    .connect(handle->events.button)
+    .connect(m_handle->events.button)
     .set([this](void* data)
     {
         auto event = static_cast<wlr_pointer_button_event*>(data);
@@ -88,87 +82,87 @@ Cursor::Cursor(wlr_cursor* handle, wlr_xcursor_manager* manager)
             --m_pointerButtonCount;
         }
 
-        m_seat->getInput().onPointerButton(event);
+        m_seat.getInput().onPointerButton(event);
     });
 
     m_axis
-    .connect(handle->events.axis)
+    .connect(m_handle->events.axis)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
+        m_seat.getInput().onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
     });
 
     m_frame
-    .connect(handle->events.frame)
+    .connect(m_handle->events.frame)
     .set([this](void* data)
     {
         enable();
-        wlr_seat_pointer_notify_frame(m_seat->getHandle());
+        wlr_seat_pointer_notify_frame(m_seat.getHandle());
     });
 
     m_swipeBegin
-    .connect(handle->events.swipe_begin)
+    .connect(m_handle->events.swipe_begin)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
+        m_seat.getInput().onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
     });
 
     m_swipeUpdate
-    .connect(handle->events.swipe_update)
+    .connect(m_handle->events.swipe_update)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
+        m_seat.getInput().onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
     });
 
     m_swipeEnd
-    .connect(handle->events.swipe_end)
+    .connect(m_handle->events.swipe_end)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
+        m_seat.getInput().onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
     });
 
     m_pinchBegin
-    .connect(handle->events.pinch_begin)
+    .connect(m_handle->events.pinch_begin)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
+        m_seat.getInput().onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
     });
 
     m_pinchUpdate
-    .connect(handle->events.pinch_update)
+    .connect(m_handle->events.pinch_update)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
+        m_seat.getInput().onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
     });
 
     m_pinchEnd
-    .connect(handle->events.pinch_end)
+    .connect(m_handle->events.pinch_end)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
+        m_seat.getInput().onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
     });
 
     m_holdBegin
-    .connect(handle->events.hold_begin)
+    .connect(m_handle->events.hold_begin)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
+        m_seat.getInput().onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
     });
 
     m_holdEnd
-    .connect(handle->events.hold_end)
+    .connect(m_handle->events.hold_end)
     .set([this](void* data)
     {
         enable();
-        m_seat->getInput().onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
+        m_seat.getInput().onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
     });
 }
 
@@ -189,12 +183,7 @@ Cursor::~Cursor()
     m_holdBegin.disconnect();
     m_holdEnd.disconnect();
 
-    // Maybe nullptr
-    if (m_xcursorManager)
-    {
-        wlr_xcursor_manager_destroy(m_xcursorManager);
-    }
-
+    wlr_xcursor_manager_destroy(m_xcursorManager);
     wlr_cursor_destroy(m_handle);
 }
 
@@ -207,7 +196,7 @@ void Cursor::enable()
 
     m_enabled = true;
 
-    m_seat->getInput().rebasePointer();
+    m_seat.getInput().rebasePointer();
 }
 
 void Cursor::disable()
@@ -222,7 +211,7 @@ void Cursor::disable()
     wlr_cursor_unset_image(m_handle);
 
     // Clear pointer focus
-    wlr_seat_pointer_notify_clear_focus(m_seat->getHandle());
+    wlr_seat_pointer_notify_clear_focus(m_seat.getHandle());
 
     m_enabled = false;
 }
@@ -277,21 +266,23 @@ void Cursor::refreshXcursor()
     wlr_cursor_set_xcursor(m_handle, m_xcursorManager, m_xcursor);
 }
 
-bool Cursor::updateXcursorTheme(const char* theme, uint32_t size)
+void Cursor::updateXcursorTheme(const char* theme, uint32_t size)
 {
     if (m_xcursorManager)
     {
         wlr_xcursor_manager_destroy(m_xcursorManager);
     }
 
-    if (m_xcursorManager = xcursorManagerCreate(theme, size); !m_xcursorManager)
+    if (m_xcursorManager = createXcursorManager(theme, size); !m_xcursorManager)
     {
-        return false;
+        // fallback to default
+        if (m_xcursorManager = createXcursorManager(theme, size); !m_xcursorManager)
+        {
+            throw std::runtime_error("Create default xcursor manager failed!");
+        }
     }
 
     refreshXcursor();
-
-    return true;
 }
 
 Output* Cursor::atOutput() const

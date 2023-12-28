@@ -7,7 +7,7 @@ namespace sycamore
 
 ImplicitGrab::ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat)
     : m_surface{surface}
-    , m_delta{sCoords - seat.getCursor().getPosition()}
+    , m_delta{sCoords - seat.cursor.getPosition()}
     , m_seat{seat}
 {
     m_surfaceUnmap
@@ -35,7 +35,7 @@ void ImplicitGrab::onPointerButton(wlr_pointer_button_event* event)
     wlr_seat_pointer_notify_button(m_seat.getHandle(), event->time_msec,
                                    event->button, event->state);
 
-    if (m_seat.getCursor().getPointerButtonCount() == 0)
+    if (m_seat.cursor.getPointerButtonCount() == 0)
     {
         m_seat.setInput(new DefaultInput{m_seat});
     }
@@ -43,7 +43,7 @@ void ImplicitGrab::onPointerButton(wlr_pointer_button_event* event)
 
 void ImplicitGrab::onPointerMotion(uint32_t timeMsec)
 {
-    auto relative = m_delta + m_seat.getCursor().getPosition();
+    auto relative = m_delta + m_seat.cursor.getPosition();
     wlr_seat_pointer_notify_motion(m_seat.getHandle(), timeMsec, relative.x, relative.y);
 }
 

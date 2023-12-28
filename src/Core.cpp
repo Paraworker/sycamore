@@ -170,11 +170,7 @@ bool Core::setup()
         return false;
     }
 
-    if (seat = Seat::create(display, outputLayout->getHandle(), DEFAULT_SEAT); !seat)
-    {
-        spdlog::error("Create Seat failed");
-        return false;
-    }
+    seat = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
 
     if (scene = Scene::create(outputLayout->getHandle(), linuxDmabuf); !scene)
     {

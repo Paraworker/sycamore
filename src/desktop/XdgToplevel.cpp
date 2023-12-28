@@ -53,7 +53,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         // Layout stuff
         auto& requested = m_toplevel->requested;
 
-        auto output = Core::instance.seat->getCursor().atOutput();
+        auto output = Core::instance.seat->cursor.atOutput();
 
         setToOutputCenter(output);
 

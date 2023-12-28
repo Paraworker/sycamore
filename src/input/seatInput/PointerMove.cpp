@@ -6,7 +6,7 @@ namespace sycamore
 
 PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
     : m_toplevel{toplevel}
-    , m_delta{seat.getCursor().getPosition() - toplevel->getPosition().into<double>()}
+    , m_delta{seat.cursor.getPosition() - toplevel->getPosition().into<double>()}
     , m_seat{seat}
 {
     m_toplevelUnmap
@@ -22,7 +22,7 @@ PointerMove::~PointerMove() = default;
 void PointerMove::onEnable()
 {
     wlr_seat_pointer_notify_clear_focus(m_seat.getHandle());
-    m_seat.getCursor().setXcursor("grabbing");
+    m_seat.cursor.setXcursor("grabbing");
 }
 
 void PointerMove::onDisable()
@@ -32,7 +32,7 @@ void PointerMove::onDisable()
 
 void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.getCursor().getPointerButtonCount() == 0)
+    if (m_seat.cursor.getPointerButtonCount() == 0)
     {
         // If there is no button being pressed
         // we back to default.
@@ -43,7 +43,7 @@ void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 void PointerMove::onPointerMotion(uint32_t timeMsec)
 {
     // Move the grabbed toplevel to the new position.
-    m_toplevel->moveTo((m_seat.getCursor().getPosition() - m_delta).into<int32_t>());
+    m_toplevel->moveTo((m_seat.cursor.getPosition() - m_delta).into<int32_t>());
 }
 
 }

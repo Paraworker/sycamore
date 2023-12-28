@@ -14,7 +14,7 @@ void Layer::create(wlr_layer_surface_v1* layerSurface)
     // Confirm output
     if (!layerSurface->output)
     {
-        auto output = Core::instance.seat->getCursor().atOutput();
+        auto output = Core::instance.seat->cursor.atOutput();
         if (!output)
         {
             spdlog::error("No output under cursor for layerSurface");
