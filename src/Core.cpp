@@ -33,7 +33,7 @@ struct Backend
         return handle;
     }
 
-    explicit Backend(wlr_backend* handle) : handle{handle}
+    explicit Backend(wlr_backend* handle)
     {
         newInput
         .connect(handle->events.new_input)
@@ -59,11 +59,9 @@ struct Backend
 
     ~Backend() = default;
 
-    wlr_backend* handle;
-
-    Listener     newInput;
-    Listener     newOutput;
-    Listener     destroy;
+    Listener newInput;
+    Listener newOutput;
+    Listener destroy;
 };
 
 // wlr_compositor helper
@@ -83,7 +81,7 @@ struct Compositor
         return handle;
     }
 
-    explicit Compositor(wlr_compositor* handle) : handle{handle}
+    explicit Compositor(wlr_compositor* handle)
     {
         newSurface
         .connect(handle->events.new_surface)
@@ -102,10 +100,8 @@ struct Compositor
 
     ~Compositor() = default;
 
-    wlr_compositor* handle;
-
-    Listener        newSurface;
-    Listener        destroy;
+    Listener newSurface;
+    Listener destroy;
 };
 
 bool Core::setup()
@@ -164,13 +160,8 @@ bool Core::setup()
         return false;
     }
 
-    if (outputLayout = OutputLayout::create(display); !outputLayout)
-    {
-        spdlog::error("Create OutputLayout failed");
-        return false;
-    }
-
-    seat = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
+    outputLayout = OutputLayout::create(display);
+    seat         = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
 
     if (scene = Scene::create(outputLayout->getHandle(), linuxDmabuf); !scene)
     {
