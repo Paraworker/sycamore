@@ -16,18 +16,12 @@ class XdgShell
 {
 public:
     /**
-     * @brief Init XDG shell
+     * @brief Create XDG shell
      */
-    static void init(wl_display* display)
+    static void create(wl_display* display)
     {
-        auto handle = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
-        if (!handle)
-        {
-            throw std::runtime_error("Create wlr_xdg_shell failed");
-        }
-
-        // Be destroyed by listener
-        new XdgShell{handle};
+        // Will be destroyed by listener
+        new XdgShell{display};
     }
 
     XdgShell(const XdgShell&) = delete;
@@ -36,8 +30,14 @@ public:
     XdgShell& operator=(XdgShell&&) = delete;
 
 private:
-    explicit XdgShell(wlr_xdg_shell* handle) noexcept
+    explicit XdgShell(wl_display* display)
     {
+        auto handle = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
+        if (!handle)
+        {
+            throw std::runtime_error("Create wlr_xdg_shell failed!");
+        }
+
         m_newToplevel
         .connect(handle->events.new_toplevel)
         .set([](void* data)

@@ -16,18 +16,12 @@ class LayerShell
 {
 public:
     /**
-     * @brief Init wlr layer shell
+     * @brief Create wlr layer shell
      */
-    static void init(wl_display* display)
+    static void create(wl_display* display)
     {
-        auto handle = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
-        if (!handle)
-        {
-            throw std::runtime_error("Create wlr_layer_shell_v1 failed");
-        }
-
-        // Be destroyed by listener
-        new LayerShell{handle};
+        // Will be destroyed by listener
+        new LayerShell{display};
     }
 
     LayerShell(const LayerShell&) = delete;
@@ -36,8 +30,14 @@ public:
     LayerShell& operator=(LayerShell&&) = delete;
 
 private:
-    explicit LayerShell(wlr_layer_shell_v1* handle) noexcept
+    explicit LayerShell(wl_display* display)
     {
+        auto handle = wlr_layer_shell_v1_create(display, LAYER_SHELL_VERSION);
+        if (!handle)
+        {
+            throw std::runtime_error("Create wlr_layer_shell_v1 failed!");
+        }
+
         m_newSurface
         .connect(handle->events.new_surface)
         .set([](void* data)

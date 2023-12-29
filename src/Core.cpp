@@ -162,11 +162,10 @@ bool Core::setup()
 
     outputLayout = OutputLayout::create(display);
     seat         = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
-
     scene        = std::make_unique<Scene>(outputLayout->getHandle(), linuxDmabuf);
 
-    XdgShell::init(display);
-    LayerShell::init(display);
+    XdgShell::create(display);
+    LayerShell::create(display);
 
     if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
