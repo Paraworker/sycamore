@@ -50,7 +50,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     // Start an implicit grab if seat has a focused surface
     if (auto& state = m_seat.getHandle()->pointer_state; state.focused_surface)
     {
-        m_seat.setInput(new ImplicitGrab{state.focused_surface, {state.sx, state.sy}, m_seat});
+        m_seat.setInput<ImplicitGrab>(state.focused_surface, Point{state.sx, state.sy}, m_seat);
     }
 }
 

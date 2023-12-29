@@ -26,7 +26,7 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
     .connect(toplevel->events.unmap)
     .set([this](auto)
     {
-        m_seat.setInput(new DefaultInput{m_seat});
+        m_seat.setInput<DefaultInput>(m_seat);
     });
 }
 
@@ -50,7 +50,7 @@ void PointerResize::onPointerButton(wlr_pointer_button_event* event)
     {
         // If there is no button being pressed
         // we back to default.
-        m_seat.setInput(new DefaultInput{m_seat});
+        m_seat.setInput<DefaultInput>(m_seat);
     }
 }
 

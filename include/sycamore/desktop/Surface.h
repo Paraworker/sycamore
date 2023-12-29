@@ -39,7 +39,7 @@ private:
 
     ~Surface()
     {
-        Core::instance.seat->getInput().rebasePointer();
+        Core::instance.seat->input->rebasePointer();
     }
 
 private:

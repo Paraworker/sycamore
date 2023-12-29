@@ -98,7 +98,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         if (memcmp(&m_committedGeometry, &newGeometry, sizeof(wlr_box)) != 0)
         {
             m_committedGeometry = newGeometry;
-            Core::instance.seat->getInput().rebasePointer();
+            Core::instance.seat->input->rebasePointer();
         }
     });
 
@@ -114,7 +114,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             return;
         }
 
-        Core::instance.seat->setInput(new PointerMove{this, *Core::instance.seat});
+        Core::instance.seat->setInput<PointerMove>(this, *Core::instance.seat);
     });
 
     m_resize.set([this](void* data)
@@ -125,7 +125,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         }
 
         auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
-        Core::instance.seat->setInput(new PointerResize{this, event->edges, *Core::instance.seat});
+        Core::instance.seat->setInput<PointerResize>(this, event->edges, *Core::instance.seat);
     });
 
     m_fullscreen.set([this](auto)

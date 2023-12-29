@@ -50,7 +50,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
         enable();
 
         wlr_cursor_move(m_handle, &event->pointer->base, event->delta_x, event->delta_y);
-        m_seat.getInput().onPointerMotion(event->time_msec);
+        m_seat.input->onPointerMotion(event->time_msec);
     });
 
     m_motionAbsolute
@@ -62,7 +62,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
         enable();
 
         wlr_cursor_warp_absolute(m_handle, &event->pointer->base, event->x, event->y);
-        m_seat.getInput().onPointerMotion(event->time_msec);
+        m_seat.input->onPointerMotion(event->time_msec);
     });
 
     m_button
@@ -82,7 +82,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
             --m_pointerButtonCount;
         }
 
-        m_seat.getInput().onPointerButton(event);
+        m_seat.input->onPointerButton(event);
     });
 
     m_axis
@@ -90,7 +90,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
+        m_seat.input->onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
     });
 
     m_frame
@@ -106,7 +106,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
+        m_seat.input->onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
     });
 
     m_swipeUpdate
@@ -114,7 +114,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
+        m_seat.input->onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
     });
 
     m_swipeEnd
@@ -122,7 +122,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
+        m_seat.input->onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
     });
 
     m_pinchBegin
@@ -130,7 +130,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
+        m_seat.input->onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
     });
 
     m_pinchUpdate
@@ -138,7 +138,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
+        m_seat.input->onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
     });
 
     m_pinchEnd
@@ -146,7 +146,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
+        m_seat.input->onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
     });
 
     m_holdBegin
@@ -154,7 +154,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
+        m_seat.input->onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
     });
 
     m_holdEnd
@@ -162,7 +162,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     .set([this](void* data)
     {
         enable();
-        m_seat.getInput().onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
+        m_seat.input->onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
     });
 }
 
@@ -196,7 +196,7 @@ void Cursor::enable()
 
     m_enabled = true;
 
-    m_seat.getInput().rebasePointer();
+    m_seat.input->rebasePointer();
 }
 
 void Cursor::disable()

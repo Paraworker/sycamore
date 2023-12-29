@@ -133,7 +133,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
         if (needRebase)
         {
-            Core::instance.seat->getInput().rebasePointer();
+            Core::instance.seat->input->rebasePointer();
         }
     });
 

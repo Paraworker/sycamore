@@ -6,6 +6,8 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
+#include <memory>
+
 namespace sycamore
 {
 
@@ -19,23 +21,20 @@ public:
      */
     static Seat* create(wl_display* display, const char* name, wlr_output_layout* layout);
 
-    auto getHandle() const
+    /**
+     * @brief Get wlr_seat
+     */
+    auto getHandle() noexcept
     {
         return m_handle;
     }
 
-    SeatInput& getInput() const
+    template<typename T, typename... Args>
+    void setInput(Args&&... args)
     {
-        return *m_input;
-    }
-
-    void setInput(SeatInput* newInput)
-    {
-        m_input->onDisable();
-        delete m_input;
-
-        m_input = newInput;
-        newInput->onEnable();
+        input->onDisable();
+        input.reset(new T{std::forward<Args>(args)...});
+        input->onEnable();
     }
 
     void updatePointerFocus(uint32_t timeMsec);
@@ -63,19 +62,18 @@ private:
     ~Seat();
 
 public:
-    Cursor cursor;
+    Cursor                     cursor;
+    std::unique_ptr<SeatInput> input;
 
 private:
-    SeatInput* m_input;
-    wlr_seat*  m_handle;
+    wlr_seat* m_handle;
 
-private:
-    Listener m_setCursor;
-    Listener m_setSelection;
-    Listener m_setPrimarySelection;
-    Listener m_requestStartDrag;
-    Listener m_startDrag;
-    Listener m_destroy;
+    Listener  m_setCursor;
+    Listener  m_setSelection;
+    Listener  m_setPrimarySelection;
+    Listener  m_requestStartDrag;
+    Listener  m_startDrag;
+    Listener  m_destroy;
 };
 
 }

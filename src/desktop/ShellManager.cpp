@@ -106,7 +106,7 @@ void ShellManager::cycleToplevel()
 
     setFocus(*m_mappedToplevels.front());
 
-    Core::instance.seat->getInput().rebasePointer();
+    Core::instance.seat->input->rebasePointer();
 }
 
 void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* output)

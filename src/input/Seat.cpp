@@ -17,7 +17,7 @@ Seat* Seat::create(wl_display* display, const char* name, wlr_output_layout* lay
 
 Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
     : cursor{layout, *this}
-    , m_input{new DefaultInput{*this}}
+    , input{std::make_unique<DefaultInput>(*this)}
     , m_handle{nullptr}
 {
     if (m_handle = wlr_seat_create(display, name); !m_handle)
@@ -92,7 +92,7 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
             DragIcon::create(drag->icon, *this);
         }
 
-        setInput(new DefaultInput{*this});
+        setInput<DefaultInput>(*this);
     });
 
     m_destroy
@@ -103,11 +103,7 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
     });
 }
 
-Seat::~Seat()
-{
-    m_input->onDisable();
-    delete m_input;
-}
+Seat::~Seat() = default;
 
 void Seat::setCapabilities(uint32_t caps)
 {
@@ -157,7 +153,7 @@ bool Seat::bindingEnterCheck(Toplevel* toplevel) const
     * PointerResize
     */
 
-    if (m_input->type() == SeatInput::BINDING)
+    if (input->type() == SeatInput::BINDING)
     {
         return false;
     }

@@ -14,7 +14,7 @@ ImplicitGrab::ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, S
     .connect(m_surface->events.unmap)
     .set([this](auto)
     {
-        m_seat.setInput(new DefaultInput{m_seat});
+        m_seat.setInput<DefaultInput>(m_seat);
     });
 }
 
@@ -37,7 +37,7 @@ void ImplicitGrab::onPointerButton(wlr_pointer_button_event* event)
 
     if (m_seat.cursor.getPointerButtonCount() == 0)
     {
-        m_seat.setInput(new DefaultInput{m_seat});
+        m_seat.setInput<DefaultInput>(m_seat);
     }
 }
 
