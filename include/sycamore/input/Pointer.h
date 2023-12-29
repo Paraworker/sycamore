@@ -60,8 +60,7 @@ public:
 private:
     wlr_pointer* m_pointerHandle;
 
-private:
-    Listener m_destroy;
+    Listener     m_destroy;
 };
 
 }

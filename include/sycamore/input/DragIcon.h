@@ -27,11 +27,17 @@ public:
     DragIcon& operator=(DragIcon&&) = delete;
 
 private:
+    /**
+     * @brief Constructor
+     */
     DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat);
 
+    /**
+     * @brief Destructor
+     */
     ~DragIcon() = default;
 
-    void setPosition(const Point<int32_t>& pos) const
+    void setPosition(const Point<int32_t>& pos) const noexcept
     {
         wlr_scene_node_set_position(&m_tree->node, pos.x, pos.y);
     }
@@ -41,8 +47,7 @@ private:
     wlr_scene_tree* m_tree;
     Seat&           m_seat;
 
-private:
-    Listener m_destroy;
+    Listener        m_destroy;
 };
 
 class DragIconElement final : public SceneElement

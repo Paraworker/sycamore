@@ -30,7 +30,7 @@ public:
      */
     void syncLeds();
 
-    uint32_t getModifiers() const
+    uint32_t getModifiers() const noexcept
     {
         return wlr_keyboard_get_modifiers(m_keyboardHandle);
     }
@@ -43,10 +43,9 @@ public:
 private:
     wlr_keyboard* m_keyboardHandle;
 
-private:
-    Listener m_modifiers;
-    Listener m_key;
-    Listener m_destroy;
+    Listener      m_modifiers;
+    Listener      m_key;
+    Listener      m_destroy;
 };
 
 }

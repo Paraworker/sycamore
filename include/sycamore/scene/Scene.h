@@ -24,12 +24,18 @@ public:
      */
     ~Scene();
 
-    auto getHandle()
+    /**
+     * @brief Get wlr_scene
+     */
+    auto getHandle() noexcept
     {
         return m_handle;
     }
 
-    auto getLayout()
+    /**
+     * @brief Get wlr_scene_output_layout
+     */
+    auto getLayout() noexcept
     {
         return m_sceneLayout;
     }

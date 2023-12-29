@@ -31,7 +31,7 @@ public:
     /**
      * @brief Return the output name
      */
-    auto name() const
+    auto name() noexcept
     {
         return m_handle->name;
     }
@@ -57,17 +57,17 @@ public:
 
     void arrangeLayers();
 
-    auto* getHandle() const
+    auto getHandle() noexcept
     {
         return m_handle;
     }
 
-    auto getSceneOutput() const
+    auto getSceneOutput() noexcept
     {
         return m_sceneOutput;
     }
 
-    const wlr_box& getUsableArea() const
+    const wlr_box& getUsableArea() const noexcept
     {
         return m_usableArea;
     }
@@ -97,10 +97,9 @@ private:
     wlr_scene_output* m_sceneOutput;
     wlr_box           m_usableArea;
 
-private:
-    Listener m_frame;
-    Listener m_requestState;
-    Listener m_destroy;
+    Listener          m_frame;
+    Listener          m_requestState;
+    Listener          m_destroy;
 };
 
 }

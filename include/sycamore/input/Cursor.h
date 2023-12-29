@@ -60,27 +60,27 @@ public:
 
     Output* atOutput() const;
 
-    void warp(const Point<double>& coords) const
+    void warp(const Point<double>& coords) const noexcept
     {
         wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
     }
 
-    Point<double> getPosition() const
+    Point<double> getPosition() const noexcept
     {
         return {m_handle->x, m_handle->y};
     }
 
-    size_t getPointerButtonCount() const
+    size_t getPointerButtonCount() const noexcept
     {
         return m_pointerButtonCount;
     }
 
-    void attachDevice(wlr_input_device* device) const
+    void attachDevice(wlr_input_device* device) const noexcept
     {
         wlr_cursor_attach_input_device(m_handle, device);
     }
 
-    void detachDevice(wlr_input_device* device) const
+    void detachDevice(wlr_input_device* device) const noexcept
     {
         wlr_cursor_detach_input_device(m_handle, device);
     }
@@ -98,20 +98,19 @@ private:
     size_t               m_pointerButtonCount;
     Seat&                m_seat;
 
-private:
-    Listener m_motion;
-    Listener m_motionAbsolute;
-    Listener m_button;
-    Listener m_axis;
-    Listener m_frame;
-    Listener m_swipeBegin;
-    Listener m_swipeUpdate;
-    Listener m_swipeEnd;
-    Listener m_pinchBegin;
-    Listener m_pinchUpdate;
-    Listener m_pinchEnd;
-    Listener m_holdBegin;
-    Listener m_holdEnd;
+    Listener             m_motion;
+    Listener             m_motionAbsolute;
+    Listener             m_button;
+    Listener             m_axis;
+    Listener             m_frame;
+    Listener             m_swipeBegin;
+    Listener             m_swipeUpdate;
+    Listener             m_swipeEnd;
+    Listener             m_pinchBegin;
+    Listener             m_pinchUpdate;
+    Listener             m_pinchEnd;
+    Listener             m_holdBegin;
+    Listener             m_holdEnd;
 };
 
 }

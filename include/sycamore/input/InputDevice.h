@@ -18,7 +18,7 @@ public:
     /**
      * @brief Get wlr_input_device_type
      */
-    auto type() const
+    auto type() const noexcept
     {
         return m_deviceHandle->type;
     }
@@ -26,7 +26,7 @@ public:
     /**
      * @brief Get device name
      */
-    auto name() const
+    auto name() const noexcept
     {
         return m_deviceHandle->name;
     }

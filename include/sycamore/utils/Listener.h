@@ -22,7 +22,7 @@ public:
 
     /**
      * @brief Destructor
-     * @note Disconnect automatically
+     * @note  Disconnect automatically
      */
     ~Listener() noexcept
     {
@@ -56,7 +56,7 @@ public:
 
     /**
      * @brief Disconnect form signal
-     * @note No-op if signal isn't connected
+     * @note  No-op if signal isn't connected
      */
     Listener& disconnect() noexcept
     {

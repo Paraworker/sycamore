@@ -25,12 +25,15 @@ public:
 
     Output* findOutputAt(const Point<double>& coords) const;
 
-    auto getHandle() const
+    /**
+     * @brief Get wlr_output_layout
+     */
+    auto getHandle() noexcept
     {
         return m_handle;
     }
 
-    size_t getOutputCount() const
+    size_t getOutputCount() const noexcept
     {
         return m_outputCount;
     }
@@ -55,8 +58,7 @@ private:
     wlr_output_layout* m_handle;
     size_t             m_outputCount;
 
-private:
-    Listener m_destroy;
+    Listener           m_destroy;
 };
 
 }
