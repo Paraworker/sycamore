@@ -163,11 +163,7 @@ bool Core::setup()
     outputLayout = OutputLayout::create(display);
     seat         = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
 
-    if (scene = Scene::create(outputLayout->getHandle(), linuxDmabuf); !scene)
-    {
-        spdlog::error("Create Scene failed");
-        return false;
-    }
+    scene        = std::make_unique<Scene>(outputLayout->getHandle(), linuxDmabuf);
 
     XdgShell::init(display);
     LayerShell::init(display);
