@@ -127,7 +127,7 @@ void DefaultInput::rebasePointer()
 {
     if (m_seat.cursor.isEnabled())
     {
-        m_seat.updatePointerFocus(getTimeMsec());
+        m_seat.updatePointerFocus(getMonotonic());
     }
 }
 
