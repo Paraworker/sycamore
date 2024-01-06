@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_IMPLICIT_GRAB_H
 #define SYCAMORE_IMPLICIT_GRAB_H
 
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
@@ -10,7 +9,7 @@
 namespace sycamore
 {
 
-class ImplicitGrab : public SeatInput
+class ImplicitGrab final : public SeatInput
 {
 public:
     ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat);
@@ -43,7 +42,10 @@ public:
 
     void onPointerHoldEnd(wlr_pointer_hold_end_event* event) override;
 
-    Type type() const override { return SeatInput::PASSTHROUGH; }
+    Type type() const override
+    {
+        return PASSTHROUGH;
+    }
 
 private:
     wlr_surface*  m_surface;

@@ -1,5 +1,6 @@
-#include "sycamore/desktop/Layer.h"
 #include "sycamore/output/Output.h"
+
+#include "sycamore/desktop/Layer.h"
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
 

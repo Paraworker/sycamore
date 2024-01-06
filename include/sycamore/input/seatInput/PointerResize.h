@@ -2,7 +2,6 @@
 #define SYCAMORE_POINTER_RESIZE_H
 
 #include "sycamore/desktop/Toplevel.h"
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/Seat.h"
 #include "SeatInput.h"
 
@@ -24,7 +23,10 @@ public:
 
     void onPointerMotion(uint32_t timeMsec) override;
 
-    Type type() const override { return SeatInput::BINDING; }
+    Type type() const override
+    {
+        return BINDING;
+    }
 
 private:
     Toplevel*     m_toplevel;

@@ -1,4 +1,5 @@
 #include "sycamore/input/Cursor.h"
+
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 

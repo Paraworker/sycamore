@@ -1,5 +1,6 @@
-#include "sycamore/input/InputManager.h"
 #include "sycamore/input/Keyboard.h"
+
+#include "sycamore/input/InputManager.h"
 #include "sycamore/input/KeybindingManager.h"
 #include "sycamore/Core.h"
 

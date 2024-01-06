@@ -1,4 +1,5 @@
 #include "sycamore/input/seatInput/ImplicitGrab.h"
+
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 

@@ -6,7 +6,9 @@
 namespace sycamore
 {
 
-class DefaultInput : public SeatInput
+class Seat;
+
+class DefaultInput final : public SeatInput
 {
 public:
     explicit DefaultInput(Seat& seat) : m_seat{seat} {}
@@ -41,7 +43,10 @@ public:
 
     void rebasePointer() override;
 
-    Type type() const override { return SeatInput::PASSTHROUGH; }
+    Type type() const override
+    {
+        return PASSTHROUGH;
+    }
 
 private:
     Seat& m_seat;

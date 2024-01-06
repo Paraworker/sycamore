@@ -9,7 +9,7 @@ namespace sycamore
 /**
  * @brief Create process
  */
-uint64_t spawn(const char* cmd);
+uint64_t spawn(const char* command);
 
 }
 

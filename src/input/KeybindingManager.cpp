@@ -1,4 +1,5 @@
 #include "sycamore/input/KeybindingManager.h"
+
 #include "sycamore/input/keybindingDispatchers.h"
 
 namespace sycamore

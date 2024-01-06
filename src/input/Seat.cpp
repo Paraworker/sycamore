@@ -1,3 +1,5 @@
+#include "sycamore/input/Seat.h"
+
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"

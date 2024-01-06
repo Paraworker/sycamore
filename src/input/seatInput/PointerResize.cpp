@@ -1,4 +1,5 @@
 #include "sycamore/input/seatInput/PointerResize.h"
+
 #include "sycamore/input/seatInput/DefaultInput.h"
 
 namespace sycamore

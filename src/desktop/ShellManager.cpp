@@ -1,4 +1,5 @@
 #include "sycamore/desktop/ShellManager.h"
+
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/output/Output.h"

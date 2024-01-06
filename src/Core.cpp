@@ -1,10 +1,11 @@
+#include "sycamore/Core.h"
+
 #include "sycamore/desktop/shell/LayerShell.h"
 #include "sycamore/desktop/shell/XdgShell.h"
 #include "sycamore/desktop/Surface.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/output/OutputLayout.h"
-#include "sycamore/Core.h"
 
 #include <spdlog/spdlog.h>
 

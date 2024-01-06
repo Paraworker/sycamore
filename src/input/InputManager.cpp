@@ -1,4 +1,5 @@
 #include "sycamore/input/InputManager.h"
+
 #include "sycamore/Core.h"
 
 namespace sycamore

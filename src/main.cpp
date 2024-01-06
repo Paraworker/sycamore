@@ -1,6 +1,7 @@
-#include <getopt.h>
 #include "sycamore/utils/process.h"
 #include "sycamore/Core.h"
+
+#include <getopt.h>
 
 static constexpr char usage[] =
         "Usage: sycamore [options] [command]\n"
@@ -45,13 +46,13 @@ int main(int argc, char **argv)
 
     if (!sycamore::Core::instance.setup())
     {
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     if (!sycamore::Core::instance.start())
     {
         sycamore::Core::instance.teardown();
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     if (startupCmd)

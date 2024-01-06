@@ -1,7 +1,8 @@
+#include "sycamore/input/seatInput/DefaultInput.h"
+
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
-#include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/input/seatInput/ImplicitGrab.h"
 #include "sycamore/utils/time.h"
 #include "sycamore/Core.h"
@@ -9,7 +10,7 @@
 namespace sycamore
 {
 
-static inline void dragIconsUpdatePosition()
+static void dragIconsUpdatePosition()
 {
     wlr_scene_node* node;
     wl_list_for_each(node, &Core::instance.scene->dragIcons->children, link)

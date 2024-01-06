@@ -1,5 +1,6 @@
-#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Layer.h"
+
+#include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Popup.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"

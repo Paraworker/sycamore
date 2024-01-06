@@ -3,8 +3,6 @@
 
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Toplevel.h"
-#include "sycamore/input/InputManager.h"
-#include "sycamore/input/KeybindingManager.h"
 #include "sycamore/utils/process.h"
 #include "sycamore/Core.h"
 
@@ -17,10 +15,10 @@ struct Spawn
 {
     void operator()() const
     {
-        spawn(cmd.c_str());
+        spawn(command.c_str());
     }
 
-    std::string cmd;
+    std::string command;
 };
 
 struct CloseFocusedToplevel

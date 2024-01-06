@@ -1,5 +1,4 @@
 #include "sycamore/desktop/Popup.h"
-#include "sycamore/output/Output.h"
 
 #include <spdlog/spdlog.h>
 

@@ -1,6 +1,7 @@
+#include "sycamore/desktop/XdgToplevel.h"
+
 #include "sycamore/desktop/ShellManager.h"
 #include "sycamore/desktop/Popup.h"
-#include "sycamore/desktop/XdgToplevel.h"
 #include "sycamore/input/seatInput/PointerMove.h"
 #include "sycamore/input/seatInput/PointerResize.h"
 #include "sycamore/Core.h"

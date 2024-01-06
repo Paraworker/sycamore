@@ -6,7 +6,7 @@
 namespace sycamore
 {
 
-uint64_t spawn(const char* cmd)
+uint64_t spawn(const char* command)
 {
     int socket[2];
     if (pipe(socket) != 0)
@@ -46,7 +46,7 @@ uint64_t spawn(const char* cmd)
             // run in grandchild
             close(socket[0]);
             close(socket[1]);
-            execl("/bin/sh", "/bin/sh", "-c", cmd, nullptr);
+            execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
             // exit grandchild
             _exit(0);
         }

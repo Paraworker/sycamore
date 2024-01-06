@@ -1,4 +1,5 @@
 #include "sycamore/input/DragIcon.h"
+
 #include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 

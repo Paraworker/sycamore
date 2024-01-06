@@ -1,4 +1,5 @@
 #include "sycamore/desktop/Toplevel.h"
+
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
 
