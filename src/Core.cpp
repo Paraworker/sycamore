@@ -135,7 +135,6 @@ bool Core::setup()
 
     if (wlr_renderer_get_dmabuf_texture_formats(renderer))
     {
-        wlr_drm_create(display, renderer);
         linuxDmabuf = wlr_linux_dmabuf_v1_create_with_renderer(display, 4, renderer);
     }
 
