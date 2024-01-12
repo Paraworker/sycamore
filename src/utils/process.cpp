@@ -6,13 +6,13 @@
 namespace sycamore
 {
 
-uint64_t spawn(const char* command)
+void spawn(const char* command)
 {
     int socket[2];
     if (pipe(socket) != 0)
     {
         spdlog::error("Create pipe for fork failed");
-        return 0;
+        return;
     }
 
     pid_t child, grandchild;
@@ -22,7 +22,7 @@ uint64_t spawn(const char* command)
         close(socket[0]);
         close(socket[1]);
         spdlog::error("First fork failed");
-        return 0;
+        return;
     }
 
     if (child == 0)
@@ -38,7 +38,8 @@ uint64_t spawn(const char* command)
             close(socket[0]);
             close(socket[1]);
             spdlog::error("Second fork failed");
-            return 0;
+            // exit child
+            _exit(0);
         }
 
         if (grandchild == 0)
@@ -65,8 +66,6 @@ uint64_t spawn(const char* command)
 
     // clear child and leave child to init
     waitpid(child, nullptr, 0);
-
-    return grandchild;
 }
 
 }
