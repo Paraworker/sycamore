@@ -6,10 +6,10 @@
 
 #include <list>
 
-#define LAYER_COUNT 4
-
 namespace sycamore
 {
+
+inline constexpr auto LAYER_COUNT = 4;
 
 class Layer;
 

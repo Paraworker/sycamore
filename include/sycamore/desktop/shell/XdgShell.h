@@ -7,10 +7,10 @@
 
 #include <stdexcept>
 
-#define XDG_SHELL_VERSION 6
-
 namespace sycamore
 {
+
+inline constexpr auto XDG_SHELL_VERSION = 6;
 
 class XdgShell
 {

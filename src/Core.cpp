@@ -9,11 +9,11 @@
 
 #include <spdlog/spdlog.h>
 
-#define WLR_COMPOSITOR_VERSION  6
-#define DEFAULT_SEAT            "seat0"
-
 namespace sycamore
 {
+
+constexpr auto WLR_COMPOSITOR_VERSION = 6;
+constexpr auto DEFAULT_SEAT           = "seat0";
 
 Core Core::instance{};
 

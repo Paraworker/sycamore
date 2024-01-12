@@ -7,10 +7,10 @@
 
 #include <stdexcept>
 
-#define LAYER_SHELL_VERSION 4
-
 namespace sycamore
 {
+
+inline constexpr auto LAYER_SHELL_VERSION = 4;
 
 class LayerShell
 {
