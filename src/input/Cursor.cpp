@@ -91,7 +91,7 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
     });
 
     m_frame.connect(m_handle->events.frame);
-    m_frame.set([this](void* data)
+    m_frame.set([this](auto)
     {
         enable();
         wlr_seat_pointer_notify_frame(m_seat.getHandle());
@@ -156,7 +156,8 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
 
 Cursor::~Cursor()
 {
-    // Disconnect signals before m_handle destroyed
+    // Listeners should be disconnected
+    // before destroying wlr_cursor
     m_motion.disconnect();
     m_motionAbsolute.disconnect();
     m_button.disconnect();
@@ -246,12 +247,10 @@ void Cursor::refreshXcursor()
 
     warp(getPosition());
 
-    if (!m_xcursor)
+    if (m_xcursor)
     {
-        return;
+        wlr_cursor_set_xcursor(m_handle, m_xcursorManager, m_xcursor);
     }
-
-    wlr_cursor_set_xcursor(m_handle, m_xcursorManager, m_xcursor);
 }
 
 void Cursor::updateXcursorTheme(const char* theme, uint32_t size)
@@ -263,8 +262,8 @@ void Cursor::updateXcursorTheme(const char* theme, uint32_t size)
 
     if (m_xcursorManager = createXcursorManager(theme, size); !m_xcursorManager)
     {
-        // fallback to default
-        if (m_xcursorManager = createXcursorManager(theme, size); !m_xcursorManager)
+        // Fallback to default
+        if (m_xcursorManager = createXcursorManager(); !m_xcursorManager)
         {
             throw std::runtime_error("Create default xcursor manager failed!");
         }
