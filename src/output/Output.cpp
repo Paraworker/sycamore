@@ -47,9 +47,8 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
 
     handle->data = this;
 
-    m_frame
-    .connect(handle->events.frame)
-    .set([this](auto)
+    m_frame.connect(handle->events.frame);
+    m_frame.set([this](auto)
     {
         // Render the scene if needed and commit the output
         wlr_scene_output_commit(m_sceneOutput, nullptr);
@@ -59,16 +58,14 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
         wlr_scene_output_send_frame_done(m_sceneOutput, &now);
     });
 
-    m_requestState
-    .connect(handle->events.request_state)
-    .set([this](void* data)
+    m_requestState.connect(handle->events.request_state);
+    m_requestState.set([this](void* data)
     {
         wlr_output_commit_state(m_handle, static_cast<wlr_output_event_request_state*>(data)->state);
     });
 
-    m_destroy
-    .connect(handle->events.destroy)
-    .set([this](auto)
+    m_destroy.connect(handle->events.destroy);
+    m_destroy.set([this](auto)
     {
         wl_signal_emit_mutable(&events.destroy, nullptr);
         Core::instance.outputLayout->remove(this);

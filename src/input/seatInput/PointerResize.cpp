@@ -23,9 +23,8 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
 
     m_delta = m_seat.cursor.getPosition() - border.into<double>();
 
-    m_toplevelUnmap
-    .connect(toplevel->events.unmap)
-    .set([this](auto)
+    m_toplevelUnmap.connect(toplevel->events.unmap);
+    m_toplevelUnmap.set([this](auto)
     {
         m_seat.setInput<DefaultInput>(m_seat);
     });

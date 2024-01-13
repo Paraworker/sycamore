@@ -53,9 +53,8 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     auto& layerList = m_output->layers[m_layer];
     m_iter = layerList.emplace(layerList.end(), this);
 
-    m_outputDestroy
-    .connect(m_output->events.destroy)
-    .set([this](auto)
+    m_outputDestroy.connect(m_output->events.destroy);
+    m_outputDestroy.set([this](auto)
     {
         m_layerSurface->output = nullptr;
 
@@ -65,32 +64,28 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         m_output = nullptr;
     });
 
-    m_newPopup
-    .connect(layerSurface->events.new_popup)
-    .set([this](void* data)
+    m_newPopup.connect(layerSurface->events.new_popup);
+    m_newPopup.set([this](void* data)
     {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
     });
 
-    m_map
-    .connect(layerSurface->surface->events.map)
-    .set([this](auto)
+    m_map.connect(layerSurface->surface->events.map);
+    m_map.set([this](auto)
     {
         ShellManager::instance.onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
 
-    m_unmap
-    .connect(layerSurface->surface->events.unmap)
-    .set([this](auto)
+    m_unmap.connect(layerSurface->surface->events.unmap);
+    m_unmap.set([this](auto)
     {
         ShellManager::instance.onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
 
-    m_commit
-    .connect(layerSurface->surface->events.commit)
-    .set([this](auto)
+    m_commit.connect(layerSurface->surface->events.commit);
+    m_commit.set([this](auto)
     {
         uint32_t committed   = m_layerSurface->current.committed;
         bool     mapped      = m_layerSurface->surface->mapped;
@@ -138,9 +133,8 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         }
     });
 
-    m_destroy
-    .connect(layerSurface->events.destroy)
-    .set([this](auto)
+    m_destroy.connect(layerSurface->events.destroy);
+    m_destroy.set([this](auto)
     {
         delete this;
     });

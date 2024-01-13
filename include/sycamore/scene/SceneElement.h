@@ -30,9 +30,8 @@ protected:
     {
         node->data = this;
 
-        m_destroy
-        .connect(node->events.destroy)
-        .set([this](auto)
+        m_destroy.connect(node->events.destroy);
+        m_destroy.set([this](auto)
         {
             delete this;
         });

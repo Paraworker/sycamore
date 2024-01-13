@@ -38,16 +38,14 @@ private:
             throw std::runtime_error("Create wlr_layer_shell_v1 failed!");
         }
 
-        m_newSurface
-        .connect(handle->events.new_surface)
-        .set([](void* data)
+        m_newSurface.connect(handle->events.new_surface);
+        m_newSurface.set([](void* data)
         {
             Layer::create(static_cast<wlr_layer_surface_v1*>(data));
         });
 
-        m_destroy
-        .connect(handle->events.destroy)
-        .set([this](auto)
+        m_destroy.connect(handle->events.destroy);
+        m_destroy.set([this](auto)
         {
             delete this;
         });

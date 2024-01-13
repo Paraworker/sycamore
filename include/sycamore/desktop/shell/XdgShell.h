@@ -38,16 +38,14 @@ private:
             throw std::runtime_error("Create wlr_xdg_shell failed!");
         }
 
-        m_newToplevel
-        .connect(handle->events.new_toplevel)
-        .set([](void* data)
+        m_newToplevel.connect(handle->events.new_toplevel);
+        m_newToplevel.set([](void* data)
         {
             XdgToplevel::create(static_cast<wlr_xdg_toplevel*>(data));
         });
 
-        m_destroy
-        .connect(handle->events.destroy)
-        .set([this](auto)
+        m_destroy.connect(handle->events.destroy);
+        m_destroy.set([this](auto)
         {
             delete this;
         });

@@ -1,8 +1,8 @@
 #ifndef SYCAMORE_LISTENER_H
 #define SYCAMORE_LISTENER_H
 
+#include <cassert>
 #include <functional>
-#include <stdexcept>
 #include <wayland-server-core.h>
 
 namespace sycamore
@@ -15,64 +15,54 @@ public:
     /**
      * @brief Constructor
      */
-    Listener() noexcept : m_wrapped{{}, onSignal}
+    Listener() : m_wrapped{{}, onSignal}
     {
         wl_list_init(&m_wrapped.link);
     }
 
     /**
      * @brief Destructor
-     * @note  Disconnect automatically
      */
-    ~Listener() noexcept
+    ~Listener()
     {
-        disconnect();
+        if (isConnected())
+        {
+            wl_list_remove(&m_wrapped.link);
+        }
     }
 
     /**
      * @brief Set callback
      */
     template<typename Fn>
-    Listener& set(Fn&& callback)
+    void set(Fn&& callback)
     {
         m_callback = std::forward<Fn>(callback);
-        return *this;
     }
 
     /**
      * @brief Connect to signal
      */
-    Listener& connect(wl_signal& signal)
+    void connect(wl_signal& signal)
     {
-        if (isConnected())
-        {
-            throw std::logic_error("connect() on a connected listener!");
-        }
-
+        assert(!isConnected());
         wl_signal_add(&signal, &m_wrapped);
-        
-        return *this;
     }
 
     /**
      * @brief Disconnect form signal
-     * @note  No-op if signal isn't connected
      */
-    Listener& disconnect() noexcept
+    void disconnect()
     {
-        if (isConnected())
-        {
-            wl_list_remove(&m_wrapped.link);
-            wl_list_init(&m_wrapped.link);
-        }
-
-        return *this;
+        assert(isConnected());
+        wl_list_remove(&m_wrapped.link);
+        wl_list_init(&m_wrapped.link);
     }
 
     /**
      * @brief Is signal connected
      */
-    bool isConnected() const noexcept
+    bool isConnected() const
     {
         return !wl_list_empty(&m_wrapped.link);
     }

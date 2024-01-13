@@ -29,9 +29,8 @@ public:
 private:
     explicit Surface(wlr_surface* handle)
     {
-        m_destroy
-        .connect(handle->events.destroy)
-        .set([this](auto)
+        m_destroy.connect(handle->events.destroy);
+        m_destroy.set([this](auto)
         {
             delete this;
         });

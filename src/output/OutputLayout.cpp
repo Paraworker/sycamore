@@ -24,9 +24,8 @@ OutputLayout::OutputLayout(wl_display* display)
         throw std::runtime_error("Create wlr_output_layout failed!");
     }
 
-    m_destroy
-    .connect(m_handle->events.destroy)
-    .set([this](auto)
+    m_destroy.connect(m_handle->events.destroy);
+    m_destroy.set([this](auto)
     {
         delete this;
     });
