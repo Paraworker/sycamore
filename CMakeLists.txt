@@ -22,6 +22,7 @@ pkg_search_module(WLR REQUIRED wlroots)
 pkg_search_module(WS REQUIRED wayland-server)
 pkg_search_module(XKBCOMMON REQUIRED xkbcommon)
 pkg_search_module(LIBINPUT REQUIRED libinput)
+pkg_search_module(FMT REQUIRED fmt)
 pkg_search_module(SPDLOG REQUIRED spdlog)
 
 set(CMAKE_CXX_FLAGS "-DWLR_USE_UNSTABLE")
@@ -38,6 +39,7 @@ target_link_libraries(
         ${WS_LINK_LIBRARIES}
         ${XKBCOMMON_LINK_LIBRARIES}
         ${LIBINPUT_LINK_LIBRARIES}
+        ${FMT_LINK_LIBRARIES}
         ${SPDLOG_LINK_LIBRARIES}
 )
 

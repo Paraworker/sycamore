@@ -13,6 +13,7 @@ Built-in keybindings:
 Install dependencies:
 
 * cmake
+* fmt
 * libinput
 * spdlog
 * wayland

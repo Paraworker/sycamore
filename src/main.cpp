@@ -1,6 +1,7 @@
 #include "sycamore/utils/process.h"
 #include "sycamore/Core.h"
 
+#include <fmt/core.h>
 #include <getopt.h>
 
 static constexpr char usage[] =
@@ -27,20 +28,20 @@ int main(int argc, char **argv)
         switch (c)
         {
             case 'h':
-                printf("%s", usage);
+                fmt::print(usage);
                 exit(EXIT_SUCCESS);
             case 's':
                 startupCmd = optarg;
                 break;
             default:
-                printf("%s", usage);
+                fmt::print(usage);
                 return EXIT_SUCCESS;
         }
     }
 
     if (optind < argc)
     {
-        printf("%s", usage);
+        fmt::print(usage);
         return EXIT_SUCCESS;
     }
 
