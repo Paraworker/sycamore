@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_LAYER_H
 #define SYCAMORE_LAYER_H
 
-#include "sycamore/scene/SceneElement.h"
+#include "sycamore/scene/Element.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
@@ -84,11 +84,11 @@ private:
     Listener m_destroy;
 };
 
-class LayerElement final : public SceneElement
+class LayerElement final : public scene::Element
 {
 public:
     LayerElement(wlr_scene_node* node, Layer* layer)
-        : SceneElement{SceneElement::LAYER, node}
+        : Element{LAYER, node}
         , m_layer{layer} {}
 
     ~LayerElement() override = default;

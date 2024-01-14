@@ -3,7 +3,7 @@
 
 #include "sycamore/input/Seat.h"
 #include "sycamore/output/OutputLayout.h"
-#include "sycamore/scene/Scene.h"
+#include "sycamore/scene/Tree.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
@@ -19,7 +19,7 @@ public:
     /**
      * @brief Setup server
      */
-    bool setup();
+    void setup();
 
     /**
      * @brief Teardown server
@@ -37,21 +37,23 @@ public:
     void run() const;
 
 public:
-    wl_display*              display      = nullptr;
-    wl_event_loop*           eventLoop    = nullptr;
+    wl_display*              display;
+    wl_event_loop*           eventLoop;
 
-    wlr_backend*             backend      = nullptr;
-    wlr_session*             session      = nullptr;
-    wlr_renderer*            renderer     = nullptr;
-    wlr_allocator*           allocator    = nullptr;
-    wlr_compositor*          compositor   = nullptr;
-    wlr_linux_dmabuf_v1*     linuxDmabuf  = nullptr;
-    wlr_pointer_gestures_v1* gestures     = nullptr;
+    wlr_backend*             backend;
+    wlr_session*             session;
+    wlr_renderer*            renderer;
+    wlr_allocator*           allocator;
+    wlr_compositor*          compositor;
+    wlr_linux_dmabuf_v1*     linuxDmabuf;
+    wlr_pointer_gestures_v1* gestures;
 
-    OutputLayout*            outputLayout = nullptr;
-    Seat*                    seat         = nullptr;
+    OutputLayout*            outputLayout;
 
-    std::unique_ptr<Scene>   scene;
+    Seat*                    seat;
+
+    scene::Tree              sceneTree;
+    wlr_scene_output_layout* sceneOutputLayout;
 
     std::string              socket;
 

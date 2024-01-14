@@ -14,7 +14,7 @@ namespace sycamore
 void XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
     // Create tree
-    auto tree = wlr_scene_xdg_surface_create(Core::instance.scene->shell.toplevel, toplevel->base);
+    auto tree = wlr_scene_xdg_surface_create(Core::instance.sceneTree.shell.toplevel, toplevel->base);
     if (!tree)
     {
         spdlog::error("Create scene tree for XdgToplevel failed!");

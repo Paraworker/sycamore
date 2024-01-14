@@ -45,10 +45,7 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    if (!sycamore::Core::instance.setup())
-    {
-        return EXIT_FAILURE;
-    }
+    sycamore::Core::instance.setup();
 
     if (!sycamore::Core::instance.start())
     {

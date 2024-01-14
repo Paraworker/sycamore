@@ -1,37 +1,29 @@
-#include "sycamore/scene/Scene.h"
+#include "sycamore/scene/Tree.h"
 
 #include <stdexcept>
 
-namespace sycamore
+namespace sycamore::scene
 {
 
-class RootElement final : public SceneElement
+struct RootElement final : Element
 {
-public:
     explicit RootElement(wlr_scene_node* node)
-        : SceneElement(SceneElement::ROOT, node) {}
+        : Element(ROOT, node) {}
 
     ~RootElement() override = default;
 };
 
-Scene::Scene(wlr_output_layout* layout, wlr_linux_dmabuf_v1* dmabuf)
-    : m_handle{nullptr}, m_sceneLayout{nullptr}
+Tree::Tree()
+    : root{nullptr}
+    , shell{nullptr}
+    , dragIcons{nullptr}
 {
-    if (m_handle = wlr_scene_create(); !m_handle)
+    if (root = wlr_scene_create(); !root)
     {
         throw std::runtime_error("Create wlr_scene failed!");
     }
 
-    if (m_sceneLayout = wlr_scene_attach_output_layout(m_handle, layout); !m_sceneLayout)
-    {
-        wlr_scene_node_destroy(&m_handle->tree.node);
-        throw std::runtime_error("Scene attach output layout failed!");
-    }
-
-    wlr_scene_set_linux_dmabuf_v1(m_handle, dmabuf);
-
-    // Create trees
-    shell.root = wlr_scene_tree_create(&m_handle->tree);
+    shell.root = wlr_scene_tree_create(&root->tree);
 
     shell.background = wlr_scene_tree_create(shell.root);
     shell.bottom     = wlr_scene_tree_create(shell.root);
@@ -39,18 +31,18 @@ Scene::Scene(wlr_output_layout* layout, wlr_linux_dmabuf_v1* dmabuf)
     shell.top        = wlr_scene_tree_create(shell.root);
     shell.overlay    = wlr_scene_tree_create(shell.root);
 
-    dragIcons = wlr_scene_tree_create(&m_handle->tree);
+    dragIcons = wlr_scene_tree_create(&root->tree);
 
     // Create RootElement
-    new RootElement{&m_handle->tree.node};
+    new RootElement{&root->tree.node};
 }
 
-Scene::~Scene()
+Tree::~Tree()
 {
-    wlr_scene_node_destroy(&m_handle->tree.node);
+    wlr_scene_node_destroy(&root->tree.node);
 }
 
-wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
+wlr_scene_tree* Tree::treeForLayer(zwlr_layer_shell_v1_layer type) const
 {
     switch (type)
     {
@@ -63,11 +55,11 @@ wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
             return shell.overlay;
         default:
-            return {};
+            throw std::logic_error("unreachable!");
     }
 }
 
-wlr_surface* Scene::surfaceFromNode(wlr_scene_node* node)
+wlr_surface* surfaceFromNode(wlr_scene_node* node)
 {
     if (!node || node->type != WLR_SCENE_NODE_BUFFER)
     {
@@ -83,7 +75,7 @@ wlr_surface* Scene::surfaceFromNode(wlr_scene_node* node)
     return sceneSurface->surface;
 }
 
-SceneElement* Scene::elementFromNode(wlr_scene_node* node)
+Element* elementFromNode(wlr_scene_node* node)
 {
     if (!node)
     {
@@ -108,7 +100,7 @@ SceneElement* Scene::elementFromNode(wlr_scene_node* node)
         tree = tree->node.parent;
     }
 
-    return static_cast<SceneElement*>(tree->node.data);
+    return static_cast<Element*>(tree->node.data);
 }
 
 }

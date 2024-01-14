@@ -4,10 +4,10 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore
+namespace sycamore::scene
 {
 
-class SceneElement
+class Element
 {
 public:
     enum Type
@@ -26,7 +26,7 @@ public:
     }
 
 protected:
-    SceneElement(Type type, wlr_scene_node* node) : m_type{type}
+    Element(Type type, wlr_scene_node* node) : m_type{type}
     {
         node->data = this;
 
@@ -37,7 +37,7 @@ protected:
         m_destroy.connect(node->events.destroy);
     }
 
-    virtual ~SceneElement() = default;
+    virtual ~Element() = default;
 
 protected:
     Type     m_type;

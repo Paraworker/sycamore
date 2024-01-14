@@ -1,8 +1,7 @@
 #ifndef SYCAMORE_TOPLEVEL_H
 #define SYCAMORE_TOPLEVEL_H
 
-#include "sycamore/output/Output.h"
-#include "sycamore/scene/SceneElement.h"
+#include "sycamore/scene/Element.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
@@ -127,11 +126,11 @@ protected:
     Iter            m_iter;
 };
 
-class ToplevelElement final : public SceneElement
+class ToplevelElement final : public scene::Element
 {
 public:
     ToplevelElement(wlr_scene_node* node, Toplevel* toplevel)
-        : SceneElement{SceneElement::TOPLEVEL, node}
+        : Element{TOPLEVEL, node}
         , m_toplevel{toplevel} {}
 
     ~ToplevelElement() override = default;

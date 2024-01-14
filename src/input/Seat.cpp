@@ -115,7 +115,7 @@ void Seat::setCapabilities(uint32_t caps)
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
     Point<double> sCoords{};
-    auto surface = Scene::surfaceFromNode(Core::instance.scene->nodeAt(cursor.getPosition(), sCoords));
+    auto surface = scene::surfaceFromNode(Core::instance.sceneTree.shellAt(cursor.getPosition(), sCoords));
 
     if (!surface)
     {

@@ -20,7 +20,7 @@ Output* Output::create(wlr_output* handle)
         return {};
     }
 
-    auto sceneOutput = wlr_scene_output_create(Core::instance.scene->getHandle(), handle);
+    auto sceneOutput = wlr_scene_output_create(Core::instance.sceneTree.root, handle);
     if (!sceneOutput)
     {
         spdlog::error("Output: {} create wlr_scene_output failed", handle->name);

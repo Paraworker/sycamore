@@ -13,7 +13,7 @@ namespace sycamore
 static void dragIconsUpdatePosition()
 {
     wlr_scene_node* node;
-    wl_list_for_each(node, &Core::instance.scene->dragIcons->children, link)
+    wl_list_for_each(node, &Core::instance.sceneTree.dragIcons->children, link)
     {
         static_cast<DragIconElement*>(node->data)->getIcon().updatePosition();
     }
@@ -39,10 +39,10 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     }
 
     Point<double> sCoords{};
-    if (auto element = Scene::elementFromNode(Core::instance.scene->nodeAt(m_seat.cursor.getPosition(), sCoords)); element)
+    if (auto element = scene::elementFromNode(Core::instance.sceneTree.shellAt(m_seat.cursor.getPosition(), sCoords)); element)
     {
         // If pressed on a toplevel, focus it
-        if (element->type() == SceneElement::TOPLEVEL)
+        if (element->type() == scene::Element::TOPLEVEL)
         {
             ShellManager::instance.setFocus(static_cast<ToplevelElement*>(element)->getToplevel());
         }

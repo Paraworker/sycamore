@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_DRAG_ICON_H
 #define SYCAMORE_DRAG_ICON_H
 
-#include "sycamore/scene/SceneElement.h"
+#include "sycamore/scene/Element.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
@@ -50,11 +50,11 @@ private:
     Listener        m_destroy;
 };
 
-class DragIconElement final : public SceneElement
+class DragIconElement final : public scene::Element
 {
 public:
     DragIconElement(wlr_scene_node* node, DragIcon* icon)
-        : SceneElement(SceneElement::DRAG_ICON, node)
+        : Element(DRAG_ICON, node)
         , m_icon(icon) {}
 
     ~DragIconElement() override = default;

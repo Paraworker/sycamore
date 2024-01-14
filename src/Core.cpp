@@ -100,7 +100,7 @@ struct Compositor
     Listener destroy;
 };
 
-bool Core::setup()
+void Core::setup()
 {
     spdlog::info("Setup Server");
 
@@ -108,22 +108,19 @@ bool Core::setup()
 
     if (display = wl_display_create(); !display)
     {
-        spdlog::error("Create wl_display failed");
-        return false;
+        throw std::runtime_error("Create wl_display failed!");
     }
 
     eventLoop = wl_display_get_event_loop(display);
 
     if (backend = Backend::autocreate(display, session); !backend)
     {
-        spdlog::error("Create wlr_backend failed");
-        return false;
+        throw std::runtime_error("Create wlr_backend failed!");
     }
 
     if (renderer = wlr_renderer_autocreate(backend); !renderer)
     {
-        spdlog::error("Create wlr_renderer failed");
-        return false;
+        throw std::runtime_error("Autocreate wlr_renderer failed!");
     }
 
     wlr_renderer_init_wl_shm(renderer, display);
@@ -135,14 +132,12 @@ bool Core::setup()
 
     if (allocator = wlr_allocator_autocreate(backend, renderer); !allocator)
     {
-        spdlog::error("Create wlr_allocator failed");
-        return false;
+        throw std::runtime_error("Autocreate wlr_allocator failed!");
     }
 
     if (compositor = Compositor::create(display, renderer); !compositor)
     {
-        spdlog::error("Create wlr_compositor failed");
-        return false;
+        throw std::runtime_error("Create wlr_compositor failed!");
     }
 
     wlr_subcompositor_create(display);
@@ -151,21 +146,26 @@ bool Core::setup()
 
     if (gestures = wlr_pointer_gestures_v1_create(display); !gestures)
     {
-        spdlog::error("Create wlr_pointer_gestures_v1 failed");
-        return false;
+        throw std::runtime_error("Create wlr_pointer_gestures_v1 failed!");
     }
 
     outputLayout = OutputLayout::create(display);
-    seat         = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
-    scene        = std::make_unique<Scene>(outputLayout->getHandle(), linuxDmabuf);
+
+    seat = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
+
+    if (sceneOutputLayout = wlr_scene_attach_output_layout(sceneTree.root, outputLayout->getHandle()); !sceneOutputLayout)
+    {
+        throw std::runtime_error("wlr_scene attach output layout failed!");
+    }
+
+    wlr_scene_set_linux_dmabuf_v1(sceneTree.root, linuxDmabuf);
 
     XdgShell::create(display);
     LayerShell::create(display);
 
     if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
-        spdlog::error("Open Wayland socket failed");
-        return false;
+        throw std::runtime_error("Open Wayland socket failed!");
     }
 
     wlr_xdg_output_manager_v1_create(display, outputLayout->getHandle());
@@ -181,8 +181,6 @@ bool Core::setup()
 
     setenv("WAYLAND_DISPLAY", socket.c_str(), true);
     setenv("XDG_CURRENT_DESKTOP", "Sycamore", true);
-
-    return true;
 }
 
 void Core::teardown()
@@ -197,7 +195,7 @@ bool Core::start() const
 
     if (!wlr_backend_start(backend))
     {
-        spdlog::error("Start Backend failed");
+        spdlog::error("Start Backend failed!");
         return false;
     }
 

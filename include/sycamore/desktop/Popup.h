@@ -3,7 +3,8 @@
 
 #include "sycamore/desktop/Layer.h"
 #include "sycamore/desktop/Toplevel.h"
-#include "sycamore/scene/SceneElement.h"
+#include "sycamore/output/Output.h"
+#include "sycamore/scene/Element.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
@@ -118,11 +119,11 @@ private:
     Listener m_destroy;
 };
 
-class PopupElement final : public SceneElement
+class PopupElement final : public scene::Element
 {
 public:
     PopupElement(wlr_scene_node* node, Popup* popup)
-        : SceneElement{SceneElement::POPUP, node}
+        : Element{POPUP, node}
         , m_popup{popup} {}
 
     ~PopupElement() override = default;
