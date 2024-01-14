@@ -53,7 +53,10 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         auto output = Core::instance.seat->cursor.atOutput();
 
-        setToOutputCenter(output);
+        if (output)
+        {
+            setToOutputCenter(*output);
+        }
 
         if (requested.maximized)
         {

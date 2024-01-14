@@ -42,7 +42,7 @@ public:
 public:
     Output* getOutput() const;
 
-    void setToOutputCenter(Output* output);
+    void setToOutputCenter(const Output& output);
 
     void moveTo(const Point<int32_t>& position) const
     {

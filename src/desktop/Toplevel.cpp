@@ -24,14 +24,9 @@ Output* Toplevel::getOutput() const
     return Core::instance.seat->cursor.atOutput();
 }
 
-void Toplevel::setToOutputCenter(Output* output)
+void Toplevel::setToOutputCenter(const Output& output)
 {
-    if (!output)
-    {
-        return;
-    }
-
-    auto outputGeo   = output->getLayoutGeometry();
+    auto outputGeo   = output.getLayoutGeometry();
     auto center      = boxGetCenterCoords(outputGeo);
     auto toplevelGeo = getGeometry();
 
