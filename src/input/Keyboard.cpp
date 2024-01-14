@@ -15,8 +15,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 {
     spdlog::info("New Keyboard: {}", deviceHandle->name);
 
-    m_modifiers.connect(m_keyboardHandle->events.modifiers);
-    m_modifiers.set([this](auto)
+    m_modifiers.notify([this](auto)
     {
         auto seatHandle = Core::instance.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
@@ -24,9 +23,9 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
         syncLeds();
     });
+    m_modifiers.connect(m_keyboardHandle->events.modifiers);
 
-    m_key.connect(m_keyboardHandle->events.key);
-    m_key.set([this](void* data)
+    m_key.notify([this](void* data)
     {
         auto event = static_cast<wlr_keyboard_key_event*>(data);
 
@@ -58,12 +57,13 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
             syncLeds();
         }
     });
+    m_key.connect(m_keyboardHandle->events.key);
 
-    m_destroy.connect(deviceHandle->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         InputManager::instance.onDestroyDevice(this);
     });
+    m_destroy.connect(deviceHandle->events.destroy);
 
     apply();
 }

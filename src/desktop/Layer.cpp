@@ -53,8 +53,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     auto& layerList = m_output->layers[m_layer];
     m_iter = layerList.emplace(layerList.end(), this);
 
-    m_outputDestroy.connect(m_output->events.destroy);
-    m_outputDestroy.set([this](auto)
+    m_outputDestroy.notify([this](auto)
     {
         m_layerSurface->output = nullptr;
 
@@ -63,29 +62,29 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         m_output->layers[m_layer].erase(m_iter);
         m_output = nullptr;
     });
+    m_outputDestroy.connect(m_output->events.destroy);
 
-    m_newPopup.connect(layerSurface->events.new_popup);
-    m_newPopup.set([this](void* data)
+    m_newPopup.notify([this](void* data)
     {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
     });
+    m_newPopup.connect(layerSurface->events.new_popup);
 
-    m_map.connect(layerSurface->surface->events.map);
-    m_map.set([this](auto)
+    m_map.notify([this](auto)
     {
         ShellManager::instance.onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
+    m_map.connect(layerSurface->surface->events.map);
 
-    m_unmap.connect(layerSurface->surface->events.unmap);
-    m_unmap.set([this](auto)
+    m_unmap.notify([this](auto)
     {
         ShellManager::instance.onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
+    m_unmap.connect(layerSurface->surface->events.unmap);
 
-    m_commit.connect(layerSurface->surface->events.commit);
-    m_commit.set([this](auto)
+    m_commit.notify([this](auto)
     {
         uint32_t committed   = m_layerSurface->current.committed;
         bool     mapped      = m_layerSurface->surface->mapped;
@@ -132,12 +131,13 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
             Core::instance.seat->input->rebasePointer();
         }
     });
+    m_commit.connect(layerSurface->surface->events.commit);
 
-    m_destroy.connect(layerSurface->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         delete this;
     });
+    m_destroy.connect(layerSurface->events.destroy);
 
     // Create LayerElement
     new LayerElement{&helper->tree->node, this};

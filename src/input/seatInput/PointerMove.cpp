@@ -10,11 +10,11 @@ PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
     , m_delta{seat.cursor.getPosition() - toplevel->getPosition().into<double>()}
     , m_seat{seat}
 {
-    m_toplevelUnmap.connect(toplevel->events.unmap);
-    m_toplevelUnmap.set([this](auto)
+    m_toplevelUnmap.notify([this](auto)
     {
         m_seat.setInput<DefaultInput>(m_seat);
     });
+    m_toplevelUnmap.connect(toplevel->events.unmap);
 }
 
 PointerMove::~PointerMove() = default;

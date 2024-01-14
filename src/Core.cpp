@@ -36,23 +36,23 @@ struct Backend
 
     explicit Backend(wlr_backend* handle)
     {
-        newInput.connect(handle->events.new_input);
-        newInput.set([](void* data)
+        newInput.notify([](void* data)
         {
             InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
         });
+        newInput.connect(handle->events.new_input);
 
-        newOutput.connect(handle->events.new_output);
-        newOutput.set([](void* data)
+        newOutput.notify([](void* data)
         {
             Output::create(static_cast<wlr_output*>(data));
         });
+        newOutput.connect(handle->events.new_output);
 
-        destroy.connect(handle->events.destroy);
-        destroy.set([this](auto)
+        destroy.notify([this](auto)
         {
             delete this;
         });
+        destroy.connect(handle->events.destroy);
     }
 
     ~Backend() = default;
@@ -81,17 +81,17 @@ struct Compositor
 
     explicit Compositor(wlr_compositor* handle)
     {
-        newSurface.connect(handle->events.new_surface);
-        newSurface.set([](void* data)
+        newSurface.notify([](void* data)
         {
             Surface::create(static_cast<wlr_surface*>(data));
         });
+        newSurface.connect(handle->events.new_surface);
 
-        destroy.connect(handle->events.destroy);
-        destroy.set([this](auto)
+        destroy.notify([this](auto)
         {
             delete this;
         });
+        destroy.connect(handle->events.destroy);
     }
 
     ~Compositor() = default;

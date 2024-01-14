@@ -35,7 +35,7 @@ public:
      * @brief Set callback
      */
     template<typename Fn>
-    void set(Fn&& callback)
+    void notify(Fn&& callback)
     {
         m_callback = std::forward<Fn>(callback);
     }

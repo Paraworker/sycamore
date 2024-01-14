@@ -16,11 +16,11 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 
     Core::instance.seat->cursor.attachDevice(deviceHandle);
 
-    m_destroy.connect(deviceHandle->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         InputManager::instance.onDestroyDevice(this);
     });
+    m_destroy.connect(deviceHandle->events.destroy);
 
     apply();
 }

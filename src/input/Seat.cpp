@@ -27,8 +27,7 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
         throw std::runtime_error("Create wlr_seat failed!");
     }
 
-    m_setCursor.connect(m_handle->events.request_set_cursor);
-    m_setCursor.set([this](void* data)
+    m_setCursor.notify([this](void* data)
     {
         auto event = static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
 
@@ -40,23 +39,23 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
 
         cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
     });
+    m_setCursor.connect(m_handle->events.request_set_cursor);
 
-    m_setSelection.connect(m_handle->events.request_set_selection);
-    m_setSelection.set([this](void* data)
+    m_setSelection.notify([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_selection_event*>(data);
         wlr_seat_set_selection(m_handle, event->source, event->serial);
     });
+    m_setSelection.connect(m_handle->events.request_set_selection);
 
-    m_setPrimarySelection.connect(m_handle->events.request_set_primary_selection);
-    m_setPrimarySelection.set([this](void* data)
+    m_setPrimarySelection.notify([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_primary_selection_event*>(data);
         wlr_seat_set_primary_selection(m_handle, event->source, event->serial);
     });
+    m_setPrimarySelection.connect(m_handle->events.request_set_primary_selection);
 
-    m_requestStartDrag.connect(m_handle->events.request_start_drag);
-    m_requestStartDrag.set([this](void* data)
+    m_requestStartDrag.notify([this](void* data)
     {
         auto event = static_cast<wlr_seat_request_start_drag_event*>(data);
 
@@ -77,9 +76,9 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
 
         wlr_data_source_destroy(event->drag->source);
     });
+    m_requestStartDrag.connect(m_handle->events.request_start_drag);
 
-    m_startDrag.connect(m_handle->events.start_drag);
-    m_startDrag.set([this](void* data)
+    m_startDrag.notify([this](void* data)
     {
         auto drag = static_cast<wlr_drag*>(data);
 
@@ -91,12 +90,13 @@ Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
 
         setInput<DefaultInput>(*this);
     });
+    m_startDrag.connect(m_handle->events.start_drag);
 
-    m_destroy.connect(m_handle->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         delete this;
     });
+    m_destroy.connect(m_handle->events.destroy);
 }
 
 Seat::~Seat() = default;

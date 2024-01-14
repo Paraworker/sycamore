@@ -22,32 +22,32 @@ void Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const Owne
 Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner)
     : m_handle{handle}, m_tree{tree}, m_owner{std::move(owner)}
 {
-    m_surfaceCommit.connect(handle->base->surface->events.commit);
-    m_surfaceCommit.set([this](auto)
+    m_surfaceCommit.notify([this](auto)
     {
         if (m_handle->base->initial_commit)
         {
             m_owner->unconstrain(*this);
         }
     });
+    m_surfaceCommit.connect(handle->base->surface->events.commit);
 
-    m_reposition.connect(handle->events.reposition);
-    m_reposition.set([this](auto)
+    m_reposition.notify([this](auto)
     {
         m_owner->unconstrain(*this);
     });
+    m_reposition.connect(handle->events.reposition);
 
-    m_newPopup.connect(handle->base->events.new_popup);
-    m_newPopup.set([this](void* data)
+    m_newPopup.notify([this](void* data)
     {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, m_owner);
     });
+    m_newPopup.connect(handle->base->events.new_popup);
 
-    m_destroy.connect(handle->base->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         delete this;
     });
+    m_destroy.connect(handle->base->events.destroy);
 
     // Create SceneElement;
     new PopupElement{&tree->node, this};

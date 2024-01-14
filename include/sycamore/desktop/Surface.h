@@ -29,11 +29,11 @@ public:
 private:
     explicit Surface(wlr_surface* handle)
     {
-        m_destroy.connect(handle->events.destroy);
-        m_destroy.set([this](auto)
+        m_destroy.notify([this](auto)
         {
             delete this;
         });
+        m_destroy.connect(handle->events.destroy);
     }
 
     ~Surface()

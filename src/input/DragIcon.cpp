@@ -24,11 +24,11 @@ void DragIcon::create(wlr_drag_icon* handle, Seat& seat)
 DragIcon::DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat)
     : m_handle{handle}, m_tree{tree}, m_seat{seat}
 {
-    m_destroy.connect(handle->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         delete this;
     });
+    m_destroy.connect(handle->events.destroy);
 
     updatePosition();
 

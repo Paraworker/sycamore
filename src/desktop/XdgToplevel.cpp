@@ -29,14 +29,13 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     : Toplevel{toplevel->base->surface, tree}, m_toplevel{toplevel}
 {
     // On creation, we only connect destroy, map, unmap
-    m_destroy.connect(toplevel->base->events.destroy);
-    m_destroy.set([this](auto)
+    m_destroy.notify([this](auto)
     {
         delete this;
     });
+    m_destroy.connect(toplevel->base->events.destroy);
 
-    m_map.connect(m_surface->events.map);
-    m_map.set([this](auto)
+    m_map.notify([this](auto)
     {
         ShellManager::instance.onToplevelMap(*this);
 
@@ -68,9 +67,9 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         wl_signal_emit_mutable(&events.map, nullptr);
     });
+    m_map.connect(m_surface->events.map);
 
-    m_unmap.connect(m_surface->events.unmap);
-    m_unmap.set([this](auto)
+    m_unmap.notify([this](auto)
     {
         // Disconnect signals
         m_commit.disconnect();
@@ -85,10 +84,11 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
+    m_unmap.connect(m_surface->events.unmap);
 
     // All listeners below are not connected util map
 
-    m_commit.set([this](auto)
+    m_commit.notify([this](auto)
     {
         auto newGeometry = getGeometry();
 
@@ -100,12 +100,12 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         }
     });
 
-    m_newPopup.set([this](void* data)
+    m_newPopup.notify([this](void* data)
     {
         Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ToplevelHandler>(this));
     });
 
-    m_move.set([this](auto)
+    m_move.notify([this](auto)
     {
         if (!Core::instance.seat->bindingEnterCheck(this))
         {
@@ -115,7 +115,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         Core::instance.seat->setInput<PointerMove>(this, *Core::instance.seat);
     });
 
-    m_resize.set([this](void* data)
+    m_resize.notify([this](void* data)
     {
         if (!Core::instance.seat->bindingEnterCheck(this))
         {
@@ -126,7 +126,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         Core::instance.seat->setInput<PointerResize>(this, event->edges, *Core::instance.seat);
     });
 
-    m_fullscreen.set([this](auto)
+    m_fullscreen.notify([this](auto)
     {
         auto&   requested = m_toplevel->requested;
         bool    state     = requested.fullscreen;
@@ -148,13 +148,13 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         ShellManager::instance.fullscreenRequest(*this, state, output);
     });
 
-    m_maximize.set([this](auto)
+    m_maximize.notify([this](auto)
     {
         bool state = m_toplevel->requested.maximized;
         ShellManager::maximizeRequest(*this, state, state ? getOutput() : nullptr);
     });
 
-    m_minimize.set([](auto)
+    m_minimize.notify([](auto)
     {
         // TODO
     });

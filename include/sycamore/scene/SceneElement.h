@@ -30,11 +30,11 @@ protected:
     {
         node->data = this;
 
-        m_destroy.connect(node->events.destroy);
-        m_destroy.set([this](auto)
+        m_destroy.notify([this](auto)
         {
             delete this;
         });
+        m_destroy.connect(node->events.destroy);
     }
 
     virtual ~SceneElement() = default;
