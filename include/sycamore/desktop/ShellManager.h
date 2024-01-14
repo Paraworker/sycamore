@@ -1,8 +1,6 @@
 #ifndef SYCAMORE_SHELL_MANAGER_H
 #define SYCAMORE_SHELL_MANAGER_H
 
-#include "sycamore/utils/Listener.h"
-
 #include <list>
 
 namespace sycamore

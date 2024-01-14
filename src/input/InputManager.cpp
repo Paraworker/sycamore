@@ -53,13 +53,13 @@ void InputManager::onNewDevice(wlr_input_device* handle)
 void InputManager::onDestroyDevice(Keyboard* keyboard)
 {
     m_keyboards.erase(keyboard->iter());
-    Core::instance.seat->setCapabilities(capabilities());
+    core.seat->setCapabilities(capabilities());
 }
 
 void InputManager::onDestroyDevice(Pointer* pointer)
 {
     m_pointers.erase(pointer->iter());
-    Core::instance.seat->setCapabilities(capabilities());
+    core.seat->setCapabilities(capabilities());
 }
 
 void InputManager::newKeyboard(wlr_input_device* handle)
@@ -67,7 +67,7 @@ void InputManager::newKeyboard(wlr_input_device* handle)
     auto iter = m_keyboards.emplace(m_keyboards.end(), handle);
     iter->iter(iter);
 
-    Core::instance.seat->setCapabilities(capabilities());
+    core.seat->setCapabilities(capabilities());
 }
 
 void InputManager::newPointer(wlr_input_device* handle)
@@ -75,7 +75,7 @@ void InputManager::newPointer(wlr_input_device* handle)
     auto iter = m_pointers.emplace(m_pointers.end(), handle);
     iter->iter(iter);
 
-    Core::instance.seat->setCapabilities(capabilities());
+    core.seat->setCapabilities(capabilities());
 }
 
 }

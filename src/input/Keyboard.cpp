@@ -17,7 +17,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_modifiers.notify([this](auto)
     {
-        auto seatHandle = Core::instance.seat->getHandle();
+        auto seatHandle = core.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
 
@@ -50,7 +50,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
         if (!handled)
         {
-            auto seatHandle = Core::instance.seat->getHandle();
+            auto seatHandle = core.seat->getHandle();
             wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
             wlr_seat_keyboard_notify_key(seatHandle, event->time_msec, event->keycode, event->state);
 

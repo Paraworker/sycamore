@@ -4,23 +4,25 @@
 #include <fmt/core.h>
 #include <getopt.h>
 
-static constexpr char usage[] =
-        "Usage: sycamore [options] [command]\n"
-        "\n"
-        "  -h, --help             Show this help message.\n"
-        "  -s, --startup_cmd      Startup with command.\n"
-        "\n";
-
-static constexpr option longOptions[] =
+static constexpr auto usage
 {
-        {"help", no_argument, nullptr, 'h'},
-        {"startup_cmd", required_argument, nullptr, 's'},
-        {nullptr, 0, nullptr, 0}
+    "Usage: sycamore [options] [command]\n"
+    "\n"
+    "  -h, --help             Show this help message.\n"
+    "  -s, --startup_cmd      Startup with command.\n"
+    "\n"
+};
+
+static constexpr option longOptions[]
+{
+    {"help", no_argument, nullptr, 'h'},
+    {"startup_cmd", required_argument, nullptr, 's'},
+    {nullptr, 0, nullptr, 0},
 };
 
 int main(int argc, char **argv)
 {
-    const char* startupCmd = nullptr;
+    const char* command{};
 
     int c, i;
     while ((c = getopt_long(argc, argv, "s:h", longOptions, &i)) != -1)
@@ -29,9 +31,9 @@ int main(int argc, char **argv)
         {
             case 'h':
                 fmt::print(usage);
-                exit(EXIT_SUCCESS);
+                return EXIT_SUCCESS;
             case 's':
-                startupCmd = optarg;
+                command = optarg;
                 break;
             default:
                 fmt::print(usage);
@@ -45,21 +47,17 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    sycamore::Core::instance.setup();
+    setenv("XDG_BACKEND", "wayland", true);
+    setenv("XDG_CURRENT_DESKTOP", "Sycamore", true);
 
-    if (!sycamore::Core::instance.start())
+    sycamore::core.start();
+
+    if (command)
     {
-        sycamore::Core::instance.teardown();
-        return EXIT_FAILURE;
+        sycamore::spawn(command);
     }
 
-    if (startupCmd)
-    {
-        sycamore::spawn(startupCmd);
-    }
+    sycamore::core.run();
 
-    sycamore::Core::instance.run();
-
-    sycamore::Core::instance.teardown();
     return EXIT_SUCCESS;
 }

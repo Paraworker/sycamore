@@ -14,7 +14,7 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 {
     spdlog::info("New Pointer: {}", deviceHandle->name);
 
-    Core::instance.seat->cursor.attachDevice(deviceHandle);
+    core.seat->cursor.attachDevice(deviceHandle);
 
     m_destroy.notify([this](auto)
     {
@@ -27,7 +27,7 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 
 Pointer::~Pointer()
 {
-    Core::instance.seat->cursor.detachDevice(m_deviceHandle);
+    core.seat->cursor.detachDevice(m_deviceHandle);
 }
 
 bool Pointer::isTouchpad() const

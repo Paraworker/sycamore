@@ -13,14 +13,14 @@ Output* Output::create(wlr_output* handle)
 {
     spdlog::info("New Output: {}", handle->name);
 
-    if (!wlr_output_init_render(handle, Core::instance.allocator, Core::instance.renderer))
+    if (!wlr_output_init_render(handle, core.allocator, core.renderer))
     {
         spdlog::error("Output: {} init render failed", handle->name);
         wlr_output_destroy(handle);
         return {};
     }
 
-    auto sceneOutput = wlr_scene_output_create(Core::instance.sceneTree.root, handle);
+    auto sceneOutput = wlr_scene_output_create(core.sceneTree.root, handle);
     if (!sceneOutput)
     {
         spdlog::error("Output: {} create wlr_scene_output failed", handle->name);
@@ -30,7 +30,7 @@ Output* Output::create(wlr_output* handle)
 
     auto output = new Output{handle, sceneOutput};
 
-    Core::instance.outputLayout->addAuto(output);
+    core.outputLayout->addAuto(output);
 
     // TODO: configurable
     output->apply();
@@ -67,7 +67,7 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
     m_destroy.notify([this](auto)
     {
         wl_signal_emit_mutable(&events.destroy, nullptr);
-        Core::instance.outputLayout->remove(this);
+        core.outputLayout->remove(this);
         delete this;
     });
     m_destroy.connect(handle->events.destroy);
@@ -100,7 +100,7 @@ bool Output::apply()
     wlr_output_state_finish(&state);
 
     // Center cursor if this is the first output
-    if (Core::instance.outputLayout->getOutputCount() == 1)
+    if (core.outputLayout->getOutputCount() == 1)
     {
         ensureCursor();
     }
@@ -121,7 +121,7 @@ wlr_box Output::getLayoutGeometry() const
     wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
 
-    auto layoutOutput = wlr_output_layout_get(Core::instance.outputLayout->getHandle(), m_handle);
+    auto layoutOutput = wlr_output_layout_get(core.outputLayout->getHandle(), m_handle);
     if (!layoutOutput)
     {
         return box;
@@ -135,8 +135,8 @@ wlr_box Output::getLayoutGeometry() const
 
 void Output::ensureCursor() const
 {
-    Core::instance.seat->cursor.warp(boxGetCenterCoords(getLayoutGeometry()).into<double>());
-    Core::instance.seat->input->rebasePointer();
+    core.seat->cursor.warp(boxGetCenterCoords(getLayoutGeometry()).into<double>());
+    core.seat->input->rebasePointer();
 }
 
 void Output::arrangeLayers()

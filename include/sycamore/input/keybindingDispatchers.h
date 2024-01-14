@@ -44,7 +44,7 @@ struct Terminate
 {
     void operator()() const
     {
-        wl_display_terminate(Core::instance.display);
+        wl_display_terminate(core.display);
     }
 };
 
@@ -54,7 +54,7 @@ struct SwitchVT
 {
     void operator()() const
     {
-        if (auto session = Core::instance.session; session)
+        if (auto session = core.session; session)
         {
             wlr_session_change_vt(session, vt);
         }

@@ -5,23 +5,20 @@
 namespace sycamore
 {
 
-void Popup::create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner)
+Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* parent, std::shared_ptr<OwnerHandler> owner)
+    : m_handle{handle}
+    , m_tree{}
+    , m_owner{std::move(owner)}
 {
-    // Create tree
-    auto tree = wlr_scene_xdg_surface_create(parentTree, handle->base);
-    if (!tree)
+    // Create scene tree
+    if (m_tree = wlr_scene_xdg_surface_create(parent, handle->base); !m_tree)
     {
-        spdlog::error("Create scene tree for Popup failed");
-        return;
+        throw std::runtime_error{"Create scene tree for Popup failed!"};
     }
 
-    // Be destroyed by listener
-    new Popup{handle, tree, owner};
-}
+    // Create SceneElement;
+    new PopupElement{&m_tree->node, *this};
 
-Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner)
-    : m_handle{handle}, m_tree{tree}, m_owner{std::move(owner)}
-{
     m_surfaceCommit.notify([this](auto)
     {
         if (m_handle->base->initial_commit)
@@ -48,9 +45,6 @@ Popup::Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr own
         delete this;
     });
     m_destroy.connect(handle->base->events.destroy);
-
-    // Create SceneElement;
-    new PopupElement{&tree->node, this};
 }
 
 Popup::~Popup() = default;

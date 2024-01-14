@@ -8,6 +8,8 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
+#include <memory>
+
 namespace sycamore
 {
 
@@ -15,12 +17,8 @@ class Popup
 {
 public:
     // Operations for different toplevel parent
-    class OwnerHandler
+    struct OwnerHandler
     {
-    public:
-        using SPtr = std::shared_ptr<OwnerHandler>;
-
-    public:
         /**
          * @brief Destructor
          */
@@ -32,19 +30,21 @@ public:
         virtual void unconstrain(Popup& popup) = 0;
     };
 
-    class ToplevelHandler : public OwnerHandler
+    struct ToplevelHandler : OwnerHandler
     {
-    public:
-        explicit ToplevelHandler(Toplevel* toplevel) : m_toplevel{toplevel} {}
+        Toplevel& toplevel;
+
+        explicit ToplevelHandler(Toplevel& toplevel)
+            : toplevel{toplevel} {}
 
         ~ToplevelHandler() override = default;
 
         void unconstrain(Popup& popup) override
         {
-            if (auto output = m_toplevel->getOutput(); output)
+            if (auto output = toplevel.getOutput(); output)
             {
-                auto geo = m_toplevel->getGeometry();
-                auto pos = m_toplevel->getPosition();
+                auto geo = toplevel.getGeometry();
+                auto pos = toplevel.getPosition();
                 auto box = output->getRelativeGeometry();
 
                 box.x = -pos.x + geo.x;
@@ -53,38 +53,35 @@ public:
                 popup.unconstrainFromBox(box);
             }
         }
-
-    private:
-        Toplevel* m_toplevel;
     };
 
-    class LayerHandler : public OwnerHandler
+    struct LayerHandler : OwnerHandler
     {
-    public:
-        explicit LayerHandler(Layer* layer) : m_layer{layer} {}
+        Layer& layer;
+
+        explicit LayerHandler(Layer& layer)
+            : layer{layer} {}
 
         ~LayerHandler() override = default;
 
         void unconstrain(Popup& popup) override
         {
-            auto pos = m_layer->getPosition();
-            auto box = m_layer->getOutput()->getRelativeGeometry();
+            auto pos = layer.getPosition();
+            auto box = layer.getOutput()->getRelativeGeometry();
 
             box.x = -pos.x;
             box.y = -pos.y;
 
             popup.unconstrainFromBox(box);
         }
-
-    private:
-        Layer* m_layer;
     };
 
 public:
-    /**
-     * @brief Create Popup
-     */
-    static void create(wlr_xdg_popup* handle, wlr_scene_tree* parentTree, const OwnerHandler::SPtr& owner);
+    template<typename... Args>
+    static void create(Args&&... args)
+    {
+        new Popup{std::forward<Args>(args)...};
+    }
 
     void unconstrainFromBox(const wlr_box& box)
     {
@@ -100,7 +97,7 @@ private:
     /**
      * @brief Constructor
      */
-    Popup(wlr_xdg_popup* handle, wlr_scene_tree* tree, OwnerHandler::SPtr owner);
+    Popup(wlr_xdg_popup* handle, wlr_scene_tree* parent, std::shared_ptr<OwnerHandler> owner);
 
     /**
      * @brief Destructor
@@ -108,33 +105,25 @@ private:
     ~Popup();
 
 private:
-    wlr_xdg_popup*     m_handle;
-    wlr_scene_tree*    m_tree;
-    OwnerHandler::SPtr m_owner;
+    wlr_xdg_popup*                m_handle;
+    wlr_scene_tree*               m_tree;
+    std::shared_ptr<OwnerHandler> m_owner;
 
-private:
-    Listener m_surfaceCommit;
-    Listener m_reposition;
-    Listener m_newPopup;
-    Listener m_destroy;
+    Listener                      m_surfaceCommit;
+    Listener                      m_reposition;
+    Listener                      m_newPopup;
+    Listener                      m_destroy;
 };
 
-class PopupElement final : public scene::Element
+struct PopupElement final : public scene::Element
 {
-public:
-    PopupElement(wlr_scene_node* node, Popup* popup)
+    Popup& popup;
+
+    PopupElement(wlr_scene_node* node, Popup& popup)
         : Element{POPUP, node}
-        , m_popup{popup} {}
+        , popup{popup} {}
 
     ~PopupElement() override = default;
-
-    Popup& getPopup() const
-    {
-        return *m_popup;
-    }
-
-private:
-    Popup* m_popup;
 };
 
 }

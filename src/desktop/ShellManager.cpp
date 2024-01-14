@@ -37,7 +37,7 @@ void ShellManager::setFocus(Toplevel& toplevel)
 
     if (!m_focusState.layer)
     {
-        Core::instance.seat->setKeyboardFocus(toplevel.getBaseSurface());
+        core.seat->setKeyboardFocus(toplevel.getBaseSurface());
     }
 
     m_focusState.toplevel = &toplevel;
@@ -52,7 +52,7 @@ void ShellManager::setFocus(Layer& layer)
 
     m_focusState.layer = &layer;
 
-    Core::instance.seat->setKeyboardFocus(layer.getBaseSurface());
+    core.seat->setKeyboardFocus(layer.getBaseSurface());
 }
 
 void ShellManager::onToplevelMap(Toplevel& toplevel)
@@ -89,7 +89,7 @@ void ShellManager::onLayerUnmap(Layer& layer)
 {
     if (m_focusState.toplevel)
     {
-        Core::instance.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
+        core.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
     }
 
     if (m_focusState.layer == &layer)
@@ -107,7 +107,7 @@ void ShellManager::cycleToplevel()
 
     setFocus(*m_mappedToplevels.front());
 
-    Core::instance.seat->input->rebasePointer();
+    core.seat->input->rebasePointer();
 }
 
 void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* output)
@@ -166,7 +166,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
         if (--m_fullscreenCount; m_fullscreenCount == 0)
         {
-            wlr_scene_node_set_enabled(&Core::instance.sceneTree.shell.top->node, true);
+            wlr_scene_node_set_enabled(&core.sceneTree.shell.top->node, true);
         }
 
         return;
@@ -195,7 +195,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
     if (++m_fullscreenCount; m_fullscreenCount == 1)
     {
-        wlr_scene_node_set_enabled(&Core::instance.sceneTree.shell.top->node, false);
+        wlr_scene_node_set_enabled(&core.sceneTree.shell.top->node, false);
     }
 }
 

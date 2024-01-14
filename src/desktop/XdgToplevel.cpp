@@ -14,7 +14,7 @@ namespace sycamore
 void XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
     // Create tree
-    auto tree = wlr_scene_xdg_surface_create(Core::instance.sceneTree.shell.toplevel, toplevel->base);
+    auto tree = wlr_scene_xdg_surface_create(core.sceneTree.shell.toplevel, toplevel->base);
     if (!tree)
     {
         spdlog::error("Create scene tree for XdgToplevel failed!");
@@ -51,7 +51,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         // Layout stuff
         auto& requested = m_toplevel->requested;
 
-        auto output = Core::instance.seat->cursor.atOutput();
+        auto output = core.seat->cursor.atOutput();
 
         if (output)
         {
@@ -99,34 +99,34 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         if (memcmp(&m_committedGeometry, &newGeometry, sizeof(wlr_box)) != 0)
         {
             m_committedGeometry = newGeometry;
-            Core::instance.seat->input->rebasePointer();
+            core.seat->input->rebasePointer();
         }
     });
 
     m_newPopup.notify([this](void* data)
     {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ToplevelHandler>(this));
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<Popup::ToplevelHandler>(*this));
     });
 
     m_move.notify([this](auto)
     {
-        if (!Core::instance.seat->bindingEnterCheck(this))
+        if (!core.seat->bindingEnterCheck(this))
         {
             return;
         }
 
-        Core::instance.seat->setInput<PointerMove>(this, *Core::instance.seat);
+        core.seat->setInput<PointerMove>(this, *core.seat);
     });
 
     m_resize.notify([this](void* data)
     {
-        if (!Core::instance.seat->bindingEnterCheck(this))
+        if (!core.seat->bindingEnterCheck(this))
         {
             return;
         }
 
         auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
-        Core::instance.seat->setInput<PointerResize>(this, event->edges, *Core::instance.seat);
+        core.seat->setInput<PointerResize>(this, event->edges, *core.seat);
     });
 
     m_fullscreen.notify([this](auto)

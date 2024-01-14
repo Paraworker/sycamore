@@ -17,19 +17,19 @@ class Core
 {
 public:
     /**
-     * @brief Setup server
-     */
-    void setup();
+    * @brief Constructor
+    */
+    Core();
 
     /**
-     * @brief Teardown server
+     * @brief Destructor
      */
-    void teardown();
+    ~Core();
 
     /**
      * @brief Start backend
      */
-    bool start() const;
+    void start();
 
     /**
      * @brief Run event loop
@@ -44,33 +44,20 @@ public:
     wlr_session*             session;
     wlr_renderer*            renderer;
     wlr_allocator*           allocator;
-    wlr_compositor*          compositor;
-    wlr_linux_dmabuf_v1*     linuxDmabuf;
-    wlr_pointer_gestures_v1* gestures;
 
     OutputLayout*            outputLayout;
-
     Seat*                    seat;
 
     scene::Tree              sceneTree;
     wlr_scene_output_layout* sceneOutputLayout;
 
+    wlr_linux_dmabuf_v1*     linuxDmabuf;
+    wlr_pointer_gestures_v1* gestures;
+
     std::string              socket;
-
-public:
-    static Core instance;
-
-private:
-    /**
-     * @brief Constructor
-     */
-    Core() = default;
-
-    /**
-     * @brief Destructor
-     */
-    ~Core() = default;
 };
+
+inline Core core{};
 
 }
 

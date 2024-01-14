@@ -1,8 +1,8 @@
 #include "sycamore/Core.h"
 
-#include "sycamore/desktop/shell/LayerShell.h"
-#include "sycamore/desktop/shell/XdgShell.h"
-#include "sycamore/desktop/Surface.h"
+#include "sycamore/desktop/CompositorHandler.h"
+#include "sycamore/desktop/LayerShellHandler.h"
+#include "sycamore/desktop/XdgShellHandler.h"
 #include "sycamore/input/InputManager.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/output/OutputLayout.h"
@@ -12,29 +12,20 @@
 namespace sycamore
 {
 
-constexpr auto WLR_COMPOSITOR_VERSION = 6;
-constexpr auto DEFAULT_SEAT           = "seat0";
+static constexpr auto DEFAULT_SEAT = "seat0";
 
-Core Core::instance{};
-
-// wlr_backend helper
-struct Backend
+struct BackendHandler
 {
-    static wlr_backend* autocreate(wl_display* display, wlr_session*& session)
+    Listener newInput;
+    Listener newOutput;
+    Listener destroy;
+
+    static void create(wlr_backend* handle)
     {
-        auto handle = wlr_backend_autocreate(display, &session);
-        if (!handle)
-        {
-            return {};
-        }
-
-        // Be destroyed by listener
-        new Backend{handle};
-
-        return handle;
+        new BackendHandler{handle};
     }
 
-    explicit Backend(wlr_backend* handle)
+    explicit BackendHandler(wlr_backend* handle)
     {
         newInput.notify([](void* data)
         {
@@ -55,55 +46,11 @@ struct Backend
         destroy.connect(handle->events.destroy);
     }
 
-    ~Backend() = default;
-
-    Listener newInput;
-    Listener newOutput;
-    Listener destroy;
+    ~BackendHandler() = default;
 };
 
-// wlr_compositor helper
-struct Compositor
+Core::Core()
 {
-    static wlr_compositor* create(wl_display* display, wlr_renderer* renderer)
-    {
-        auto handle = wlr_compositor_create(display, WLR_COMPOSITOR_VERSION, renderer);
-        if (!handle)
-        {
-            return {};
-        }
-
-        // Be destroyed by listener
-        new Compositor{handle};
-
-        return handle;
-    }
-
-    explicit Compositor(wlr_compositor* handle)
-    {
-        newSurface.notify([](void* data)
-        {
-            Surface::create(static_cast<wlr_surface*>(data));
-        });
-        newSurface.connect(handle->events.new_surface);
-
-        destroy.notify([this](auto)
-        {
-            delete this;
-        });
-        destroy.connect(handle->events.destroy);
-    }
-
-    ~Compositor() = default;
-
-    Listener newSurface;
-    Listener destroy;
-};
-
-void Core::setup()
-{
-    spdlog::info("Setup Server");
-
     wlr_log_init(WLR_DEBUG, nullptr);
 
     if (display = wl_display_create(); !display)
@@ -113,10 +60,12 @@ void Core::setup()
 
     eventLoop = wl_display_get_event_loop(display);
 
-    if (backend = Backend::autocreate(display, session); !backend)
+    if (backend = wlr_backend_autocreate(display, &session); !backend)
     {
-        throw std::runtime_error("Create wlr_backend failed!");
+        throw std::runtime_error("Autocreate wlr_backend failed!");
     }
+
+    BackendHandler::create(backend);
 
     if (renderer = wlr_renderer_autocreate(backend); !renderer)
     {
@@ -135,19 +84,11 @@ void Core::setup()
         throw std::runtime_error("Autocreate wlr_allocator failed!");
     }
 
-    if (compositor = Compositor::create(display, renderer); !compositor)
-    {
-        throw std::runtime_error("Create wlr_compositor failed!");
-    }
+    CompositorHandler::create(display, renderer);
 
     wlr_subcompositor_create(display);
 
     wlr_presentation_create(display, backend);
-
-    if (gestures = wlr_pointer_gestures_v1_create(display); !gestures)
-    {
-        throw std::runtime_error("Create wlr_pointer_gestures_v1 failed!");
-    }
 
     outputLayout = OutputLayout::create(display);
 
@@ -160,12 +101,12 @@ void Core::setup()
 
     wlr_scene_set_linux_dmabuf_v1(sceneTree.root, linuxDmabuf);
 
-    XdgShell::create(display);
-    LayerShell::create(display);
+    XdgShellHandler::create(display);
+    LayerShellHandler::create(display);
 
-    if (socket = wl_display_add_socket_auto(display); socket.empty())
+    if (gestures = wlr_pointer_gestures_v1_create(display); !gestures)
     {
-        throw std::runtime_error("Open Wayland socket failed!");
+        throw std::runtime_error("Create wlr_pointer_gestures_v1 failed!");
     }
 
     wlr_xdg_output_manager_v1_create(display, outputLayout->getHandle());
@@ -178,33 +119,35 @@ void Core::setup()
     wlr_viewporter_create(display);
     wlr_gamma_control_manager_v1_create(display);
     wlr_single_pixel_buffer_manager_v1_create(display);
-
-    setenv("WAYLAND_DISPLAY", socket.c_str(), true);
-    setenv("XDG_CURRENT_DESKTOP", "Sycamore", true);
 }
 
-void Core::teardown()
+Core::~Core()
 {
     wl_display_destroy_clients(display);
     wl_display_destroy(display);
 }
 
-bool Core::start() const
+void Core::start()
 {
-    spdlog::info("Starting Backend");
-
-    if (!wlr_backend_start(backend))
+    // Add socket
+    if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
-        spdlog::error("Start Backend failed!");
-        return false;
+        throw std::runtime_error("Open Wayland socket failed!");
     }
 
-    return true;
+    setenv("WAYLAND_DISPLAY", socket.c_str(), true);
+
+    spdlog::info("Using WAYLAND_DISPLAY={}", socket);
+
+    // Start backend
+    if (!wlr_backend_start(backend))
+    {
+        throw std::runtime_error("Start Backend failed!");
+    }
 }
 
 void Core::run() const
 {
-    spdlog::info("Running Compositor on WAYLAND_DISPLAY: {}", socket);
     wl_display_run(display);
 }
 

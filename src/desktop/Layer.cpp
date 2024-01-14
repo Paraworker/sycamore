@@ -15,7 +15,7 @@ void Layer::create(wlr_layer_surface_v1* layerSurface)
     // Confirm output
     if (!layerSurface->output)
     {
-        auto output = Core::instance.seat->cursor.atOutput();
+        auto output = core.seat->cursor.atOutput();
         if (!output)
         {
             spdlog::error("No output under cursor for layerSurface");
@@ -27,7 +27,7 @@ void Layer::create(wlr_layer_surface_v1* layerSurface)
     }
 
     // Create scene helper
-    auto helper = wlr_scene_layer_surface_v1_create(Core::instance.sceneTree.treeForLayer(layerSurface->pending.layer), layerSurface);
+    auto helper = wlr_scene_layer_surface_v1_create(core.sceneTree.treeForLayer(layerSurface->pending.layer), layerSurface);
     if (!helper)
     {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
@@ -66,7 +66,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_newPopup.notify([this](void* data)
     {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(this));
+        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(*this));
     });
     m_newPopup.connect(layerSurface->events.new_popup);
 
@@ -100,7 +100,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
                 m_layer = m_layerSurface->current.layer;
                 auto& newList = m_output->layers[m_layer];
 
-                wlr_scene_node_reparent(&m_sceneHelper->tree->node, Core::instance.sceneTree.treeForLayer(m_layer));
+                wlr_scene_node_reparent(&m_sceneHelper->tree->node, core.sceneTree.treeForLayer(m_layer));
                 newList.splice(newList.end(), oldList, m_iter);
             }
 
@@ -128,7 +128,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
         if (needRebase)
         {
-            Core::instance.seat->input->rebasePointer();
+            core.seat->input->rebasePointer();
         }
     });
     m_commit.connect(layerSurface->surface->events.commit);

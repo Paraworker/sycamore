@@ -274,7 +274,7 @@ void Cursor::updateXcursorTheme(const char* theme, uint32_t size)
 
 Output* Cursor::atOutput() const
 {
-    return Core::instance.outputLayout->findOutputAt(getPosition());
+    return core.outputLayout->findOutputAt(getPosition());
 }
 
 }

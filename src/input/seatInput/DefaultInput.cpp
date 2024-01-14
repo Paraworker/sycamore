@@ -13,7 +13,7 @@ namespace sycamore
 static void dragIconsUpdatePosition()
 {
     wlr_scene_node* node;
-    wl_list_for_each(node, &Core::instance.sceneTree.dragIcons->children, link)
+    wl_list_for_each(node, &core.sceneTree.dragIcons->children, link)
     {
         static_cast<DragIconElement*>(node->data)->getIcon().updatePosition();
     }
@@ -39,7 +39,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     }
 
     Point<double> sCoords{};
-    if (auto element = scene::elementFromNode(Core::instance.sceneTree.shellAt(m_seat.cursor.getPosition(), sCoords)); element)
+    if (auto element = scene::elementFromNode(core.sceneTree.shellAt(m_seat.cursor.getPosition(), sCoords)); element)
     {
         // If pressed on a toplevel, focus it
         if (element->type() == scene::Element::TOPLEVEL)
@@ -69,35 +69,35 @@ void DefaultInput::onPointerAxis(wlr_pointer_axis_event* event)
 
 void DefaultInput::onPointerSwipeBegin(wlr_pointer_swipe_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_begin(core.gestures,
                                              m_seat.getHandle(),
                                              event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerSwipeUpdate(wlr_pointer_swipe_update_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_update(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_update(core.gestures,
                                               m_seat.getHandle(),
                                               event->time_msec, event->dx, event->dy);
 }
 
 void DefaultInput::onPointerSwipeEnd(wlr_pointer_swipe_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_swipe_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_swipe_end(core.gestures,
                                            m_seat.getHandle(),
                                            event->time_msec, event->cancelled);
 }
 
 void DefaultInput::onPointerPinchBegin(wlr_pointer_pinch_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_begin(core.gestures,
                                              m_seat.getHandle(),
                                              event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_update(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_update(core.gestures,
                                               m_seat.getHandle(),
                                               event->time_msec, event->dx, event->dy,
                                               event->scale, event->rotation);
@@ -105,21 +105,21 @@ void DefaultInput::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 
 void DefaultInput::onPointerPinchEnd(wlr_pointer_pinch_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_pinch_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_pinch_end(core.gestures,
                                            m_seat.getHandle(),
                                            event->time_msec, event->cancelled);
 }
 
 void DefaultInput::onPointerHoldBegin(wlr_pointer_hold_begin_event* event)
 {
-    wlr_pointer_gestures_v1_send_hold_begin(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_hold_begin(core.gestures,
                                             m_seat.getHandle(),
                                             event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerHoldEnd(wlr_pointer_hold_end_event* event)
 {
-    wlr_pointer_gestures_v1_send_hold_end(Core::instance.gestures,
+    wlr_pointer_gestures_v1_send_hold_end(core.gestures,
                                           m_seat.getHandle(),
                                           event->time_msec, event->cancelled);
 }
