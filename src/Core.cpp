@@ -60,7 +60,7 @@ Core::Core()
 
     eventLoop = wl_display_get_event_loop(display);
 
-    if (backend = wlr_backend_autocreate(display, &session); !backend)
+    if (backend = wlr_backend_autocreate(eventLoop, &session); !backend)
     {
         throw std::runtime_error("Autocreate wlr_backend failed!");
     }

@@ -63,8 +63,9 @@ void DefaultInput::onPointerMotion(uint32_t timeMsec)
 
 void DefaultInput::onPointerAxis(wlr_pointer_axis_event* event)
 {
-    wlr_seat_pointer_notify_axis(m_seat.getHandle(), event->time_msec, event->orientation,
-                                 event->delta, event->delta_discrete, event->source);
+    wlr_seat_pointer_notify_axis(m_seat.getHandle(),
+        event->time_msec, event->orientation, event->delta,
+        event->delta_discrete, event->source, event->relative_direction);
 }
 
 void DefaultInput::onPointerSwipeBegin(wlr_pointer_swipe_begin_event* event)
