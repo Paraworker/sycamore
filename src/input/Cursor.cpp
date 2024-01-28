@@ -1,6 +1,6 @@
 #include "sycamore/input/Cursor.h"
 
-#include "sycamore/output/Output.h"
+#include "sycamore/output/OutputManager.h"
 #include "sycamore/Core.h"
 
 #include <stdexcept>
@@ -274,7 +274,7 @@ void Cursor::updateXcursorTheme(const char* theme, uint32_t size)
 
 Output* Cursor::atOutput() const
 {
-    return core.outputLayout->findOutputAt(getPosition());
+    return OutputManager::findOutputAt(getPosition());
 }
 
 }

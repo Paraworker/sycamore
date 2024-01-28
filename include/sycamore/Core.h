@@ -2,7 +2,6 @@
 #define SYCAMORE_CORE_H
 
 #include "sycamore/input/Seat.h"
-#include "sycamore/output/OutputLayout.h"
 #include "sycamore/scene/Tree.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
@@ -45,7 +44,8 @@ public:
     wlr_renderer*            renderer;
     wlr_allocator*           allocator;
 
-    OutputLayout*            outputLayout;
+    wlr_output_layout*       outputLayout;
+
     Seat*                    seat;
 
     scene::Tree              sceneTree;

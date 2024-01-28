@@ -4,8 +4,7 @@
 #include "sycamore/desktop/LayerShellHandler.h"
 #include "sycamore/desktop/XdgShellHandler.h"
 #include "sycamore/input/InputManager.h"
-#include "sycamore/output/Output.h"
-#include "sycamore/output/OutputLayout.h"
+#include "sycamore/output/OutputManager.h"
 
 #include <spdlog/spdlog.h>
 
@@ -35,7 +34,7 @@ struct BackendHandler
 
         newOutput.notify([](void* data)
         {
-            Output::create(static_cast<wlr_output*>(data));
+            outputManager.addOutput(static_cast<wlr_output*>(data));
         });
         newOutput.connect(handle->events.new_output);
 
@@ -90,11 +89,14 @@ Core::Core()
 
     wlr_presentation_create(display, backend);
 
-    outputLayout = OutputLayout::create(display);
+    if (outputLayout = wlr_output_layout_create(display); !outputLayout)
+    {
+        throw std::runtime_error("Create wlr_output_layout failed!");
+    }
 
-    seat = Seat::create(display, DEFAULT_SEAT, outputLayout->getHandle());
+    seat = Seat::create(display, DEFAULT_SEAT, outputLayout);
 
-    if (sceneOutputLayout = wlr_scene_attach_output_layout(sceneTree.root, outputLayout->getHandle()); !sceneOutputLayout)
+    if (sceneOutputLayout = wlr_scene_attach_output_layout(sceneTree.root, outputLayout); !sceneOutputLayout)
     {
         throw std::runtime_error("wlr_scene attach output layout failed!");
     }
@@ -109,7 +111,7 @@ Core::Core()
         throw std::runtime_error("Create wlr_pointer_gestures_v1 failed!");
     }
 
-    wlr_xdg_output_manager_v1_create(display, outputLayout->getHandle());
+    wlr_xdg_output_manager_v1_create(display, outputLayout);
     wlr_output_manager_v1_create(display);
     wlr_export_dmabuf_manager_v1_create(display);
     wlr_data_device_manager_create(display);

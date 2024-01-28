@@ -23,15 +23,19 @@ public:
 
 public:
     /**
-     * @brief Create Output
-     * @return nullptr on failure
+     * @brief Constructor
      */
-    static Output* create(wlr_output* handle);
+    Output(wlr_output* handle, wlr_scene_output* sceneOutput);
+
+    /**
+     * @brief Destructor
+     */
+    ~Output();
 
     /**
      * @brief Return the output name
      */
-    auto name() noexcept
+    auto name()
     {
         return m_handle->name;
     }
@@ -57,12 +61,12 @@ public:
 
     void arrangeLayers();
 
-    auto getHandle() noexcept
+    auto getHandle()
     {
         return m_handle;
     }
 
-    auto getSceneOutput() noexcept
+    auto getSceneOutput()
     {
         return m_sceneOutput;
     }
@@ -77,20 +81,10 @@ public:
     Output& operator=(const Output&) = delete;
     Output& operator=(Output&&) = delete;
 
-private:
-    /**
-     * @brief Constructor
-     */
-    Output(wlr_output* handle, wlr_scene_output* sceneOutput);
-
-    /**
-     * @brief Destructor
-     */
-    ~Output();
-
 public:
-    Events            events;
-    std::list<Layer*> layers[LAYER_COUNT];
+    Events                      events;
+    std::list<Layer*>           layers[LAYER_COUNT];
+    std::list<Output>::iterator iter;
 
 private:
     wlr_output*       m_handle;
