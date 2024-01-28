@@ -50,22 +50,16 @@ private:
     Listener        m_destroy;
 };
 
-class DragIconElement final : public scene::Element
+struct DragIconElement final : scene::Element
 {
-public:
-    DragIconElement(wlr_scene_node* node, DragIcon* icon)
+    DragIcon& icon;
+
+    DragIconElement(wlr_scene_node* node, DragIcon& icon)
         : Element(DRAG_ICON, node)
-        , m_icon(icon) {}
+        , icon(icon)
+    {}
 
     ~DragIconElement() override = default;
-
-    DragIcon& getIcon() const
-    {
-        return *m_icon;
-    }
-
-private:
-    DragIcon* m_icon;
 };
 
 }

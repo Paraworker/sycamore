@@ -17,24 +17,15 @@ bool OutputManager::addOutput(wlr_output* handle)
         return false;
     }
 
-    auto sceneOutput = wlr_scene_output_create(core.sceneTree.root, handle);
-    if (!sceneOutput)
-    {
-        spdlog::error("Output: {} create wlr_scene_output failed!", handle->name);
-        wlr_output_destroy(handle);
-        return false;
-    }
-
     // Add to output layout
     auto layoutOutput = wlr_output_layout_add_auto(core.outputLayout, handle);
     if (!layoutOutput)
     {
-        spdlog::error("Output: {} add to wlr_output_layout failed", handle->name);
-        wlr_output_destroy(handle);
-        return false;
+        throw std::runtime_error{"Output add to wlr_output_layout failed!"};
     }
 
-    wlr_scene_output_layout_add_output(core.sceneOutputLayout, layoutOutput, sceneOutput);
+    // Add to scene layout
+    auto sceneOutput = core.scene.addOutput(handle, layoutOutput);
 
     const auto output = m_outputList.emplace(m_outputList.end(), handle, sceneOutput);
     output->iter = output;

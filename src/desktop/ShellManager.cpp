@@ -166,7 +166,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
         if (--m_fullscreenCount; m_fullscreenCount == 0)
         {
-            wlr_scene_node_set_enabled(&core.sceneTree.shell.top->node, true);
+            wlr_scene_node_set_enabled(&core.scene.shell.top->node, true);
         }
 
         return;
@@ -195,7 +195,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
     if (++m_fullscreenCount; m_fullscreenCount == 1)
     {
-        wlr_scene_node_set_enabled(&core.sceneTree.shell.top->node, false);
+        wlr_scene_node_set_enabled(&core.scene.shell.top->node, false);
     }
 }
 

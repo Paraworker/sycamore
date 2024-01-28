@@ -2,7 +2,7 @@
 #define SYCAMORE_CORE_H
 
 #include "sycamore/input/Seat.h"
-#include "sycamore/scene/Tree.h"
+#include "sycamore/scene/Scene.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
@@ -48,8 +48,7 @@ public:
 
     Seat*                    seat;
 
-    scene::Tree              sceneTree;
-    wlr_scene_output_layout* sceneOutputLayout;
+    scene::Scene             scene;
 
     wlr_linux_dmabuf_v1*     linuxDmabuf;
     wlr_pointer_gestures_v1* gestures;

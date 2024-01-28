@@ -19,7 +19,9 @@ public:
         DRAG_ICON,
     };
 
-public:
+    /**
+     * @brief Get derived element type
+     */
     Type type() const
     {
         return m_type;
@@ -39,7 +41,7 @@ protected:
 
     virtual ~Element() = default;
 
-protected:
+private:
     Type     m_type;
     Listener m_destroy;
 };

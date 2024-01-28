@@ -1,5 +1,5 @@
-#ifndef SYCAMORE_SCENE_TREE_H
-#define SYCAMORE_SCENE_TREE_H
+#ifndef SYCAMORE_SCENE_H
+#define SYCAMORE_SCENE_H
 
 #include "sycamore/utils/Point.h"
 #include "sycamore/scene/Element.h"
@@ -8,10 +8,9 @@
 namespace sycamore::scene
 {
 
-// scene tree
-struct Tree
+struct Scene
 {
-    // shell tree
+    // shell tree structure
     struct Shell
     {
         wlr_scene_tree* root;
@@ -29,12 +28,17 @@ struct Tree
     /**
      * @brief Constructor
      */
-    Tree();
+    Scene();
 
     /**
      * @brief Destructor
      */
-    ~Tree();
+    ~Scene();
+
+    /**
+     * @brief Init Scene
+     */
+    void init(wlr_output_layout* outputLayout, wlr_linux_dmabuf_v1* dmabuf);
 
     /**
      * @brief Get scene tree for layer
@@ -49,10 +53,19 @@ struct Tree
         return wlr_scene_node_at(&shell.root->node, lCoords.x, lCoords.y, &sCoords.x, &sCoords.y);
     }
 
-    Tree(const Tree&) = delete;
-    Tree(Tree&&) = delete;
-    Tree& operator=(const Tree&) = delete;
-    Tree& operator=(Tree&&) = delete;
+    /**
+     * @brief  Add an output to scene layout
+     * @return scene output
+     */
+    wlr_scene_output* addOutput(wlr_output* handle, wlr_output_layout_output* layoutOutput);
+
+    Scene(const Scene&) = delete;
+    Scene(Scene&&) = delete;
+    Scene& operator=(const Scene&) = delete;
+    Scene& operator=(Scene&&) = delete;
+
+private:
+    wlr_scene_output_layout* layout;
 };
 
 wlr_surface* surfaceFromNode(wlr_scene_node* node);
@@ -61,4 +74,4 @@ Element* elementFromNode(wlr_scene_node* node);
 
 }
 
-#endif //SYCAMORE_SCENE_TREE_H
+#endif //SYCAMORE_SCENE_H

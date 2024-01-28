@@ -115,13 +115,14 @@ private:
     Listener                      m_destroy;
 };
 
-struct PopupElement final : public scene::Element
+struct PopupElement final : scene::Element
 {
     Popup& popup;
 
     PopupElement(wlr_scene_node* node, Popup& popup)
         : Element{POPUP, node}
-        , popup{popup} {}
+        , popup{popup}
+    {}
 
     ~PopupElement() override = default;
 };

@@ -94,14 +94,9 @@ Core::Core()
         throw std::runtime_error("Create wlr_output_layout failed!");
     }
 
+    scene.init(outputLayout, linuxDmabuf);
+
     seat = Seat::create(display, DEFAULT_SEAT, outputLayout);
-
-    if (sceneOutputLayout = wlr_scene_attach_output_layout(sceneTree.root, outputLayout); !sceneOutputLayout)
-    {
-        throw std::runtime_error("wlr_scene attach output layout failed!");
-    }
-
-    wlr_scene_set_linux_dmabuf_v1(sceneTree.root, linuxDmabuf);
 
     XdgShellHandler::create(display);
     LayerShellHandler::create(display);

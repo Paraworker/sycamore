@@ -84,22 +84,16 @@ private:
     Listener m_destroy;
 };
 
-class LayerElement final : public scene::Element
+struct LayerElement final : scene::Element
 {
-public:
-    LayerElement(wlr_scene_node* node, Layer* layer)
+    Layer& layer;
+
+    LayerElement(wlr_scene_node* node, Layer& layer)
         : Element{LAYER, node}
-        , m_layer{layer} {}
+        , layer{layer}
+    {}
 
     ~LayerElement() override = default;
-
-    Layer& getLayer() const
-    {
-        return *m_layer;
-    }
-
-private:
-    Layer* m_layer;
 };
 
 }

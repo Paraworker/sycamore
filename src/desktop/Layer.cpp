@@ -27,7 +27,7 @@ void Layer::create(wlr_layer_surface_v1* layerSurface)
     }
 
     // Create scene helper
-    auto helper = wlr_scene_layer_surface_v1_create(core.sceneTree.treeForLayer(layerSurface->pending.layer), layerSurface);
+    auto helper = wlr_scene_layer_surface_v1_create(core.scene.treeForLayer(layerSurface->pending.layer), layerSurface);
     if (!helper)
     {
         spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
@@ -46,6 +46,9 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     , m_lastMapState{false}
     , m_output{static_cast<Output*>(layerSurface->output->data)}
  {
+    // Create LayerElement
+    new LayerElement{&helper->tree->node, *this};
+
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
 
@@ -100,7 +103,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
                 m_layer = m_layerSurface->current.layer;
                 auto& newList = m_output->layers[m_layer];
 
-                wlr_scene_node_reparent(&m_sceneHelper->tree->node, core.sceneTree.treeForLayer(m_layer));
+                wlr_scene_node_reparent(&m_sceneHelper->tree->node, core.scene.treeForLayer(m_layer));
                 newList.splice(newList.end(), oldList, m_iter);
             }
 
@@ -138,9 +141,6 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         delete this;
     });
     m_destroy.connect(layerSurface->events.destroy);
-
-    // Create LayerElement
-    new LayerElement{&helper->tree->node, this};
 }
 
 Layer::~Layer()

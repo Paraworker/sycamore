@@ -1,4 +1,4 @@
-#include "sycamore/scene/Tree.h"
+#include "sycamore/scene/Scene.h"
 
 #include <stdexcept>
 
@@ -8,20 +8,25 @@ namespace sycamore::scene
 struct RootElement final : Element
 {
     explicit RootElement(wlr_scene_node* node)
-        : Element(ROOT, node) {}
+        : Element(ROOT, node)
+    {}
 
     ~RootElement() override = default;
 };
 
-Tree::Tree()
+Scene::Scene()
     : root{nullptr}
     , shell{nullptr}
     , dragIcons{nullptr}
+    , layout{nullptr}
 {
     if (root = wlr_scene_create(); !root)
     {
         throw std::runtime_error("Create wlr_scene failed!");
     }
+
+    // Create RootElement
+    new RootElement{&root->tree.node};
 
     shell.root = wlr_scene_tree_create(&root->tree);
 
@@ -32,17 +37,24 @@ Tree::Tree()
     shell.overlay    = wlr_scene_tree_create(shell.root);
 
     dragIcons = wlr_scene_tree_create(&root->tree);
-
-    // Create RootElement
-    new RootElement{&root->tree.node};
 }
 
-Tree::~Tree()
+Scene::~Scene()
 {
     wlr_scene_node_destroy(&root->tree.node);
 }
 
-wlr_scene_tree* Tree::treeForLayer(zwlr_layer_shell_v1_layer type) const
+void Scene::init(wlr_output_layout* outputLayout, wlr_linux_dmabuf_v1* dmabuf)
+{
+    if (layout = wlr_scene_attach_output_layout(root, outputLayout); !layout)
+    {
+        throw std::runtime_error("wlr_scene attach output layout failed!");
+    }
+
+    wlr_scene_set_linux_dmabuf_v1(root, dmabuf);
+}
+
+wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
 {
     switch (type)
     {
@@ -57,6 +69,19 @@ wlr_scene_tree* Tree::treeForLayer(zwlr_layer_shell_v1_layer type) const
         default:
             throw std::logic_error("unreachable!");
     }
+}
+
+wlr_scene_output* Scene::addOutput(wlr_output* handle, wlr_output_layout_output* layoutOutput)
+{
+    const auto sceneOutput = wlr_scene_output_create(root, handle);
+    if (!sceneOutput)
+    {
+        throw std::runtime_error{"Create wlr_scene_output failed!"};
+    }
+
+    wlr_scene_output_layout_add_output(layout, layoutOutput, sceneOutput);
+
+    return sceneOutput;
 }
 
 wlr_surface* surfaceFromNode(wlr_scene_node* node)

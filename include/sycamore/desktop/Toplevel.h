@@ -126,22 +126,16 @@ protected:
     Iter            m_iter;
 };
 
-class ToplevelElement final : public scene::Element
+struct ToplevelElement final : scene::Element
 {
-public:
-    ToplevelElement(wlr_scene_node* node, Toplevel* toplevel)
+    Toplevel& toplevel;
+
+    ToplevelElement(wlr_scene_node* node, Toplevel& toplevel)
         : Element{TOPLEVEL, node}
-        , m_toplevel{toplevel} {}
+        , toplevel{toplevel}
+    {}
 
     ~ToplevelElement() override = default;
-
-    Toplevel& getToplevel() const
-    {
-        return *m_toplevel;
-    }
-
-private:
-    Toplevel* m_toplevel;
 };
 
 }
