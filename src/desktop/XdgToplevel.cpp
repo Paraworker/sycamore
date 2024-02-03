@@ -13,7 +13,6 @@ namespace sycamore
 
 void XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 {
-    // Create tree
     auto tree = wlr_scene_xdg_surface_create(core.scene.shell.toplevel, toplevel->base);
     if (!tree)
     {
@@ -21,7 +20,6 @@ void XdgToplevel::create(wlr_xdg_toplevel* toplevel)
         return;
     }
 
-    // Be destroyed by listener
     new XdgToplevel{toplevel, tree};
 }
 
@@ -37,7 +35,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_map.notify([this](auto)
     {
-        ShellManager::instance.onToplevelMap(*this);
+        shellManager.onToplevelMap(*this);
 
         // Connect signals
         m_commit.connect(m_surface->events.commit);
@@ -49,23 +47,23 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_minimize.connect(m_toplevel->events.request_minimize);
 
         // Layout stuff
-        auto& requested = m_toplevel->requested;
-
         auto output = core.seat->cursor.atOutput();
 
         if (output)
         {
             setToOutputCenter(*output);
-        }
 
-        if (requested.maximized)
-        {
-            ShellManager::maximizeRequest(*this, true, output);
-        }
+            const auto& requested = m_toplevel->requested;
 
-        if (requested.fullscreen)
-        {
-            ShellManager::instance.fullscreenRequest(*this, true, output);
+            if (requested.maximized)
+            {
+                ShellManager::maximizeRequest(*this, *output);
+            }
+
+            if (requested.fullscreen)
+            {
+                shellManager.fullscreenRequest(*this, *output);
+            }
         }
 
         wl_signal_emit_mutable(&events.map, nullptr);
@@ -83,7 +81,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
         m_maximize.disconnect();
         m_minimize.disconnect();
 
-        ShellManager::instance.onToplevelUnmap(*this);
+        shellManager.onToplevelUnmap(*this);
 
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
@@ -131,30 +129,30 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
 
     m_fullscreen.notify([this](auto)
     {
-        auto&   requested = m_toplevel->requested;
-        bool    state     = requested.fullscreen;
-        Output* output    = nullptr;
-
-        if (state)
+        if (!m_toplevel->requested.fullscreen)
         {
-            // If there is an output provided, try to satisfy it
-            if (auto fs = requested.fullscreen_output; fs && fs->data)
-            {
-                output = static_cast<Output*>(fs->data);
-            }
-            else
-            {
-                output = getOutput();
-            }
+            shellManager.unfullscreenRequest(*this);
+            return;
         }
 
-        ShellManager::instance.fullscreenRequest(*this, state, output);
+        if (auto output = getOutput(); output)
+        {
+            shellManager.fullscreenRequest(*this, *output);
+        }
     });
 
     m_maximize.notify([this](auto)
     {
-        bool state = m_toplevel->requested.maximized;
-        ShellManager::maximizeRequest(*this, state, state ? getOutput() : nullptr);
+        if (!m_toplevel->requested.maximized)
+        {
+            ShellManager::unmaximizeRequest(*this);
+            return;
+        }
+
+        if (auto output = getOutput(); output)
+        {
+            ShellManager::maximizeRequest(*this, *output);
+        }
     });
 
     m_minimize.notify([](auto)

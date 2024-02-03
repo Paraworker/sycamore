@@ -75,14 +75,14 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
     m_map.notify([this](auto)
     {
-        ShellManager::instance.onLayerMap(*this);
+        shellManager.onLayerMap(*this);
         wl_signal_emit_mutable(&events.map, nullptr);
     });
     m_map.connect(layerSurface->surface->events.map);
 
     m_unmap.notify([this](auto)
     {
-        ShellManager::instance.onLayerUnmap(*this);
+        shellManager.onLayerUnmap(*this);
         wl_signal_emit_mutable(&events.unmap, nullptr);
     });
     m_unmap.connect(layerSurface->surface->events.unmap);

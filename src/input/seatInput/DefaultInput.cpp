@@ -44,7 +44,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
         // If pressed on a toplevel, focus it
         if (element->type() == scene::Element::TOPLEVEL)
         {
-            ShellManager::instance.setFocus(static_cast<ToplevelElement*>(element)->toplevel);
+            shellManager.setFocus(static_cast<ToplevelElement*>(element)->toplevel);
         }
     }
 

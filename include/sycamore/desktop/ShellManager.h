@@ -21,6 +21,16 @@ public:
 
 public:
     /**
+     * @brief Constructor
+     */
+    ShellManager();
+
+    /**
+     * @brief Destructor
+     */
+    ~ShellManager();
+
+    /**
      * @brief Focus a toplevel
      */
     void setFocus(Toplevel& toplevel);
@@ -45,29 +55,21 @@ public:
 
     void cycleToplevel();
 
-    void fullscreenRequest(Toplevel& toplevel, bool state, Output* output);
+    void fullscreenRequest(Toplevel& toplevel, const Output& output);
 
-    static void maximizeRequest(Toplevel& toplevel, bool state, Output* output);
+    void unfullscreenRequest(Toplevel& toplevel);
 
-public:
-    static ShellManager instance;
+    static void maximizeRequest(Toplevel& toplevel, const Output& output);
 
-private:
-    /**
-     * @brief Constructor
-     */
-    ShellManager();
-
-    /**
-     * @brief Destructor
-     */
-    ~ShellManager();
+    static void unmaximizeRequest(Toplevel& toplevel);
 
 private:
     std::list<Toplevel*> m_mappedToplevels;
     FocusState           m_focusState;
     size_t               m_fullscreenCount;
 };
+
+inline ShellManager shellManager{};
 
 }
 

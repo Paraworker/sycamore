@@ -160,7 +160,7 @@ bool Seat::bindingEnterCheck(Toplevel* toplevel) const
     }
 
     // Deny pointerMove/pointerResize from unfocused toplevel or there is no focused toplevel.
-    if (toplevel != ShellManager::instance.getFocusState().toplevel)
+    if (toplevel != shellManager.getFocusState().toplevel)
     {
         return false;
     }

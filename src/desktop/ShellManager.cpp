@@ -8,8 +8,6 @@
 namespace sycamore
 {
 
-ShellManager ShellManager::instance{};
-
 ShellManager::ShellManager() : m_focusState{}, m_fullscreenCount{0} {}
 
 ShellManager::~ShellManager() = default;
@@ -110,32 +108,16 @@ void ShellManager::cycleToplevel()
     core.seat->input->rebasePointer();
 }
 
-void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* output)
+void ShellManager::maximizeRequest(Toplevel& toplevel, const Output& output)
 {
-    if (state == toplevel.state().maximized)
+    if (toplevel.state().maximized)
     {
         return;
     }
 
-    if (!state)
-    {
-        // Restore from maximized mode
-        toplevel.setMaximized(state);
-        toplevel.setSize(toplevel.restore.maximize.width, toplevel.restore.maximize.height);
-        toplevel.moveTo({toplevel.restore.maximize.x, toplevel.restore.maximize.y});
-        toplevel.state().maximized = state;
-        return;
-    }
-
-    // Set to maximized mode
-    if (!output)
-    {
-        return;
-    }
-
-    auto& maxBox      = output->getUsableArea();
-    auto  toplevelPos = toplevel.getPosition();
-    auto  toplevelGeo = toplevel.getGeometry();
+    const auto& maxBox      = output.getUsableArea();
+    const auto  toplevelPos = toplevel.getPosition();
+    const auto  toplevelGeo = toplevel.getGeometry();
 
     toplevel.restore.maximize.x = toplevelPos.x;
     toplevel.restore.maximize.y = toplevelPos.y;
@@ -145,42 +127,33 @@ void ShellManager::maximizeRequest(Toplevel& toplevel, bool state, Output* outpu
 
     toplevel.moveTo({maxBox.x, maxBox.y});
     toplevel.setSize(maxBox.width, maxBox.height);
-    toplevel.setMaximized(state);
-    toplevel.state().maximized = state;
+    toplevel.setMaximized(true);
+    toplevel.state().maximized = true;
 }
 
-void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* output)
+void ShellManager::unmaximizeRequest(Toplevel& toplevel)
 {
-    if (state == toplevel.state().fullscreen)
+    if (!toplevel.state().maximized)
     {
         return;
     }
 
-    if (!state)
-    {
-        // Restore from fullscreen mode
-        toplevel.setSize(toplevel.restore.fullscreen.width, toplevel.restore.fullscreen.height);
-        toplevel.moveTo({toplevel.restore.fullscreen.x, toplevel.restore.fullscreen.y});
-        toplevel.setFullscreen(state);
-        toplevel.state().fullscreen = state;
+    toplevel.setSize(toplevel.restore.maximize.width, toplevel.restore.maximize.height);
+    toplevel.moveTo({toplevel.restore.maximize.x, toplevel.restore.maximize.y});
+    toplevel.setMaximized(false);
+    toplevel.state().maximized = false;
+}
 
-        if (--m_fullscreenCount; m_fullscreenCount == 0)
-        {
-            wlr_scene_node_set_enabled(&core.scene.shell.top->node, true);
-        }
-
-        return;
-    }
-
-    // Set to fullscreen mode
-    if (!output)
+void ShellManager::fullscreenRequest(Toplevel& toplevel, const Output& output)
+{
+    if (toplevel.state().fullscreen)
     {
         return;
     }
 
-    auto outputGeo   = output->getLayoutGeometry();
-    auto toplevelPos = toplevel.getPosition();
-    auto toplevelGeo = toplevel.getGeometry();
+    const auto outputGeo   = output.getLayoutGeometry();
+    const auto toplevelPos = toplevel.getPosition();
+    const auto toplevelGeo = toplevel.getGeometry();
 
     toplevel.restore.fullscreen.x = toplevelPos.x;
     toplevel.restore.fullscreen.y = toplevelPos.y;
@@ -190,12 +163,30 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, bool state, Output* out
 
     toplevel.moveTo({outputGeo.x, outputGeo.y});
     toplevel.setSize(outputGeo.width, outputGeo.height);
-    toplevel.setFullscreen(state);
-    toplevel.state().fullscreen = state;
+    toplevel.setFullscreen(true);
+    toplevel.state().fullscreen = true;
 
     if (++m_fullscreenCount; m_fullscreenCount == 1)
     {
         wlr_scene_node_set_enabled(&core.scene.shell.top->node, false);
+    }
+}
+
+void ShellManager::unfullscreenRequest(Toplevel& toplevel)
+{
+    if (!toplevel.state().fullscreen)
+    {
+        return;
+    }
+
+    toplevel.setSize(toplevel.restore.fullscreen.width, toplevel.restore.fullscreen.height);
+    toplevel.moveTo({toplevel.restore.fullscreen.x, toplevel.restore.fullscreen.y});
+    toplevel.setFullscreen(false);
+    toplevel.state().fullscreen = false;
+
+    if (--m_fullscreenCount; m_fullscreenCount == 0)
+    {
+        wlr_scene_node_set_enabled(&core.scene.shell.top->node, true);
     }
 }
 

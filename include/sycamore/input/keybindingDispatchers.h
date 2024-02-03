@@ -25,7 +25,7 @@ struct CloseFocusedToplevel
 {
     void operator()() const
     {
-        if (auto toplevel = ShellManager::instance.getFocusState().toplevel; toplevel)
+        if (auto toplevel = shellManager.getFocusState().toplevel; toplevel)
         {
             toplevel->close();
         }
@@ -36,7 +36,7 @@ struct CycleToplevel
 {
     void operator()() const
     {
-        ShellManager::instance.cycleToplevel();
+        shellManager.cycleToplevel();
     }
 };
 
