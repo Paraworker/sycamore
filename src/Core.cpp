@@ -28,7 +28,7 @@ struct BackendHandler
     {
         newInput.notify([](void* data)
         {
-            InputManager::instance.onNewDevice(static_cast<wlr_input_device*>(data));
+            inputManager.addDevice(static_cast<wlr_input_device*>(data));
         });
         newInput.connect(handle->events.new_input);
 

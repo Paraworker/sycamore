@@ -18,7 +18,7 @@ Pointer::Pointer(wlr_input_device* deviceHandle)
 
     m_destroy.notify([this](auto)
     {
-        InputManager::instance.onDestroyDevice(this);
+        inputManager.removeDevice(this);
     });
     m_destroy.connect(deviceHandle->events.destroy);
 

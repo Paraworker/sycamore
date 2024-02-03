@@ -25,14 +25,27 @@ public:
      */
     void apply();
 
-    /**
-     * @brief Sync LEDs with other keyboards
-     */
-    void syncLeds();
-
     uint32_t getModifiers() const noexcept
     {
         return wlr_keyboard_get_modifiers(m_keyboardHandle);
+    }
+
+    /**
+     * @brief Get LEDs state
+     */
+    uint32_t ledsState() const;
+
+    /**
+     * @brief Update LEDs state
+     */
+    void updateLeds(uint32_t leds) const
+    {
+        wlr_keyboard_led_update(m_keyboardHandle, leds);
+    }
+
+    bool operator==(const Keyboard& rhs) const
+    {
+        return m_keyboardHandle == rhs.m_keyboardHandle;
     }
 
     Keyboard(const Keyboard&) = delete;

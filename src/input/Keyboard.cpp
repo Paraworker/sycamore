@@ -21,7 +21,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
 
-        syncLeds();
+        inputManager.syncKeyboardLeds(*this);
     });
     m_modifiers.connect(m_keyboardHandle->events.modifiers);
 
@@ -54,14 +54,14 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
             wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
             wlr_seat_keyboard_notify_key(seatHandle, event->time_msec, event->keycode, event->state);
 
-            syncLeds();
+            inputManager.syncKeyboardLeds(*this);
         }
     });
     m_key.connect(m_keyboardHandle->events.key);
 
     m_destroy.notify([this](auto)
     {
-        InputManager::instance.onDestroyDevice(this);
+        inputManager.removeDevice(this);
     });
     m_destroy.connect(deviceHandle->events.destroy);
 
@@ -94,14 +94,15 @@ void Keyboard::apply()
     xkb_context_unref(ctx);
 }
 
-void Keyboard::syncLeds()
+uint32_t Keyboard::ledsState() const
 {
     if (!m_keyboardHandle->xkb_state)
     {
-        return;
+        throw std::runtime_error{"Keyboard without xkb_state!"};
     }
 
-    uint32_t leds = 0;
+    uint32_t leds{0};
+
     for (uint32_t i = 0; i < WLR_LED_COUNT; ++i)
     {
         if (xkb_state_led_index_is_active(m_keyboardHandle->xkb_state, m_keyboardHandle->led_indexes[i]))
@@ -110,13 +111,7 @@ void Keyboard::syncLeds()
         }
     }
 
-    InputManager::instance.forEachKeyboard([this, leds](const Keyboard& keyboard)
-    {
-        if (keyboard.m_keyboardHandle != m_keyboardHandle)
-        {
-            wlr_keyboard_led_update(keyboard.m_keyboardHandle, leds);
-        }
-    });
+    return leds;
 }
 
 }

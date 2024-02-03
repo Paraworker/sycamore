@@ -14,37 +14,6 @@ class InputManager
 {
 public:
     /**
-     * @brief Return seat capabilities according to current devices
-     */
-    uint32_t capabilities() const;
-
-    template<typename Func>
-    void forEachKeyboard(Func&& func)
-    {
-        for (auto& keyboard : m_keyboards)
-        {
-            func(keyboard);
-        }
-    }
-
-    template<typename Func>
-    void forEachPointer(Func&& func)
-    {
-        for (auto& pointer : m_pointers)
-        {
-            func(pointer);
-        }
-    }
-
-    void onNewDevice(wlr_input_device* handle);
-    void onDestroyDevice(Keyboard* keyboard);
-    void onDestroyDevice(Pointer* pointer);
-
-public:
-    static InputManager instance;
-
-private:
-    /**
      * @brief Constructor
      */
     InputManager() = default;
@@ -54,13 +23,30 @@ private:
      */
     ~InputManager() = default;
 
-    void newKeyboard(wlr_input_device* handle);
-    void newPointer(wlr_input_device* handle);
+    /**
+     * @brief Get seat capabilities
+     */
+    uint32_t capabilities() const;
+
+    /**
+     * @brief Sync LEDs with other keyboards
+     */
+    void syncKeyboardLeds(const Keyboard& keyboard) const;
+
+    void addDevice(wlr_input_device* handle);
+    void removeDevice(Keyboard* keyboard);
+    void removeDevice(Pointer* pointer);
+
+private:
+    void addKeyboard(wlr_input_device* handle);
+    void addPointer(wlr_input_device* handle);
 
 private:
     std::list<Keyboard> m_keyboards;
     std::list<Pointer>  m_pointers;
 };
+
+inline InputManager inputManager{};
 
 }
 

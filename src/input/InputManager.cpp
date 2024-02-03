@@ -5,7 +5,18 @@
 namespace sycamore
 {
 
-InputManager InputManager::instance{};
+void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
+{
+    const auto leds = keyboard.ledsState();
+
+    for (auto& item : m_keyboards)
+    {
+        if (item != keyboard)
+        {
+            item.updateLeds(leds);
+        }
+    }
+}
 
 uint32_t InputManager::capabilities() const
 {
@@ -31,15 +42,15 @@ uint32_t InputManager::capabilities() const
     return caps;
 }
 
-void InputManager::onNewDevice(wlr_input_device* handle)
+void InputManager::addDevice(wlr_input_device* handle)
 {
     switch (handle->type)
     {
         case WLR_INPUT_DEVICE_KEYBOARD:
-            newKeyboard(handle);
+            addKeyboard(handle);
             break;
         case WLR_INPUT_DEVICE_POINTER:
-            newPointer(handle);
+            addPointer(handle);
             break;
         case WLR_INPUT_DEVICE_TOUCH:
         case WLR_INPUT_DEVICE_TABLET_TOOL:
@@ -50,30 +61,30 @@ void InputManager::onNewDevice(wlr_input_device* handle)
     }
 }
 
-void InputManager::onDestroyDevice(Keyboard* keyboard)
+void InputManager::removeDevice(Keyboard* keyboard)
 {
     m_keyboards.erase(keyboard->iter());
     core.seat->setCapabilities(capabilities());
 }
 
-void InputManager::onDestroyDevice(Pointer* pointer)
+void InputManager::removeDevice(Pointer* pointer)
 {
     m_pointers.erase(pointer->iter());
     core.seat->setCapabilities(capabilities());
 }
 
-void InputManager::newKeyboard(wlr_input_device* handle)
+void InputManager::addKeyboard(wlr_input_device* handle)
 {
-    auto iter = m_keyboards.emplace(m_keyboards.end(), handle);
-    iter->iter(iter);
+    auto keyboard = m_keyboards.emplace(m_keyboards.end(), handle);
+    keyboard->iter(keyboard);
 
     core.seat->setCapabilities(capabilities());
 }
 
-void InputManager::newPointer(wlr_input_device* handle)
+void InputManager::addPointer(wlr_input_device* handle)
 {
-    auto iter = m_pointers.emplace(m_pointers.end(), handle);
-    iter->iter(iter);
+    auto pointer = m_pointers.emplace(m_pointers.end(), handle);
+    pointer->iter(pointer);
 
     core.seat->setCapabilities(capabilities());
 }
