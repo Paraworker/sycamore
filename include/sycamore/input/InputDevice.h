@@ -12,13 +12,10 @@ template<typename ConcreteType>
 class InputDevice
 {
 public:
-    using Iter = std::list<ConcreteType>::iterator;
-
-public:
     /**
      * @brief Get wlr_input_device_type
      */
-    auto type() const noexcept
+    auto type() const
     {
         return m_deviceHandle->type;
     }
@@ -26,27 +23,21 @@ public:
     /**
      * @brief Get device name
      */
-    auto name() const noexcept
+    auto name() const
     {
         return m_deviceHandle->name;
     }
 
-    void iter(const Iter& iter)
-    {
-        m_iter = iter;
-    }
-
-    Iter& iter()
-    {
-        return m_iter;
-    }
+public:
+    std::list<ConcreteType>::iterator iter;
 
 protected:
     /**
      * @brief Constructor
      */
     explicit InputDevice(wlr_input_device* handle)
-        : m_deviceHandle{handle} {}
+        : m_deviceHandle{handle}
+    {}
 
     /**
      * @brief Destructor
@@ -55,7 +46,6 @@ protected:
 
 protected:
     wlr_input_device* m_deviceHandle;
-    Iter              m_iter;
 };
 
 }
