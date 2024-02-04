@@ -5,19 +5,6 @@
 namespace sycamore
 {
 
-void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
-{
-    const auto leds = keyboard.ledsState();
-
-    for (auto& item : m_keyboards)
-    {
-        if (item != keyboard)
-        {
-            item.updateLeds(leds);
-        }
-    }
-}
-
 uint32_t InputManager::capabilities() const
 {
     uint32_t caps{0};
@@ -40,6 +27,19 @@ uint32_t InputManager::capabilities() const
      */
 
     return caps;
+}
+
+void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
+{
+    const auto leds = keyboard.ledsState();
+
+    for (auto& item : m_keyboards)
+    {
+        if (item != keyboard)
+        {
+            item.updateLeds(leds);
+        }
+    }
 }
 
 void InputManager::addDevice(wlr_input_device* handle)

@@ -28,7 +28,7 @@ void ShellManager::setFocus(Toplevel& toplevel)
 
     // Bring new toplevel to front
     toplevel.toFront();
-    m_mappedToplevels.splice(m_mappedToplevels.end(), m_mappedToplevels, toplevel.iter());
+    m_mappedToplevels.splice(m_mappedToplevels.end(), m_mappedToplevels, toplevel.iter);
 
     // Activate new toplevel
     toplevel.setActivated(true);
@@ -55,13 +55,13 @@ void ShellManager::setFocus(Layer& layer)
 
 void ShellManager::onToplevelMap(Toplevel& toplevel)
 {
-    toplevel.iter(m_mappedToplevels.emplace(m_mappedToplevels.end(), &toplevel));
+    toplevel.iter = m_mappedToplevels.emplace(m_mappedToplevels.end(), &toplevel);
     setFocus(toplevel);
 }
 
 void ShellManager::onToplevelUnmap(Toplevel& toplevel)
 {
-    m_mappedToplevels.erase(toplevel.iter());
+    m_mappedToplevels.erase(toplevel.iter);
 
     if (m_focusState.toplevel == &toplevel)
     {

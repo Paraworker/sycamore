@@ -6,7 +6,6 @@
 #include "sycamore/wlroots.h"
 
 #include <list>
-#include <memory>
 
 namespace sycamore
 {
@@ -78,16 +77,6 @@ public:
         return m_state;
     }
 
-    Iter& iter()
-    {
-        return m_iter;
-    }
-
-    void iter(const Iter& iter)
-    {
-        m_iter = iter;
-    }
-
     virtual Role role() const = 0;
 
     virtual uint32_t setMaximized(bool maximized) = 0;
@@ -107,6 +96,7 @@ public:
 public:
     Events      events;
     RestoreData restore;
+    Iter        iter;
 
 protected:
     /**
@@ -123,7 +113,6 @@ protected:
     wlr_surface*    m_surface;
     wlr_scene_tree* m_tree;
     State           m_state;
-    Iter            m_iter;
 };
 
 struct ToplevelElement final : scene::Element
