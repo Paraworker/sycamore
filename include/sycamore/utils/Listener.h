@@ -15,9 +15,9 @@ public:
     /**
      * @brief Constructor
      */
-    Listener() : m_wrapped{{}, onSignal}
+    Listener() : m_wrapper{{{}, onSignal}, {}}
     {
-        wl_list_init(&m_wrapped.link);
+        wl_list_init(&m_wrapper.listener.link);
     }
 
     /**
@@ -27,7 +27,7 @@ public:
     {
         if (isConnected())
         {
-            wl_list_remove(&m_wrapped.link);
+            wl_list_remove(&m_wrapper.listener.link);
         }
     }
 
@@ -37,7 +37,7 @@ public:
     template<typename Fn>
     void notify(Fn&& callback)
     {
-        m_callback = std::forward<Fn>(callback);
+        m_wrapper.callback = std::forward<Fn>(callback);
     }
 
     /**
@@ -46,7 +46,7 @@ public:
     void connect(wl_signal& signal)
     {
         assert(!isConnected());
-        wl_signal_add(&signal, &m_wrapped);
+        wl_signal_add(&signal, &m_wrapper.listener);
     }
 
     /**
@@ -55,8 +55,8 @@ public:
     void disconnect()
     {
         assert(isConnected());
-        wl_list_remove(&m_wrapped.link);
-        wl_list_init(&m_wrapped.link);
+        wl_list_remove(&m_wrapper.listener.link);
+        wl_list_init(&m_wrapper.listener.link);
     }
 
     /**
@@ -64,7 +64,7 @@ public:
      */
     bool isConnected() const
     {
-        return !wl_list_empty(&m_wrapped.link);
+        return !wl_list_empty(&m_wrapper.listener.link);
     }
 
     Listener(const Listener&) = delete;
@@ -75,14 +75,20 @@ public:
 private:
     static void onSignal(wl_listener* listener, void* data)
     {
-        reinterpret_cast<Listener*>(listener)->m_callback(data);
+        reinterpret_cast<Wrapper*>(listener)->callback(data);
     }
 
 private:
     using Callback = std::function<void(void*)>;
 
-    wl_listener m_wrapped;
-    Callback    m_callback;
+    struct Wrapper
+    {
+        wl_listener listener;
+        Callback    callback;
+    };
+    
+private:
+    Wrapper m_wrapper;
 };
 
 }
