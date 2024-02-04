@@ -44,7 +44,7 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
             for (int i = 0; i < nsyms; ++i)
             {
                 info.sym = syms[i];
-                handled = KeybindingManager::instance.dispatch(info);
+                handled = keybindingManager.dispatch(info);
             }
         }
 

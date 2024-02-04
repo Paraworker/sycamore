@@ -35,16 +35,6 @@ public:
     using Dispatcher = std::function<void(void)>;
 
 public:
-    bool add(const KeyInfo& info, Dispatcher&& dispatcher);
-
-    bool remove(const KeyInfo& info);
-
-    bool dispatch(const KeyInfo& info);
-
-public:
-    static KeybindingManager instance;
-
-private:
     /**
      * @brief Constructor
      */
@@ -55,9 +45,27 @@ private:
      */
     ~KeybindingManager();
 
+    /**
+     * @brief Add a keybinding
+     */
+    bool add(const KeyInfo& info, Dispatcher&& dispatcher);
+
+    /**
+     * @brief Remove a keybinding
+     */
+    bool remove(const KeyInfo& info);
+
+    /**
+     * @brief  Dispatch a keybinding
+     * @return true if dispatched
+     */
+    bool dispatch(const KeyInfo& info);
+
 private:
     std::unordered_map<KeyInfo, Dispatcher, KeyInfo::Hash> m_bindingMap;
 };
+
+inline KeybindingManager keybindingManager{};
 
 }
 
