@@ -38,7 +38,7 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
 
     m_destroy.notify([this](auto)
     {
-        outputManager.removeOutput(this);
+        outputManager.destroyOutput(this);
     });
     m_destroy.connect(handle->events.destroy);
 }
@@ -116,7 +116,7 @@ void Output::arrangeLayers()
     auto fullArea   = getLayoutGeometry();
     auto usableArea = fullArea;
 
-    for (auto& list : layers)
+    for (auto& list : layerList)
     {
         for (auto layer : list)
         {

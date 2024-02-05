@@ -21,7 +21,7 @@ static wlr_xcursor_manager* createXcursorManager(const char* theme = nullptr, ui
     return wlr_xcursor_manager_create(theme, size);
 }
 
-Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
+Cursor::Cursor(Seat& seat)
     : m_handle{nullptr}
     , m_xcursorManager{nullptr}
     , m_enabled{false}
@@ -39,8 +39,6 @@ Cursor::Cursor(wlr_output_layout* layout, Seat& seat)
         wlr_cursor_destroy(m_handle);
         throw std::runtime_error("Create wlr_xcursor_manager failed!");
     }
-
-    wlr_cursor_attach_output_layout(m_handle, layout);
 
     m_motion.notify([this](void* data)
     {

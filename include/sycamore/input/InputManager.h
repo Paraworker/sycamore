@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_INPUT_MANAGER_H
 #define SYCAMORE_INPUT_MANAGER_H
 
-#include "sycamore/input/InputDevice.h"
 #include "sycamore/input/Keyboard.h"
 #include "sycamore/input/Pointer.h"
 
@@ -24,22 +23,36 @@ public:
     ~InputManager() = default;
 
     /**
-     * @brief Get seat capabilities
+     * @brief Update seat capabilities
      */
-    uint32_t capabilities() const;
+    void updateCapabilities() const;
 
     /**
      * @brief Sync LEDs with other keyboards
      */
     void syncKeyboardLeds(const Keyboard& keyboard) const;
 
-    void addDevice(wlr_input_device* handle);
-    void removeDevice(Keyboard* keyboard);
-    void removeDevice(Pointer* pointer);
+    /**
+     * @brief Handle a new input device
+     */
+    void newDevice(wlr_input_device* handle);
+
+    /**
+     * @brief Destroy an input device
+     */
+    template<typename T>
+    void destroyDevice(T* device)
+    {
+        destroy(device);
+        updateCapabilities();
+    }
 
 private:
-    void addKeyboard(wlr_input_device* handle);
-    void addPointer(wlr_input_device* handle);
+    void newKeyboard(wlr_input_device* handle);
+    void newPointer(wlr_input_device* handle);
+
+    void destroy(Keyboard* keyboard);
+    void destroy(Pointer* pointer);
 
 private:
     std::list<Keyboard> m_keyboards;

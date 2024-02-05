@@ -24,14 +24,14 @@ public:
     ~OutputManager() = default;
 
     /**
-     * @brief Add output
+     * @brief Handle a new output
      */
-    bool addOutput(wlr_output* handle);
+    void newOutput(wlr_output* handle);
 
     /**
-     * @brief Remove output
+     * @brief Destroy an output
      */
-    void removeOutput(Output* output);
+    void destroyOutput(Output* output);
 
     /**
      * @brief Get the number all outputs

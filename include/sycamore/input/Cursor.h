@@ -17,7 +17,7 @@ public:
     /**
      * @brief Constructor
      */
-    Cursor(wlr_output_layout* layout, Seat& seat);
+    explicit Cursor(Seat& seat);
 
     /**
      * @brief Destructor
@@ -60,29 +60,34 @@ public:
 
     Output* atOutput() const;
 
-    void warp(const Point<double>& coords) const noexcept
+    void warp(const Point<double>& coords) const
     {
         wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
     }
 
-    Point<double> getPosition() const noexcept
+    Point<double> getPosition() const
     {
         return {m_handle->x, m_handle->y};
     }
 
-    size_t getPointerButtonCount() const noexcept
+    size_t getPointerButtonCount() const
     {
         return m_pointerButtonCount;
     }
 
-    void attachDevice(wlr_input_device* device) const noexcept
+    void attachDevice(wlr_input_device* device) const
     {
         wlr_cursor_attach_input_device(m_handle, device);
     }
 
-    void detachDevice(wlr_input_device* device) const noexcept
+    void detachDevice(wlr_input_device* device) const
     {
         wlr_cursor_detach_input_device(m_handle, device);
+    }
+
+    void attachOutputLayout(wlr_output_layout* layout)
+    {
+        wlr_cursor_attach_output_layout(m_handle, layout);
     }
 
     Cursor(const Cursor&) = delete;

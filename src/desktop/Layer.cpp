@@ -53,7 +53,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     wl_signal_init(&events.unmap);
 
     // Link to output
-    auto& layerList = m_output->layers[m_layer];
+    auto& layerList = m_output->layerList[m_layer];
     m_iter = layerList.emplace(layerList.end(), this);
 
     m_outputDestroy.notify([this](auto)
@@ -62,7 +62,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
 
         // Unlink output
         m_outputDestroy.disconnect();
-        m_output->layers[m_layer].erase(m_iter);
+        m_output->layerList[m_layer].erase(m_iter);
         m_output = nullptr;
     });
     m_outputDestroy.connect(m_output->events.destroy);
@@ -99,9 +99,9 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
             // Layer type changed
             if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER)
             {
-                auto& oldList = m_output->layers[m_layer];
+                auto& oldList = m_output->layerList[m_layer];
                 m_layer = m_layerSurface->current.layer;
-                auto& newList = m_output->layers[m_layer];
+                auto& newList = m_output->layerList[m_layer];
 
                 wlr_scene_node_reparent(&m_sceneHelper->tree->node, core.scene.treeForLayer(m_layer));
                 newList.splice(newList.end(), oldList, m_iter);
@@ -148,7 +148,7 @@ Layer::~Layer()
     if (m_output)
     {
         // Unlink output
-        m_output->layers[m_layer].erase(m_iter);
+        m_output->layerList[m_layer].erase(m_iter);
         m_output->arrangeLayers();
     }
 }

@@ -19,7 +19,7 @@ public:
     /**
      * @brief Create Seat
      */
-    static Seat* create(wl_display* display, const char* name, wlr_output_layout* layout);
+    static Seat* create(wl_display* display, const char* name);
 
     /**
      * @brief Get wlr_seat
@@ -54,7 +54,7 @@ private:
     /**
      * @brief Constructor
      */
-    Seat(wl_display* display, const char* name, wlr_output_layout* layout);
+    Seat(wl_display* display, const char* name);
 
     /**
      * @brief Destructor

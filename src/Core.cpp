@@ -28,13 +28,13 @@ struct BackendHandler
     {
         newInput.notify([](void* data)
         {
-            inputManager.addDevice(static_cast<wlr_input_device*>(data));
+            inputManager.newDevice(static_cast<wlr_input_device*>(data));
         });
         newInput.connect(handle->events.new_input);
 
         newOutput.notify([](void* data)
         {
-            outputManager.addOutput(static_cast<wlr_output*>(data));
+            outputManager.newOutput(static_cast<wlr_output*>(data));
         });
         newOutput.connect(handle->events.new_output);
 
@@ -94,9 +94,10 @@ Core::Core()
         throw std::runtime_error("Create wlr_output_layout failed!");
     }
 
-    scene.init(outputLayout, linuxDmabuf);
+    seat = Seat::create(display, DEFAULT_SEAT);
+    seat->cursor.attachOutputLayout(outputLayout);
 
-    seat = Seat::create(display, DEFAULT_SEAT, outputLayout);
+    scene.init(outputLayout, linuxDmabuf);
 
     XdgShellHandler::create(display);
     LayerShellHandler::create(display);

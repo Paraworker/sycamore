@@ -13,7 +13,7 @@ public:
     /**
      * @brief Constructor
      */
-    explicit Keyboard(wlr_input_device* deviceHandle);
+    explicit Keyboard(wlr_input_device* baseHandle);
 
     /**
      * @brief Destructor

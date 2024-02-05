@@ -11,14 +11,13 @@
 namespace sycamore
 {
 
-Seat* Seat::create(wl_display* display, const char* name, wlr_output_layout* layout)
+Seat* Seat::create(wl_display* display, const char* name)
 {
-    // Will be destroyed by listener
-    return new Seat{display, name, layout};
+    return new Seat{display, name};
 }
 
-Seat::Seat(wl_display* display, const char* name, wlr_output_layout* layout)
-    : cursor{layout, *this}
+Seat::Seat(wl_display* display, const char* name)
+    : cursor{*this}
     , input{std::make_unique<DefaultInput>(*this)}
     , m_handle{nullptr}
 {

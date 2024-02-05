@@ -1,11 +1,12 @@
 #include "sycamore/input/InputManager.h"
 
 #include "sycamore/Core.h"
+#include <spdlog/spdlog.h>
 
 namespace sycamore
 {
 
-uint32_t InputManager::capabilities() const
+void InputManager::updateCapabilities() const
 {
     uint32_t caps{0};
 
@@ -26,7 +27,7 @@ uint32_t InputManager::capabilities() const
     }
      */
 
-    return caps;
+    core.seat->setCapabilities(caps);
 }
 
 void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
@@ -42,15 +43,15 @@ void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
     }
 }
 
-void InputManager::addDevice(wlr_input_device* handle)
+void InputManager::newDevice(wlr_input_device* handle)
 {
     switch (handle->type)
     {
         case WLR_INPUT_DEVICE_KEYBOARD:
-            addKeyboard(handle);
+            newKeyboard(handle);
             break;
         case WLR_INPUT_DEVICE_POINTER:
-            addPointer(handle);
+            newPointer(handle);
             break;
         case WLR_INPUT_DEVICE_TOUCH:
         case WLR_INPUT_DEVICE_TABLET_TOOL:
@@ -59,34 +60,43 @@ void InputManager::addDevice(wlr_input_device* handle)
         default:
             break;
     }
+
+    updateCapabilities();
 }
 
-void InputManager::removeDevice(Keyboard* keyboard)
+void InputManager::newKeyboard(wlr_input_device* handle)
 {
-    m_keyboards.erase(keyboard->iter);
-    core.seat->setCapabilities(capabilities());
-}
+    spdlog::info("New Keyboard: {}", handle->name);
 
-void InputManager::removeDevice(Pointer* pointer)
-{
-    m_pointers.erase(pointer->iter);
-    core.seat->setCapabilities(capabilities());
-}
-
-void InputManager::addKeyboard(wlr_input_device* handle)
-{
     auto keyboard = m_keyboards.emplace(m_keyboards.end(), handle);
-    keyboard->iter = keyboard;
 
-    core.seat->setCapabilities(capabilities());
+    keyboard->iter = keyboard;
+    keyboard->apply();
 }
 
-void InputManager::addPointer(wlr_input_device* handle)
+void InputManager::newPointer(wlr_input_device* handle)
 {
-    auto pointer = m_pointers.emplace(m_pointers.end(), handle);
-    pointer->iter = pointer;
+    spdlog::info("New Pointer: {}", handle->name);
 
-    core.seat->setCapabilities(capabilities());
+    auto pointer = m_pointers.emplace(m_pointers.end(), handle);
+
+    pointer->iter = pointer;
+    pointer->apply();
+
+    core.seat->cursor.attachDevice(handle);
+}
+
+void InputManager::destroy(Keyboard* keyboard)
+{
+    spdlog::info("Destroy Keyboard: {}", keyboard->name());
+    m_keyboards.erase(keyboard->iter);
+}
+
+void InputManager::destroy(Pointer* pointer)
+{
+    spdlog::info("Destroy Pointer: {}", pointer->name());
+    core.seat->cursor.detachDevice(pointer->getBaseHandle());
+    m_pointers.erase(pointer->iter);
 }
 
 }

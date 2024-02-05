@@ -13,7 +13,7 @@ public:
     /**
      * @brief Constructor
      */
-    explicit Pointer(wlr_input_device* deviceHandle);
+    explicit Pointer(wlr_input_device* baseHandle);
 
     /**
      * @brief Destructor

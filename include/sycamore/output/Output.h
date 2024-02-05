@@ -21,6 +21,8 @@ public:
         wl_signal destroy;
     };
 
+    using Iter = std::list<Output>::iterator;
+
 public:
     /**
      * @brief Constructor
@@ -43,13 +45,13 @@ public:
     bool apply();
 
     /**
-     * @brief Get geometry in local layout
+     * @brief  Get geometry in local layout
      * @return {0, 0, width, height}
      */
     wlr_box getRelativeGeometry() const;
 
     /**
-     * @brief Get geometry in output layout
+     * @brief  Get geometry in output layout
      * @return {x, y, width, height}
      */
     wlr_box getLayoutGeometry() const;
@@ -71,7 +73,7 @@ public:
         return m_sceneOutput;
     }
 
-    const wlr_box& getUsableArea() const noexcept
+    const wlr_box& getUsableArea() const
     {
         return m_usableArea;
     }
@@ -82,9 +84,9 @@ public:
     Output& operator=(Output&&) = delete;
 
 public:
-    Events                      events;
-    std::list<Layer*>           layers[LAYER_COUNT];
-    std::list<Output>::iterator iter;
+    Events            events;
+    std::list<Layer*> layerList[LAYER_COUNT];
+    Iter              iter;
 
 private:
     wlr_output*       m_handle;

@@ -8,47 +8,38 @@
 namespace sycamore
 {
 
-Pointer::Pointer(wlr_input_device* deviceHandle)
-    : InputDevice{deviceHandle}
-    , m_pointerHandle{wlr_pointer_from_input_device(deviceHandle)}
+Pointer::Pointer(wlr_input_device* baseHandle)
+    : InputDevice{baseHandle}
+    , m_pointerHandle{wlr_pointer_from_input_device(baseHandle)}
 {
-    spdlog::info("New Pointer: {}", deviceHandle->name);
-
-    core.seat->cursor.attachDevice(deviceHandle);
-
     m_destroy.notify([this](auto)
     {
-        inputManager.removeDevice(this);
+        inputManager.destroyDevice(this);
     });
-    m_destroy.connect(deviceHandle->events.destroy);
-
-    apply();
+    m_destroy.connect(baseHandle->events.destroy);
 }
 
-Pointer::~Pointer()
-{
-    core.seat->cursor.detachDevice(m_deviceHandle);
-}
+Pointer::~Pointer() = default;
 
 bool Pointer::isTouchpad() const
 {
-    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    if (!wlr_input_device_is_libinput(m_baseHandle))
     {
         return false;
     }
 
-    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    auto handle = wlr_libinput_get_device_handle(m_baseHandle);
     return libinput_device_config_tap_get_finger_count(handle) > 0;
 }
 
 bool Pointer::setNaturalScroll(bool enable)
 {
-    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    if (!wlr_input_device_is_libinput(m_baseHandle))
     {
         return false;
     }
 
-    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    auto handle = wlr_libinput_get_device_handle(m_baseHandle);
 
     if (!libinput_device_config_scroll_has_natural_scroll(handle) ||
         libinput_device_config_scroll_get_natural_scroll_enabled(handle) == enable)
@@ -63,12 +54,12 @@ bool Pointer::setNaturalScroll(bool enable)
 
 bool Pointer::setTapToClick(libinput_config_tap_state state)
 {
-    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    if (!wlr_input_device_is_libinput(m_baseHandle))
     {
         return false;
     }
 
-    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    auto handle = wlr_libinput_get_device_handle(m_baseHandle);
 
     if (libinput_device_config_tap_get_finger_count(handle) <= 0 ||
         libinput_device_config_tap_get_enabled(handle) == state)
@@ -83,12 +74,12 @@ bool Pointer::setTapToClick(libinput_config_tap_state state)
 
 bool Pointer::setAccelSpeed(double speed)
 {
-    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    if (!wlr_input_device_is_libinput(m_baseHandle))
     {
         return false;
     }
 
-    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    auto handle = wlr_libinput_get_device_handle(m_baseHandle);
 
     if (!libinput_device_config_accel_is_available(handle) ||
         libinput_device_config_accel_get_speed(handle) == speed)
@@ -103,12 +94,12 @@ bool Pointer::setAccelSpeed(double speed)
 
 bool Pointer::setAccelProfile(libinput_config_accel_profile profile)
 {
-    if (!wlr_input_device_is_libinput(m_deviceHandle))
+    if (!wlr_input_device_is_libinput(m_baseHandle))
     {
         return false;
     }
 
-    auto handle = wlr_libinput_get_device_handle(m_deviceHandle);
+    auto handle = wlr_libinput_get_device_handle(m_baseHandle);
 
     if (!libinput_device_config_accel_is_available(handle) ||
         libinput_device_config_accel_get_profile(handle) == profile)

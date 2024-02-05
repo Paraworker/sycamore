@@ -9,12 +9,10 @@
 namespace sycamore
 {
 
-Keyboard::Keyboard(wlr_input_device* deviceHandle)
-    : InputDevice{deviceHandle}
-    , m_keyboardHandle{wlr_keyboard_from_input_device(deviceHandle)}
+Keyboard::Keyboard(wlr_input_device* baseHandle)
+    : InputDevice{baseHandle}
+    , m_keyboardHandle{wlr_keyboard_from_input_device(baseHandle)}
 {
-    spdlog::info("New Keyboard: {}", deviceHandle->name);
-
     m_modifiers.notify([this](auto)
     {
         auto seatHandle = core.seat->getHandle();
@@ -61,11 +59,9 @@ Keyboard::Keyboard(wlr_input_device* deviceHandle)
 
     m_destroy.notify([this](auto)
     {
-        inputManager.removeDevice(this);
+        inputManager.destroyDevice(this);
     });
-    m_destroy.connect(deviceHandle->events.destroy);
-
-    apply();
+    m_destroy.connect(baseHandle->events.destroy);
 }
 
 Keyboard::~Keyboard() = default;

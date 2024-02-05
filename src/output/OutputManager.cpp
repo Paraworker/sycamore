@@ -6,7 +6,7 @@
 namespace sycamore
 {
 
-bool OutputManager::addOutput(wlr_output* handle)
+void OutputManager::newOutput(wlr_output* handle)
 {
     spdlog::info("New Output: {}", handle->name);
 
@@ -14,7 +14,7 @@ bool OutputManager::addOutput(wlr_output* handle)
     {
         spdlog::error("Output: {} init render failed", handle->name);
         wlr_output_destroy(handle);
-        return false;
+        return;
     }
 
     // Add to output layout
@@ -32,11 +32,9 @@ bool OutputManager::addOutput(wlr_output* handle)
 
     // TODO: configurable
     output->apply();
-
-    return true;
 }
 
-void OutputManager::removeOutput(Output* output)
+void OutputManager::destroyOutput(Output* output)
 {
     wlr_output_layout_remove(core.outputLayout, output->getHandle());
     m_outputList.erase(output->iter);

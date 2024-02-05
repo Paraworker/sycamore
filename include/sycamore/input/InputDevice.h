@@ -17,7 +17,7 @@ public:
      */
     auto type() const
     {
-        return m_deviceHandle->type;
+        return m_baseHandle->type;
     }
 
     /**
@@ -25,7 +25,15 @@ public:
      */
     auto name() const
     {
-        return m_deviceHandle->name;
+        return m_baseHandle->name;
+    }
+
+    /**
+     * @brief Get wlr_input_device
+     */
+    auto getBaseHandle() const
+    {
+        return m_baseHandle;
     }
 
 public:
@@ -36,7 +44,7 @@ protected:
      * @brief Constructor
      */
     explicit InputDevice(wlr_input_device* handle)
-        : m_deviceHandle{handle}
+        : m_baseHandle{handle}
     {}
 
     /**
@@ -45,7 +53,7 @@ protected:
     ~InputDevice() = default;
 
 protected:
-    wlr_input_device* m_deviceHandle;
+    wlr_input_device* m_baseHandle;
 };
 
 }
