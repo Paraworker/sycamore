@@ -26,19 +26,12 @@ void XdgToplevel::create(wlr_xdg_toplevel* toplevel)
 XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     : Toplevel{toplevel->base->surface, tree}, m_toplevel{toplevel}
 {
-    // On creation, we only connect destroy, map, unmap
-    m_destroy.notify([this](auto)
-    {
-        delete this;
-    });
-    m_destroy.connect(toplevel->base->events.destroy);
-
+    // On creation, we only connect map, unmap, commit, destroy
     m_map.notify([this](auto)
     {
         shellManager.onToplevelMap(*this);
 
         // Connect signals
-        m_commit.connect(m_surface->events.commit);
         m_newPopup.connect(m_toplevel->base->events.new_popup);
         m_move.connect(m_toplevel->events.request_move);
         m_resize.connect(m_toplevel->events.request_resize);
@@ -73,7 +66,6 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     m_unmap.notify([this](auto)
     {
         // Disconnect signals
-        m_commit.disconnect();
         m_newPopup.disconnect();
         m_move.disconnect();
         m_resize.disconnect();
@@ -87,10 +79,21 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
     });
     m_unmap.connect(m_surface->events.unmap);
 
-    // All listeners below are not connected util map
-
     m_commit.notify([this](auto)
     {
+        if (m_toplevel->base->initial_commit)
+        {
+            // Configures the xdg_toplevel with 0,0 size
+            // to let the client pick the dimensions itself
+            wlr_xdg_toplevel_set_size(m_toplevel, 0, 0);
+            return;
+        }
+
+        if (!isMapped())
+        {
+            return;
+        }
+
         auto newGeometry = getGeometry();
 
         // geometry changed
@@ -100,6 +103,15 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree)
             core.seat->input->rebasePointer();
         }
     });
+    m_commit.connect(m_surface->events.commit);
+
+    m_destroy.notify([this](auto)
+    {
+        delete this;
+    });
+    m_destroy.connect(toplevel->base->events.destroy);
+
+    // All listeners below are not connected util map
 
     m_newPopup.notify([this](void* data)
     {
