@@ -8,25 +8,25 @@ namespace sycamore
 PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
     : m_toplevel{toplevel}
     , m_edges{edges}
-    , m_grabGeo{toplevel->getGeometry()}
+    , m_grabGeo{toplevel->geometry()}
     , m_seat{seat}
 {
-    auto toplevelPos = toplevel->getPosition();
+    auto toplevelPos = toplevel->position();
     m_grabGeo.x += toplevelPos.x;
     m_grabGeo.y += toplevelPos.y;
 
-    Point<int> border
+    Point<double> border
     {
-        m_grabGeo.x + ((edges & WLR_EDGE_RIGHT) ? m_grabGeo.width : 0),
-        m_grabGeo.y + ((edges & WLR_EDGE_BOTTOM) ? m_grabGeo.height : 0)
+        static_cast<double>(m_grabGeo.x + ((edges & WLR_EDGE_RIGHT) ? m_grabGeo.width : 0)),
+        static_cast<double>(m_grabGeo.y + ((edges & WLR_EDGE_BOTTOM) ? m_grabGeo.height : 0)),
     };
 
-    m_delta = m_seat.cursor.getPosition() - border.into<double>();
+    m_delta = m_seat.cursor.position() - border;
 
-    m_toplevelUnmap.notify([this](auto)
+    m_toplevelUnmap = [this](auto)
     {
         m_seat.setInput<DefaultInput>(m_seat);
-    });
+    };
     m_toplevelUnmap.connect(toplevel->events.unmap);
 }
 
@@ -46,7 +46,7 @@ void PointerResize::onDisable()
 
 void PointerResize::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.cursor.getPointerButtonCount() == 0)
+    if (m_seat.cursor.pointerButtonCount() == 0)
     {
         // If there is no button being pressed
         // we back to default.
@@ -69,7 +69,7 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
     int newTop    = m_grabGeo.y;
     int newBottom = m_grabGeo.y + m_grabGeo.height;
 
-    auto border = m_seat.cursor.getPosition() - m_delta;
+    auto border = m_seat.cursor.position() - m_delta;
 
     if (m_edges & WLR_EDGE_TOP)
     {
@@ -105,7 +105,7 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
         }
     }
 
-    auto toplevelGeo = m_toplevel->getGeometry();
+    auto toplevelGeo = m_toplevel->geometry();
 
     m_toplevel->moveTo({newLeft - toplevelGeo.x, newTop - toplevelGeo.y});
     m_toplevel->setSize(newRight - newLeft, newBottom - newTop);

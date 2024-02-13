@@ -1,23 +1,25 @@
 #include "sycamore/input/KeybindingManager.h"
 
-#include "sycamore/input/keybindingDispatchers.h"
+#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/utils/process.h"
+#include "sycamore/Core.h"
 
 namespace sycamore
 {
 
 KeybindingManager::KeybindingManager()
 {
-    add({WLR_MODIFIER_LOGO, XKB_KEY_d}, Spawn{"fuzzel -i Papirus"});
-    add({WLR_MODIFIER_LOGO, XKB_KEY_Return}, Spawn{"gnome-terminal"});
-    add({WLR_MODIFIER_LOGO, XKB_KEY_q}, CloseFocusedToplevel{});
-    add({WLR_MODIFIER_LOGO, XKB_KEY_Tab}, CycleToplevel{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_Escape}, Terminate{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_1}, SwitchVT<1>{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_2}, SwitchVT<2>{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_3}, SwitchVT<3>{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_4}, SwitchVT<4>{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_5}, SwitchVT<5>{});
-    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_6}, SwitchVT<6>{});
+    add({WLR_MODIFIER_LOGO, XKB_KEY_d}, [] { spawn("fuzzel -i Papirus"); });
+    add({WLR_MODIFIER_LOGO, XKB_KEY_Return}, [] { spawn("gnome-terminal"); });
+    add({WLR_MODIFIER_LOGO, XKB_KEY_q}, [] { windowManager.closeFocusedToplevel(); });
+    add({WLR_MODIFIER_LOGO, XKB_KEY_Tab}, [] { windowManager.cycleToplevel(); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_Escape}, [] { core.terminate(); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_1}, [] { core.switchVt(1); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_2}, [] { core.switchVt(2); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_3}, [] { core.switchVt(3); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_4}, [] { core.switchVt(4); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_5}, [] { core.switchVt(5); });
+    add({WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, XKB_KEY_XF86Switch_VT_6}, [] { core.switchVt(6); });
 }
 
 KeybindingManager::~KeybindingManager() = default;

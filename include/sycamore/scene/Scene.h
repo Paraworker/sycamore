@@ -57,7 +57,7 @@ struct Scene
      * @brief  Add an output to scene layout
      * @return scene output
      */
-    wlr_scene_output* addOutput(wlr_output* handle, wlr_output_layout_output* layoutOutput);
+    wlr_scene_output* addOutput(wlr_output* outputHandle, wlr_output_layout_output* layoutOutput);
 
     Scene(const Scene&) = delete;
     Scene(Scene&&) = delete;

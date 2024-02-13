@@ -25,7 +25,7 @@ public:
      */
     void apply();
 
-    uint32_t getModifiers() const noexcept
+    uint32_t modifiers() const
     {
         return wlr_keyboard_get_modifiers(m_keyboardHandle);
     }

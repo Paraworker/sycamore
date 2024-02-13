@@ -1,9 +1,7 @@
 #ifndef SYCAMORE_CORE_H
 #define SYCAMORE_CORE_H
 
-#include "sycamore/input/Seat.h"
 #include "sycamore/scene/Scene.h"
-#include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
 #include <memory>
@@ -11,6 +9,8 @@
 
 namespace sycamore
 {
+
+class Seat;
 
 class Core
 {
@@ -35,25 +35,41 @@ public:
      */
     void run() const;
 
+    /**
+     * @brief Terminate server
+     */
+    void terminate() const;
+
+    /**
+     * @brief Switch to virtual terminal
+     */
+    void switchVt(uint32_t vt) const;
+
 public:
     wl_display*              display;
     wl_event_loop*           eventLoop;
 
+    std::string              socket;
+
     wlr_backend*             backend;
     wlr_session*             session;
+
     wlr_renderer*            renderer;
+    wlr_linux_dmabuf_v1*     linuxDmabuf;
+
     wlr_allocator*           allocator;
+
+    wlr_compositor*          compositor;
 
     wlr_output_layout*       outputLayout;
 
-    Seat*                    seat;
-
     scene::Scene             scene;
 
-    wlr_linux_dmabuf_v1*     linuxDmabuf;
-    wlr_pointer_gestures_v1* gestures;
+    std::unique_ptr<Seat>    seat;
+    wlr_pointer_gestures_v1* pointerGestures;
 
-    std::string              socket;
+    wlr_xdg_shell*           xdgShell;
+    wlr_layer_shell_v1*      layerShell;
 };
 
 inline Core core{};

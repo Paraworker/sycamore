@@ -1,60 +1,46 @@
 #include "sycamore/input/Seat.h"
 
-#include "sycamore/desktop/ShellManager.h"
+#include "sycamore/desktop/WindowManager.h"
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/input/DragIcon.h"
 #include "sycamore/input/seatInput/DefaultInput.h"
 #include "sycamore/Core.h"
 
-#include <stdexcept>
-
 namespace sycamore
 {
-
-Seat* Seat::create(wl_display* display, const char* name)
-{
-    return new Seat{display, name};
-}
 
 Seat::Seat(wl_display* display, const char* name)
     : cursor{*this}
     , input{std::make_unique<DefaultInput>(*this)}
-    , m_handle{nullptr}
+    , m_handle{wlr_seat_create(display, name)}
 {
-    if (m_handle = wlr_seat_create(display, name); !m_handle)
-    {
-        throw std::runtime_error("Create wlr_seat failed!");
-    }
-
-    m_setCursor.notify([this](void* data)
+    m_setCursor = [this](void* data)
     {
         auto event = static_cast<wlr_seat_pointer_request_set_cursor_event*>(data);
 
         auto* focusedClient = m_handle->pointer_state.focused_client;
-        if (focusedClient != event->seat_client)
+        if (focusedClient == event->seat_client)
         {
-            return;
+            cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
         }
-
-        cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
-    });
+    };
     m_setCursor.connect(m_handle->events.request_set_cursor);
 
-    m_setSelection.notify([this](void* data)
+    m_setSelection = [this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_selection_event*>(data);
         wlr_seat_set_selection(m_handle, event->source, event->serial);
-    });
+    };
     m_setSelection.connect(m_handle->events.request_set_selection);
 
-    m_setPrimarySelection.notify([this](void* data)
+    m_setPrimarySelection = [this](void* data)
     {
         auto event = static_cast<wlr_seat_request_set_primary_selection_event*>(data);
         wlr_seat_set_primary_selection(m_handle, event->source, event->serial);
-    });
+    };
     m_setPrimarySelection.connect(m_handle->events.request_set_primary_selection);
 
-    m_requestStartDrag.notify([this](void* data)
+    m_requestStartDrag = [this](void* data)
     {
         auto event = static_cast<wlr_seat_request_start_drag_event*>(data);
 
@@ -74,27 +60,28 @@ Seat::Seat(wl_display* display, const char* name)
         // TODO: tablet grabs
 
         wlr_data_source_destroy(event->drag->source);
-    });
+    };
     m_requestStartDrag.connect(m_handle->events.request_start_drag);
 
-    m_startDrag.notify([this](void* data)
+    m_startDrag = [this](void* data)
     {
         auto drag = static_cast<wlr_drag*>(data);
 
         // Setup icon if provided
         if (drag->icon)
         {
-            DragIcon::create(drag->icon, *this);
+            auto icon = new DragIcon{drag->icon};
+            dragIconUpdatePosition(*icon);
         }
 
         setInput<DefaultInput>(*this);
-    });
+    };
     m_startDrag.connect(m_handle->events.start_drag);
 
-    m_destroy.notify([this](auto)
+    m_destroy = [](auto)
     {
-        delete this;
-    });
+        core.seat.reset();
+    };
     m_destroy.connect(m_handle->events.destroy);
 }
 
@@ -114,7 +101,7 @@ void Seat::setCapabilities(uint32_t caps)
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
     Point<double> sCoords{};
-    auto surface = scene::surfaceFromNode(core.scene.shellAt(cursor.getPosition(), sCoords));
+    auto surface = scene::surfaceFromNode(core.scene.shellAt(cursor.position(), sCoords));
 
     if (!surface)
     {
@@ -139,7 +126,16 @@ void Seat::setKeyboardFocus(wlr_surface* surface) const
     wlr_seat_keyboard_notify_enter(m_handle, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-bool Seat::bindingEnterCheck(Toplevel* toplevel) const
+void Seat::updateDragIconsPosition() const
+{
+    wlr_scene_node* node;
+    wl_list_for_each(node, &core.scene.dragIcons->children, link)
+    {
+        dragIconUpdatePosition(static_cast<DragIconElement*>(node->data)->icon);
+    }
+}
+
+bool Seat::bindingEnterCheck(const Toplevel& toplevel) const
 {
     /* This function is used for checking whether an
     * 'pointer interactive' input mode should begin. including:
@@ -153,18 +149,34 @@ bool Seat::bindingEnterCheck(Toplevel* toplevel) const
         return false;
     }
 
-    if (toplevel->isPinned())
+    if (toplevel.isPinned())
     {
         return false;
     }
 
-    // Deny pointerMove/pointerResize from unfocused toplevel or there is no focused toplevel.
-    if (toplevel != shellManager.getFocusState().toplevel)
+    // Deny pointerMove/pointerResize for unfocused toplevel
+    // or there is no focused toplevel.
+    if (windowManager.focusState().toplevel != &toplevel)
     {
         return false;
     }
 
     return true;
+}
+
+void Seat::dragIconUpdatePosition(const DragIcon& icon) const
+{
+    switch (icon.grabType())
+    {
+        case WLR_DRAG_GRAB_KEYBOARD:
+            return;
+        case WLR_DRAG_GRAB_KEYBOARD_POINTER:
+            icon.setPosition(static_cast<Point<int32_t>>(cursor.position()));
+            break;
+        case WLR_DRAG_GRAB_KEYBOARD_TOUCH:
+            // TODO
+            break;
+    }
 }
 
 }

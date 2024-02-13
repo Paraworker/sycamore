@@ -5,21 +5,61 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
+#include "sycamore/Core.h"
 
 namespace sycamore
 {
 
-class Seat;
+class DragIcon;
+
+struct DragIconElement final : scene::Element
+{
+    DragIcon& icon;
+    Listener  destroy;
+
+    DragIconElement(wlr_scene_node& node, DragIcon& icon)
+        : scene::Element{DRAG_ICON}, icon{icon}
+    {
+        // attach node
+        node.data = this;
+
+        destroy = [this](auto)
+        {
+            delete this;
+        };
+        destroy.connect(node.events.destroy);
+    }
+
+    ~DragIconElement() = default;
+};
 
 class DragIcon
 {
 public:
-    /**
-     * @brief Create DragIcon
-     */
-    static void create(wlr_drag_icon* handle, Seat& seat);
+    explicit DragIcon(wlr_drag_icon* handle)
+        : m_handle{handle}
+        , m_tree{wlr_scene_drag_icon_create(core.scene.dragIcons, handle)}
+    {
+        new DragIconElement{m_tree->node, *this};
 
-    void updatePosition() const;
+        m_destroy = [this](auto)
+        {
+            delete this;
+        };
+        m_destroy.connect(m_handle->events.destroy);
+    }
+
+    ~DragIcon() = default;
+
+    void setPosition(const Point<int32_t>& pos) const
+    {
+        wlr_scene_node_set_position(&m_tree->node, pos.x, pos.y);
+    }
+
+    auto grabType() const
+    {
+        return m_handle->drag->grab_type;
+    }
 
     DragIcon(const DragIcon&) = delete;
     DragIcon(DragIcon&&) = delete;
@@ -27,39 +67,10 @@ public:
     DragIcon& operator=(DragIcon&&) = delete;
 
 private:
-    /**
-     * @brief Constructor
-     */
-    DragIcon(wlr_drag_icon* handle, wlr_scene_tree* tree, Seat& seat);
-
-    /**
-     * @brief Destructor
-     */
-    ~DragIcon() = default;
-
-    void setPosition(const Point<int32_t>& pos) const noexcept
-    {
-        wlr_scene_node_set_position(&m_tree->node, pos.x, pos.y);
-    }
-
-private:
     wlr_drag_icon*  m_handle;
     wlr_scene_tree* m_tree;
-    Seat&           m_seat;
 
     Listener        m_destroy;
-};
-
-struct DragIconElement final : scene::Element
-{
-    DragIcon& icon;
-
-    DragIconElement(wlr_scene_node* node, DragIcon& icon)
-        : Element(DRAG_ICON, node)
-        , icon(icon)
-    {}
-
-    ~DragIconElement() override = default;
 };
 
 }

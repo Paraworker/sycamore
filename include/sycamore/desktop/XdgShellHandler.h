@@ -5,41 +5,26 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-#include <stdexcept>
-
 namespace sycamore
 {
-
-inline constexpr auto XDG_SHELL_VERSION = 6;
 
 struct XdgShellHandler
 {
     Listener newToplevel;
     Listener destroy;
 
-    static void create(wl_display* display)
+    explicit XdgShellHandler(wlr_xdg_shell* handle)
     {
-        new XdgShellHandler{display};
-    }
-
-    explicit XdgShellHandler(wl_display* display)
-    {
-        auto handle = wlr_xdg_shell_create(display, XDG_SHELL_VERSION);
-        if (!handle)
+        newToplevel = [](void* data)
         {
-            throw std::runtime_error("Create wlr_xdg_shell failed!");
-        }
-
-        newToplevel.notify([](void* data)
-        {
-            XdgToplevel::create(static_cast<wlr_xdg_toplevel*>(data));
-        });
+            new XdgToplevel{static_cast<wlr_xdg_toplevel*>(data)};
+        };
         newToplevel.connect(handle->events.new_toplevel);
 
-        destroy.notify([this](auto)
+        destroy = [this](auto)
         {
             delete this;
-        });
+        };
         destroy.connect(handle->events.destroy);
     }
 

@@ -1,18 +1,22 @@
-#include "sycamore/desktop/ShellManager.h"
+#include "sycamore/desktop/WindowManager.h"
 
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/desktop/Layer.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
 namespace sycamore
 {
 
-ShellManager::ShellManager() : m_focusState{}, m_fullscreenCount{0} {}
+WindowManager::WindowManager()
+    : m_focusState{}
+    , m_fullscreenCount{0}
+{}
 
-ShellManager::~ShellManager() = default;
+WindowManager::~WindowManager() = default;
 
-void ShellManager::setFocus(Toplevel& toplevel)
+void WindowManager::focusToplevel(Toplevel& toplevel)
 {
     // Note: this function only deals with keyboard focus.
     if (m_focusState.toplevel == &toplevel)
@@ -35,13 +39,13 @@ void ShellManager::setFocus(Toplevel& toplevel)
 
     if (!m_focusState.layer)
     {
-        core.seat->setKeyboardFocus(toplevel.getBaseSurface());
+        core.seat->setKeyboardFocus(toplevel.baseSurface());
     }
 
     m_focusState.toplevel = &toplevel;
 }
 
-void ShellManager::setFocus(Layer& layer)
+void WindowManager::focusLayer(Layer& layer)
 {
     if (m_focusState.layer == &layer)
     {
@@ -50,16 +54,46 @@ void ShellManager::setFocus(Layer& layer)
 
     m_focusState.layer = &layer;
 
-    core.seat->setKeyboardFocus(layer.getBaseSurface());
+    core.seat->setKeyboardFocus(layer.baseSurface());
 }
 
-void ShellManager::onToplevelMap(Toplevel& toplevel)
+void WindowManager::mapToplevel(Toplevel& toplevel, bool maximized, bool fullscreen)
 {
+    // Layout stuff
+    auto output = toplevel.output();
+
+    if (output)
+    {
+        toplevel.setToOutputCenter(*output);
+
+        if (maximized)
+        {
+            maximizeRequest(toplevel, *output);
+        }
+
+        if (fullscreen)
+        {
+            fullscreenRequest(toplevel, *output);
+        }
+    }
+
     toplevel.iter = m_mappedToplevels.emplace(m_mappedToplevels.end(), &toplevel);
-    setFocus(toplevel);
+    focusToplevel(toplevel);
+
+    wl_signal_emit_mutable(&toplevel.events.map, nullptr);
 }
 
-void ShellManager::onToplevelUnmap(Toplevel& toplevel)
+void WindowManager::mapLayer(Layer& layer)
+{
+    if (layer.isFocusable())
+    {
+        focusLayer(layer);
+    }
+
+    wl_signal_emit_mutable(&layer.events.map, nullptr);
+}
+
+void WindowManager::unmapToplevel(Toplevel& toplevel)
 {
     m_mappedToplevels.erase(toplevel.iter);
 
@@ -70,54 +104,38 @@ void ShellManager::onToplevelUnmap(Toplevel& toplevel)
         // Focus the topmost toplevel if there is one
         if (!m_mappedToplevels.empty())
         {
-            setFocus(*m_mappedToplevels.back());
+            focusToplevel(*m_mappedToplevels.back());
         }
     }
+
+    wl_signal_emit_mutable(&toplevel.events.unmap, nullptr);
 }
 
-void ShellManager::onLayerMap(Layer& layer)
-{
-    if (layer.isFocusable())
-    {
-        setFocus(layer);
-    }
-}
-
-void ShellManager::onLayerUnmap(Layer& layer)
+void WindowManager::unmapLayer(Layer& layer)
 {
     if (m_focusState.toplevel)
     {
-        core.seat->setKeyboardFocus(m_focusState.toplevel->getBaseSurface());
+        core.seat->setKeyboardFocus(m_focusState.toplevel->baseSurface());
     }
 
     if (m_focusState.layer == &layer)
     {
         m_focusState.layer = nullptr;
     }
+
+    wl_signal_emit_mutable(&layer.events.unmap, nullptr);
 }
 
-void ShellManager::cycleToplevel()
+void WindowManager::maximizeRequest(Toplevel& toplevel, const Output& output)
 {
-    if (m_mappedToplevels.size() < 2)
+    if (toplevel.state.maximized)
     {
         return;
     }
 
-    setFocus(*m_mappedToplevels.front());
-
-    core.seat->input->rebasePointer();
-}
-
-void ShellManager::maximizeRequest(Toplevel& toplevel, const Output& output)
-{
-    if (toplevel.state().maximized)
-    {
-        return;
-    }
-
-    const auto& maxBox      = output.getUsableArea();
-    const auto  toplevelPos = toplevel.getPosition();
-    const auto  toplevelGeo = toplevel.getGeometry();
+    const auto& maxBox      = output.usableArea();
+    const auto  toplevelPos = toplevel.position();
+    const auto  toplevelGeo = toplevel.geometry();
 
     toplevel.restore.maximize.x = toplevelPos.x;
     toplevel.restore.maximize.y = toplevelPos.y;
@@ -128,12 +146,12 @@ void ShellManager::maximizeRequest(Toplevel& toplevel, const Output& output)
     toplevel.moveTo({maxBox.x, maxBox.y});
     toplevel.setSize(maxBox.width, maxBox.height);
     toplevel.setMaximized(true);
-    toplevel.state().maximized = true;
+    toplevel.state.maximized = true;
 }
 
-void ShellManager::unmaximizeRequest(Toplevel& toplevel)
+void WindowManager::unmaximizeRequest(Toplevel& toplevel)
 {
-    if (!toplevel.state().maximized)
+    if (!toplevel.state.maximized)
     {
         return;
     }
@@ -141,19 +159,19 @@ void ShellManager::unmaximizeRequest(Toplevel& toplevel)
     toplevel.setSize(toplevel.restore.maximize.width, toplevel.restore.maximize.height);
     toplevel.moveTo({toplevel.restore.maximize.x, toplevel.restore.maximize.y});
     toplevel.setMaximized(false);
-    toplevel.state().maximized = false;
+    toplevel.state.maximized = false;
 }
 
-void ShellManager::fullscreenRequest(Toplevel& toplevel, const Output& output)
+void WindowManager::fullscreenRequest(Toplevel& toplevel, const Output& output)
 {
-    if (toplevel.state().fullscreen)
+    if (toplevel.state.fullscreen)
     {
         return;
     }
 
-    const auto outputGeo   = output.getLayoutGeometry();
-    const auto toplevelPos = toplevel.getPosition();
-    const auto toplevelGeo = toplevel.getGeometry();
+    const auto outputGeo   = output.layoutGeometry();
+    const auto toplevelPos = toplevel.position();
+    const auto toplevelGeo = toplevel.geometry();
 
     toplevel.restore.fullscreen.x = toplevelPos.x;
     toplevel.restore.fullscreen.y = toplevelPos.y;
@@ -164,7 +182,7 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, const Output& output)
     toplevel.moveTo({outputGeo.x, outputGeo.y});
     toplevel.setSize(outputGeo.width, outputGeo.height);
     toplevel.setFullscreen(true);
-    toplevel.state().fullscreen = true;
+    toplevel.state.fullscreen = true;
 
     if (++m_fullscreenCount; m_fullscreenCount == 1)
     {
@@ -172,9 +190,9 @@ void ShellManager::fullscreenRequest(Toplevel& toplevel, const Output& output)
     }
 }
 
-void ShellManager::unfullscreenRequest(Toplevel& toplevel)
+void WindowManager::unfullscreenRequest(Toplevel& toplevel)
 {
-    if (!toplevel.state().fullscreen)
+    if (!toplevel.state.fullscreen)
     {
         return;
     }
@@ -182,11 +200,31 @@ void ShellManager::unfullscreenRequest(Toplevel& toplevel)
     toplevel.setSize(toplevel.restore.fullscreen.width, toplevel.restore.fullscreen.height);
     toplevel.moveTo({toplevel.restore.fullscreen.x, toplevel.restore.fullscreen.y});
     toplevel.setFullscreen(false);
-    toplevel.state().fullscreen = false;
+    toplevel.state.fullscreen = false;
 
     if (--m_fullscreenCount; m_fullscreenCount == 0)
     {
         wlr_scene_node_set_enabled(&core.scene.shell.top->node, true);
+    }
+}
+
+void WindowManager::cycleToplevel()
+{
+    if (m_mappedToplevels.size() < 2)
+    {
+        return;
+    }
+
+    focusToplevel(*m_mappedToplevels.front());
+
+    core.seat->input->rebasePointer();
+}
+
+void WindowManager::closeFocusedToplevel() const
+{
+    if (m_focusState.toplevel)
+    {
+        m_focusState.toplevel->close();
     }
 }
 

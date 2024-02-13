@@ -12,10 +12,10 @@ Pointer::Pointer(wlr_input_device* baseHandle)
     : InputDevice{baseHandle}
     , m_pointerHandle{wlr_pointer_from_input_device(baseHandle)}
 {
-    m_destroy.notify([this](auto)
+    m_destroy = [this](auto)
     {
-        inputManager.destroyDevice(this);
-    });
+        inputManager.removeDevice(this);
+    };
     m_destroy.connect(baseHandle->events.destroy);
 }
 

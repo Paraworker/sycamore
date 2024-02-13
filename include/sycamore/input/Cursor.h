@@ -24,6 +24,8 @@ public:
      */
     ~Cursor();
 
+    void init(wlr_output_layout* layout);
+
     void enable();
 
     void disable();
@@ -65,12 +67,12 @@ public:
         wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
     }
 
-    Point<double> getPosition() const
+    Point<double> position() const
     {
         return {m_handle->x, m_handle->y};
     }
 
-    size_t getPointerButtonCount() const
+    size_t pointerButtonCount() const
     {
         return m_pointerButtonCount;
     }
@@ -83,11 +85,6 @@ public:
     void detachDevice(wlr_input_device* device) const
     {
         wlr_cursor_detach_input_device(m_handle, device);
-    }
-
-    void attachOutputLayout(wlr_output_layout* layout)
-    {
-        wlr_cursor_attach_output_layout(m_handle, layout);
     }
 
     Cursor(const Cursor&) = delete;

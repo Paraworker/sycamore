@@ -11,20 +11,26 @@
 namespace sycamore
 {
 
+class DragIcon;
 class Toplevel;
 
 class Seat
 {
 public:
     /**
-     * @brief Create Seat
+     * @brief Constructor
      */
-    static Seat* create(wl_display* display, const char* name);
+    Seat(wl_display* display, const char* name);
+
+    /**
+     * @brief Destructor
+     */
+    ~Seat();
 
     /**
      * @brief Get wlr_seat
      */
-    auto getHandle() noexcept
+    auto getHandle()
     {
         return m_handle;
     }
@@ -37,13 +43,15 @@ public:
         input->onEnable();
     }
 
+    void setCapabilities(uint32_t caps);
+
     void updatePointerFocus(uint32_t timeMsec);
 
     void setKeyboardFocus(wlr_surface* surface) const;
 
-    void setCapabilities(uint32_t caps);
+    void updateDragIconsPosition() const;
 
-    bool bindingEnterCheck(Toplevel* toplevel) const;
+    bool bindingEnterCheck(const Toplevel& toplevel) const;
 
     Seat(const Seat&) = delete;
     Seat(Seat&&) = delete;
@@ -51,15 +59,7 @@ public:
     Seat& operator=(Seat&&) = delete;
 
 private:
-    /**
-     * @brief Constructor
-     */
-    Seat(wl_display* display, const char* name);
-
-    /**
-     * @brief Destructor
-     */
-    ~Seat();
+    void dragIconUpdatePosition(const DragIcon& icon) const;
 
 public:
     Cursor                     cursor;

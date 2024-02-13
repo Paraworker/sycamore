@@ -1,7 +1,8 @@
 #include "sycamore/desktop/Layer.h"
 
-#include "sycamore/desktop/ShellManager.h"
+#include "sycamore/desktop/WindowManager.h"
 #include "sycamore/desktop/Popup.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
@@ -10,44 +11,36 @@
 namespace sycamore
 {
 
-void Layer::create(wlr_layer_surface_v1* layerSurface)
+struct LayerPopup : Popup::Handler
 {
-    // Confirm output
-    if (!layerSurface->output)
+    Layer& layer;
+
+    explicit LayerPopup(Layer& layer)
+        : layer{layer}
+    {}
+
+    ~LayerPopup() override = default;
+
+    void unconstrain(Popup& popup) override
     {
-        auto output = core.seat->cursor.atOutput();
-        if (!output)
-        {
-            spdlog::error("No output under cursor for layerSurface");
-            wlr_layer_surface_v1_destroy(layerSurface);
-            return;
-        }
+        auto pos = layer.position();
+        auto box = layer.output()->relativeGeometry();
 
-        layerSurface->output = output->getHandle();
+        box.x = -pos.x;
+        box.y = -pos.y;
+
+        popup.unconstrainFromBox(box);
     }
+};
 
-    // Create scene helper
-    auto helper = wlr_scene_layer_surface_v1_create(core.scene.treeForLayer(layerSurface->pending.layer), layerSurface);
-    if (!helper)
-    {
-        spdlog::error("Create wlr_scene_layer_surface_v1 failed!");
-        wlr_layer_surface_v1_destroy(layerSurface);
-        return;
-    }
-
-    // Be destroyed by listener
-    new Layer{layerSurface, helper};
-}
-
-Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* helper)
-    : m_layerSurface{layerSurface}
-    , m_sceneHelper{helper}
-    , m_layer{m_layerSurface->pending.layer}
+Layer::Layer(wlr_layer_surface_v1* handle)
+    : m_handle{handle}
+    , m_sceneHelper{wlr_scene_layer_surface_v1_create(core.scene.treeForLayer(handle->pending.layer), handle)}
+    , m_layer{handle->pending.layer}
     , m_lastMapState{false}
-    , m_output{static_cast<Output*>(layerSurface->output->data)}
+    , m_output{static_cast<Output*>(handle->output->data)}
  {
-    // Create LayerElement
-    new LayerElement{&helper->tree->node, *this};
+    new LayerElement{m_sceneHelper->tree->node, *this};
 
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
@@ -56,41 +49,39 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
     auto& layerList = m_output->layerList[m_layer];
     m_iter = layerList.emplace(layerList.end(), this);
 
-    m_outputDestroy.notify([this](auto)
+    m_outputDestroy = [this](auto)
     {
-        m_layerSurface->output = nullptr;
+        m_handle->output = nullptr;
 
         // Unlink output
         m_outputDestroy.disconnect();
         m_output->layerList[m_layer].erase(m_iter);
         m_output = nullptr;
-    });
+    };
     m_outputDestroy.connect(m_output->events.destroy);
 
-    m_newPopup.notify([this](void* data)
+    m_newPopup = [this](void* data)
     {
-        Popup::create(static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<Popup::LayerHandler>(*this));
-    });
-    m_newPopup.connect(layerSurface->events.new_popup);
+        new Popup{static_cast<wlr_xdg_popup*>(data), m_sceneHelper->tree, std::make_shared<LayerPopup>(*this)};
+    };
+    m_newPopup.connect(handle->events.new_popup);
 
-    m_map.notify([this](auto)
+    m_map = [this](auto)
     {
-        shellManager.onLayerMap(*this);
-        wl_signal_emit_mutable(&events.map, nullptr);
-    });
-    m_map.connect(layerSurface->surface->events.map);
+        windowManager.mapLayer(*this);
+    };
+    m_map.connect(handle->surface->events.map);
 
-    m_unmap.notify([this](auto)
+    m_unmap = [this](auto)
     {
-        shellManager.onLayerUnmap(*this);
-        wl_signal_emit_mutable(&events.unmap, nullptr);
-    });
-    m_unmap.connect(layerSurface->surface->events.unmap);
+        windowManager.unmapLayer(*this);
+    };
+    m_unmap.connect(handle->surface->events.unmap);
 
-    m_commit.notify([this](auto)
+    m_commit = [this](auto)
     {
-        uint32_t committed   = m_layerSurface->current.committed;
-        bool     mapped      = m_layerSurface->surface->mapped;
+        uint32_t committed   = m_handle->current.committed;
+        bool     mapped      = m_handle->surface->mapped;
         bool     needArrange = false;
         bool     needRebase  = false;
 
@@ -100,7 +91,7 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
             if (committed & WLR_LAYER_SURFACE_V1_STATE_LAYER)
             {
                 auto& oldList = m_output->layerList[m_layer];
-                m_layer = m_layerSurface->current.layer;
+                m_layer = m_handle->current.layer;
                 auto& newList = m_output->layerList[m_layer];
 
                 wlr_scene_node_reparent(&m_sceneHelper->tree->node, core.scene.treeForLayer(m_layer));
@@ -133,14 +124,14 @@ Layer::Layer(wlr_layer_surface_v1* layerSurface, wlr_scene_layer_surface_v1* hel
         {
             core.seat->input->rebasePointer();
         }
-    });
-    m_commit.connect(layerSurface->surface->events.commit);
+    };
+    m_commit.connect(handle->surface->events.commit);
 
-    m_destroy.notify([this](auto)
+    m_destroy = [this](auto)
     {
         delete this;
-    });
-    m_destroy.connect(layerSurface->events.destroy);
+    };
+    m_destroy.connect(handle->events.destroy);
 }
 
 Layer::~Layer()
@@ -160,8 +151,8 @@ void Layer::configure(const wlr_box& fullArea, wlr_box& usableArea)
 
 bool Layer::isFocusable() const
 {
-    return (m_layerSurface->current.keyboard_interactive) &&
-           (m_layerSurface->current.layer > ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM);
+    return (m_handle->current.keyboard_interactive) &&
+           (m_handle->current.layer > ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM);
 }
 
 }

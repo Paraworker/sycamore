@@ -2,8 +2,10 @@
 
 #include "sycamore/input/InputManager.h"
 #include "sycamore/input/KeybindingManager.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 
+#include <cassert>
 #include <spdlog/spdlog.h>
 
 namespace sycamore
@@ -13,17 +15,17 @@ Keyboard::Keyboard(wlr_input_device* baseHandle)
     : InputDevice{baseHandle}
     , m_keyboardHandle{wlr_keyboard_from_input_device(baseHandle)}
 {
-    m_modifiers.notify([this](auto)
+    m_modifiers = [this](auto)
     {
         auto seatHandle = core.seat->getHandle();
         wlr_seat_set_keyboard(seatHandle, m_keyboardHandle);
         wlr_seat_keyboard_notify_modifiers(seatHandle, &m_keyboardHandle->modifiers);
 
         inputManager.syncKeyboardLeds(*this);
-    });
+    };
     m_modifiers.connect(m_keyboardHandle->events.modifiers);
 
-    m_key.notify([this](void* data)
+    m_key = [this](void* data)
     {
         auto event = static_cast<wlr_keyboard_key_event*>(data);
 
@@ -37,7 +39,7 @@ Keyboard::Keyboard(wlr_input_device* baseHandle)
         bool handled{false};
         if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
         {
-            KeyInfo info{getModifiers(), {}};
+            KeyInfo info{modifiers(), {}};
 
             for (int i = 0; i < nsyms; ++i)
             {
@@ -54,13 +56,13 @@ Keyboard::Keyboard(wlr_input_device* baseHandle)
 
             inputManager.syncKeyboardLeds(*this);
         }
-    });
+    };
     m_key.connect(m_keyboardHandle->events.key);
 
-    m_destroy.notify([this](auto)
+    m_destroy = [this](auto)
     {
-        inputManager.destroyDevice(this);
-    });
+        inputManager.removeDevice(this);
+    };
     m_destroy.connect(baseHandle->events.destroy);
 }
 
@@ -92,10 +94,7 @@ void Keyboard::apply()
 
 uint32_t Keyboard::ledsState() const
 {
-    if (!m_keyboardHandle->xkb_state)
-    {
-        throw std::runtime_error{"Keyboard without xkb_state!"};
-    }
+    assert(m_keyboardHandle->xkb_state);
 
     uint32_t leds{0};
 

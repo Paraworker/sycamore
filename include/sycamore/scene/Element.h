@@ -7,10 +7,9 @@
 namespace sycamore::scene
 {
 
-class Element
+struct Element
 {
-public:
-    enum Type
+    enum Kind
     {
         ROOT,
         TOPLEVEL,
@@ -19,31 +18,7 @@ public:
         DRAG_ICON,
     };
 
-    /**
-     * @brief Get derived element type
-     */
-    Type type() const
-    {
-        return m_type;
-    }
-
-protected:
-    Element(Type type, wlr_scene_node* node) : m_type{type}
-    {
-        node->data = this;
-
-        m_destroy.notify([this](auto)
-        {
-            delete this;
-        });
-        m_destroy.connect(node->events.destroy);
-    }
-
-    virtual ~Element() = default;
-
-private:
-    Type     m_type;
-    Listener m_destroy;
+    Kind kind;
 };
 
 }

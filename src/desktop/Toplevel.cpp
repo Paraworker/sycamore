@@ -1,5 +1,6 @@
 #include "sycamore/desktop/Toplevel.h"
 
+#include "sycamore/input/Seat.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
@@ -8,18 +9,18 @@ namespace sycamore
 {
 
 Toplevel::Toplevel(wlr_surface* surface, wlr_scene_tree* tree)
-    : m_surface{surface}, m_tree{tree}
+    : m_surface{surface}
+    , m_tree{tree}
 {
+    new ToplevelElement{m_tree->node, *this};
+
     wl_signal_init(&events.map);
     wl_signal_init(&events.unmap);
-
-    // Create SceneElement
-    new ToplevelElement{&m_tree->node, *this};
 }
 
 Toplevel::~Toplevel() = default;
 
-Output* Toplevel::getOutput() const
+Output* Toplevel::output() const
 {
     // FIXME
     return core.seat->cursor.atOutput();
@@ -27,9 +28,9 @@ Output* Toplevel::getOutput() const
 
 void Toplevel::setToOutputCenter(const Output& output)
 {
-    auto outputGeo   = output.getLayoutGeometry();
-    auto center      = boxGetCenterCoords(outputGeo);
-    auto toplevelGeo = getGeometry();
+    auto outputGeo   = output.layoutGeometry();
+    auto center      = boxGetCenter(outputGeo);
+    auto toplevelGeo = geometry();
 
     toplevelGeo.x = center.x - (toplevelGeo.width / 2);
     toplevelGeo.y = center.y - (toplevelGeo.height / 2);

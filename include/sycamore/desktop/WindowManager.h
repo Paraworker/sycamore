@@ -1,5 +1,9 @@
-#ifndef SYCAMORE_SHELL_MANAGER_H
-#define SYCAMORE_SHELL_MANAGER_H
+#ifndef SYCAMORE_WINDOW_MANAGER_H
+#define SYCAMORE_WINDOW_MANAGER_H
+
+#include "sycamore/desktop/Layer.h"
+#include "sycamore/desktop/XdgToplevel.h"
+#include "sycamore/wlroots.h"
 
 #include <list>
 
@@ -10,7 +14,7 @@ class Layer;
 class Output;
 class Toplevel;
 
-class ShellManager
+class WindowManager
 {
 public:
     struct FocusState
@@ -23,45 +27,35 @@ public:
     /**
      * @brief Constructor
      */
-    ShellManager();
+    WindowManager();
 
     /**
      * @brief Destructor
      */
-    ~ShellManager();
+    ~WindowManager();
 
-    /**
-     * @brief Focus a toplevel
-     */
-    void setFocus(Toplevel& toplevel);
-
-    /**
-     * @brief Focus a layer
-     */
-    void setFocus(Layer& layer);
-
-    const FocusState& getFocusState() const
+    const auto& focusState() const
     {
         return m_focusState;
     }
 
-    void onToplevelMap(Toplevel& toplevel);
+    void focusToplevel(Toplevel& toplevel);
+    void focusLayer(Layer& layer);
 
-    void onToplevelUnmap(Toplevel& toplevel);
+    void mapToplevel(Toplevel& toplevel, bool maximized, bool fullscreen);
+    void mapLayer(Layer& layer);
 
-    void onLayerMap(Layer& layer);
-
-    void onLayerUnmap(Layer& layer);
-
-    void cycleToplevel();
+    void unmapToplevel(Toplevel& toplevel);
+    void unmapLayer(Layer& layer);
 
     void fullscreenRequest(Toplevel& toplevel, const Output& output);
-
     void unfullscreenRequest(Toplevel& toplevel);
 
     static void maximizeRequest(Toplevel& toplevel, const Output& output);
-
     static void unmaximizeRequest(Toplevel& toplevel);
+
+    void cycleToplevel();
+    void closeFocusedToplevel() const;
 
 private:
     std::list<Toplevel*> m_mappedToplevels;
@@ -69,8 +63,8 @@ private:
     size_t               m_fullscreenCount;
 };
 
-inline ShellManager shellManager{};
+inline WindowManager windowManager{};
 
 }
 
-#endif //SYCAMORE_SHELL_MANAGER_H
+#endif //SYCAMORE_WINDOW_MANAGER_H

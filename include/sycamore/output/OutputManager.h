@@ -24,14 +24,14 @@ public:
     ~OutputManager() = default;
 
     /**
-     * @brief Handle a new output
+     * @brief Add a new output
      */
-    void newOutput(wlr_output* handle);
+    void addOutput(wlr_output* handle);
 
     /**
-     * @brief Destroy an output
+     * @brief Remove an output
      */
-    void destroyOutput(Output* output);
+    void removeOutput(Output* output);
 
     /**
      * @brief Get the number all outputs
@@ -44,7 +44,7 @@ public:
     static Output* findOutputAt(const Point<double>& coords);
 
 private:
-    std::list<Output> m_outputList;
+    std::list<Output> m_outputs;
 };
 
 inline OutputManager outputManager{};

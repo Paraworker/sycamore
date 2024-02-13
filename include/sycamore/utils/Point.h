@@ -23,8 +23,7 @@ struct Point
     }
 
     template<typename U>
-    requires std::is_convertible_v<T, U>
-    constexpr Point<U> into() const
+    constexpr explicit operator Point<U>() const
     {
         return {static_cast<U>(x), static_cast<U>(y)};
     }

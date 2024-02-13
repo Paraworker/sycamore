@@ -24,25 +24,30 @@ public:
 
 public:
     /**
-     * @brief Create Layer
+     * @brief Constructor
      */
-    static void create(wlr_layer_surface_v1* layerSurface);
+    explicit Layer(wlr_layer_surface_v1* handle);
+
+    /**
+     * @brief Destructor
+     */
+    ~Layer();
 
     void configure(const wlr_box& fullArea, wlr_box& usableArea);
 
     bool isFocusable() const;
 
-    auto getBaseSurface() const
+    auto baseSurface() const
     {
-        return m_layerSurface->surface;
+        return m_handle->surface;
     }
 
-    Point<int32_t> getPosition() const
+    Point<int32_t> position() const
     {
         return {m_sceneHelper->tree->node.x, m_sceneHelper->tree->node.y};
     }
 
-    Output* getOutput() const
+    Output* output() const
     {
         return m_output;
     }
@@ -56,44 +61,42 @@ public:
     Events events;
 
 private:
-    /**
-     * @brief Constructor
-     */
-    Layer(wlr_layer_surface_v1* surface, wlr_scene_layer_surface_v1* helper);
-
-    /**
-     * @brief Destructor
-     */
-    ~Layer();
-
-private:
-    wlr_layer_surface_v1*       m_layerSurface;
+    wlr_layer_surface_v1*       m_handle;
     wlr_scene_layer_surface_v1* m_sceneHelper;
     zwlr_layer_shell_v1_layer   m_layer;
     bool                        m_lastMapState; // Update on commit
 
     Output*                     m_output;
     Listener                    m_outputDestroy;
+
     std::list<Layer*>::iterator m_iter;
 
-private:
-    Listener m_newPopup;
-    Listener m_map;
-    Listener m_unmap;
-    Listener m_commit;
-    Listener m_destroy;
+    Listener                    m_newPopup;
+    Listener                    m_map;
+    Listener                    m_unmap;
+    Listener                    m_commit;
+    Listener                    m_destroy;
 };
 
 struct LayerElement final : scene::Element
 {
-    Layer& layer;
+    Layer&   layer;
+    Listener destroy;
 
-    LayerElement(wlr_scene_node* node, Layer& layer)
-        : Element{LAYER, node}
-        , layer{layer}
-    {}
+    LayerElement(wlr_scene_node& node, Layer& layer)
+        : Element{LAYER}, layer{layer}
+    {
+        // attach node
+        node.data = this;
 
-    ~LayerElement() override = default;
+        destroy = [this](auto)
+        {
+            delete this;
+        };
+        destroy.connect(node.events.destroy);
+    }
+
+    ~LayerElement() = default;
 };
 
 }

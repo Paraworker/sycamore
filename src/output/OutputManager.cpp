@@ -6,7 +6,7 @@
 namespace sycamore
 {
 
-void OutputManager::newOutput(wlr_output* handle)
+void OutputManager::addOutput(wlr_output* handle)
 {
     spdlog::info("New Output: {}", handle->name);
 
@@ -19,30 +19,27 @@ void OutputManager::newOutput(wlr_output* handle)
 
     // Add to output layout
     auto layoutOutput = wlr_output_layout_add_auto(core.outputLayout, handle);
-    if (!layoutOutput)
-    {
-        throw std::runtime_error{"Output add to wlr_output_layout failed!"};
-    }
 
     // Add to scene layout
     auto sceneOutput = core.scene.addOutput(handle, layoutOutput);
 
-    const auto output = m_outputList.emplace(m_outputList.end(), handle, sceneOutput);
+    const auto output = m_outputs.emplace(m_outputs.end(), handle, sceneOutput);
     output->iter = output;
 
     // TODO: configurable
     output->apply();
 }
 
-void OutputManager::destroyOutput(Output* output)
+void OutputManager::removeOutput(Output* output)
 {
+    wl_signal_emit_mutable(&output->events.destroy, nullptr);
     wlr_output_layout_remove(core.outputLayout, output->getHandle());
-    m_outputList.erase(output->iter);
+    m_outputs.erase(output->iter);
 }
 
 size_t OutputManager::outputCount() const
 {
-    return m_outputList.size();
+    return m_outputs.size();
 }
 
 Output* OutputManager::findOutputAt(const Point<double>& coords)

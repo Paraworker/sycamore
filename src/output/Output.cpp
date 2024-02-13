@@ -1,6 +1,7 @@
 #include "sycamore/output/Output.h"
 
 #include "sycamore/desktop/Layer.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/output/OutputManager.h"
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
@@ -13,13 +14,13 @@ namespace sycamore
 Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
     : m_handle{handle}
     , m_sceneOutput{sceneOutput}
-    , m_usableArea{getLayoutGeometry()}
+    , m_usableArea{}
 {
-    wl_signal_init(&events.destroy);
-
     handle->data = this;
 
-    m_frame.notify([this](auto)
+    wl_signal_init(&events.destroy);
+
+    m_frame = [this](auto)
     {
         // Render the scene if needed and commit the output
         wlr_scene_output_commit(m_sceneOutput, nullptr);
@@ -27,25 +28,24 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
         timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
         wlr_scene_output_send_frame_done(m_sceneOutput, &now);
-    });
+    };
     m_frame.connect(handle->events.frame);
 
-    m_requestState.notify([this](void* data)
+    m_requestState = [this](void* data)
     {
         wlr_output_commit_state(m_handle, static_cast<wlr_output_event_request_state*>(data)->state);
-    });
+    };
     m_requestState.connect(handle->events.request_state);
 
-    m_destroy.notify([this](auto)
+    m_destroy = [this](auto)
     {
-        outputManager.destroyOutput(this);
-    });
+        outputManager.removeOutput(this);
+    };
     m_destroy.connect(handle->events.destroy);
 }
 
 Output::~Output()
 {
-    wl_signal_emit_mutable(&events.destroy, nullptr);
     m_handle->data = nullptr;
 }
 
@@ -81,14 +81,14 @@ bool Output::apply()
     return true;
 }
 
-wlr_box Output::getRelativeGeometry() const
+wlr_box Output::relativeGeometry() const
 {
     wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
     return box;
 }
 
-wlr_box Output::getLayoutGeometry() const
+wlr_box Output::layoutGeometry() const
 {
     wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
@@ -107,13 +107,13 @@ wlr_box Output::getLayoutGeometry() const
 
 void Output::ensureCursor() const
 {
-    core.seat->cursor.warp(boxGetCenterCoords(getLayoutGeometry()).into<double>());
+    core.seat->cursor.warp(static_cast<Point<double>>(boxGetCenter(layoutGeometry())));
     core.seat->input->rebasePointer();
 }
 
 void Output::arrangeLayers()
 {
-    auto fullArea   = getLayoutGeometry();
+    auto fullArea   = layoutGeometry();
     auto usableArea = fullArea;
 
     for (auto& list : layerList)

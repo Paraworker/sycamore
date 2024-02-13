@@ -35,9 +35,9 @@ public:
     ~Output();
 
     /**
-     * @brief Return the output name
+     * @brief Get the output name
      */
-    auto name()
+    auto name() const
     {
         return m_handle->name;
     }
@@ -48,13 +48,13 @@ public:
      * @brief  Get geometry in local layout
      * @return {0, 0, width, height}
      */
-    wlr_box getRelativeGeometry() const;
+    wlr_box relativeGeometry() const;
 
     /**
      * @brief  Get geometry in output layout
      * @return {x, y, width, height}
      */
-    wlr_box getLayoutGeometry() const;
+    wlr_box layoutGeometry() const;
 
     /**
      * @brief Center cursor on this output
@@ -68,12 +68,7 @@ public:
         return m_handle;
     }
 
-    auto getSceneOutput()
-    {
-        return m_sceneOutput;
-    }
-
-    const wlr_box& getUsableArea() const
+    const auto& usableArea() const
     {
         return m_usableArea;
     }

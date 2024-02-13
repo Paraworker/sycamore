@@ -35,9 +35,10 @@ public:
      * @brief Set callback
      */
     template<typename Fn>
-    void notify(Fn&& callback)
+    Listener& operator=(Fn&& fn)
     {
-        m_wrapper.callback = std::forward<Fn>(callback);
+        m_wrapper.callback = std::forward<Fn>(fn);
+        return *this;
     }
 
     /**

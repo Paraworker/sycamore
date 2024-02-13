@@ -10,27 +10,26 @@ namespace sycamore
 class XdgToplevel final : public Toplevel
 {
 public:
-    /**
-     * @brief Create XdgToplevel
-     */
-    static void create(wlr_xdg_toplevel* toplevel);
+    explicit XdgToplevel(wlr_xdg_toplevel* toplevel);
 
-    Role role() const override
+    ~XdgToplevel() override;
+
+    Kind kind() const override
     {
         return XDG;
     }
 
-    uint32_t setMaximized(bool maximized) override;
+    uint32_t setMaximized(bool state) override;
 
-    uint32_t setFullscreen(bool fullscreen) override;
+    uint32_t setFullscreen(bool state) override;
 
-    uint32_t setActivated(bool activated) override;
+    uint32_t setActivated(bool state) override;
 
-    uint32_t setResizing(bool resizing) override;
+    uint32_t setResizing(bool state) override;
 
     uint32_t setSize(uint32_t width, uint32_t height) override;
 
-    wlr_box getGeometry() override;
+    wlr_box geometry() override;
 
     void close() override;
 
@@ -40,25 +39,20 @@ public:
     XdgToplevel& operator=(XdgToplevel&&) = delete;
 
 private:
-    XdgToplevel(wlr_xdg_toplevel* toplevel, wlr_scene_tree* tree);
-
-    ~XdgToplevel() override;
-
-private:
     wlr_xdg_toplevel* m_toplevel;
-    wlr_box           m_committedGeometry{0, 0, 0, 0};
+    wlr_box           m_lastGeo{0, 0, 0, 0};
 
-private:
-    Listener m_destroy;
-    Listener m_map;
-    Listener m_unmap;
-    Listener m_commit;
-    Listener m_newPopup;
-    Listener m_move;
-    Listener m_resize;
-    Listener m_fullscreen;
-    Listener m_maximize;
-    Listener m_minimize;
+    Listener          m_map;
+    Listener          m_unmap;
+    Listener          m_commit;
+    Listener          m_destroy;
+
+    Listener          m_newPopup;
+    Listener          m_move;
+    Listener          m_resize;
+    Listener          m_fullscreen;
+    Listener          m_maximize;
+    Listener          m_minimize;
 };
 
 }

@@ -15,7 +15,7 @@ class Output;
 class Toplevel
 {
 public:
-    enum Role { XDG, XWAYLAND };
+    enum Kind { XDG, XWAYLAND };
 
     struct State
     {
@@ -23,7 +23,7 @@ public:
         bool fullscreen = false;
     };
 
-    struct RestoreData
+    struct Restore
     {
         wlr_box maximize;
         wlr_box fullscreen;
@@ -38,7 +38,17 @@ public:
     using Iter = std::list<Toplevel*>::iterator;
 
 public:
-    Output* getOutput() const;
+    /**
+     * @brief Constructor
+     */
+    Toplevel(wlr_surface* surface, wlr_scene_tree* tree);
+
+    /**
+     * @brief Destructor
+     */
+    virtual ~Toplevel();
+
+    Output* output() const;
 
     void setToOutputCenter(const Output& output);
 
@@ -47,7 +57,7 @@ public:
         wlr_scene_node_set_position(&m_tree->node, position.x, position.y);
     }
 
-    Point<int32_t> getPosition() const
+    Point<int32_t> position() const
     {
         return {m_tree->node.x, m_tree->node.y};
     }
@@ -57,7 +67,7 @@ public:
         wlr_scene_node_raise_to_top(&m_tree->node);
     }
 
-    auto getBaseSurface() const
+    auto baseSurface() const
     {
         return m_surface;
     }
@@ -69,62 +79,55 @@ public:
 
     bool isPinned() const
     {
-        return m_state.maximized || m_state.fullscreen;
+        return state.maximized || state.fullscreen;
     }
 
-    State& state()
-    {
-        return m_state;
-    }
+    virtual Kind kind() const = 0;
 
-    virtual Role role() const = 0;
+    virtual uint32_t setMaximized(bool state) = 0;
 
-    virtual uint32_t setMaximized(bool maximized) = 0;
+    virtual uint32_t setFullscreen(bool state) = 0;
 
-    virtual uint32_t setFullscreen(bool fullscreen) = 0;
+    virtual uint32_t setActivated(bool state) = 0;
 
-    virtual uint32_t setActivated(bool activated) = 0;
-
-    virtual uint32_t setResizing(bool resizing) = 0;
+    virtual uint32_t setResizing(bool state) = 0;
 
     virtual uint32_t setSize(uint32_t width, uint32_t height) = 0;
 
-    virtual wlr_box getGeometry() = 0;
+    virtual wlr_box geometry() = 0;
 
     virtual void close() = 0;
 
 public:
-    Events      events;
-    RestoreData restore;
-    Iter        iter;
-
-protected:
-    /**
-     * @brief Constructor
-     */
-    Toplevel(wlr_surface* surface, wlr_scene_tree* tree);
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~Toplevel();
+    Events  events;
+    State   state;
+    Restore restore;
+    Iter    iter;
 
 protected:
     wlr_surface*    m_surface;
     wlr_scene_tree* m_tree;
-    State           m_state;
 };
 
 struct ToplevelElement final : scene::Element
 {
     Toplevel& toplevel;
+    Listener  destroy;
 
-    ToplevelElement(wlr_scene_node* node, Toplevel& toplevel)
-        : Element{TOPLEVEL, node}
-        , toplevel{toplevel}
-    {}
+    ToplevelElement(wlr_scene_node& node, Toplevel& toplevel)
+        : Element{TOPLEVEL}, toplevel{toplevel}
+    {
+        // attach node
+        node.data = this;
 
-    ~ToplevelElement() override = default;
+        destroy = [this](auto)
+        {
+            delete this;
+        };
+        destroy.connect(node.events.destroy);
+    }
+
+    ~ToplevelElement() = default;
 };
 
 }

@@ -1,32 +1,31 @@
 #include "sycamore/scene/Scene.h"
 
-#include <stdexcept>
-
 namespace sycamore::scene
 {
 
 struct RootElement final : Element
 {
-    explicit RootElement(wlr_scene_node* node)
-        : Element(ROOT, node)
-    {}
+    Listener destroy;
 
-    ~RootElement() override = default;
-};
-
-Scene::Scene()
-    : root{nullptr}
-    , shell{nullptr}
-    , dragIcons{nullptr}
-    , layout{nullptr}
-{
-    if (root = wlr_scene_create(); !root)
+    explicit RootElement(wlr_scene_node& node)
+        : Element{ROOT}
     {
-        throw std::runtime_error("Create wlr_scene failed!");
+        // attach node
+        node.data = this;
+
+        destroy = [this](auto)
+        {
+            delete this;
+        };
+        destroy.connect(node.events.destroy);
     }
 
-    // Create RootElement
-    new RootElement{&root->tree.node};
+    ~RootElement() = default;
+};
+
+Scene::Scene() : root{wlr_scene_create()}, shell{}, dragIcons{}, layout{}
+{
+    new RootElement{root->tree.node};
 
     shell.root = wlr_scene_tree_create(&root->tree);
 
@@ -46,11 +45,7 @@ Scene::~Scene()
 
 void Scene::init(wlr_output_layout* outputLayout, wlr_linux_dmabuf_v1* dmabuf)
 {
-    if (layout = wlr_scene_attach_output_layout(root, outputLayout); !layout)
-    {
-        throw std::runtime_error("wlr_scene attach output layout failed!");
-    }
-
+    layout = wlr_scene_attach_output_layout(root, outputLayout);
     wlr_scene_set_linux_dmabuf_v1(root, dmabuf);
 }
 
@@ -66,21 +61,13 @@ wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
             return shell.top;
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
             return shell.overlay;
-        default:
-            throw std::logic_error("unreachable!");
     }
 }
 
-wlr_scene_output* Scene::addOutput(wlr_output* handle, wlr_output_layout_output* layoutOutput)
+wlr_scene_output* Scene::addOutput(wlr_output* outputHandle, wlr_output_layout_output* layoutOutput)
 {
-    const auto sceneOutput = wlr_scene_output_create(root, handle);
-    if (!sceneOutput)
-    {
-        throw std::runtime_error{"Create wlr_scene_output failed!"};
-    }
-
+    const auto sceneOutput = wlr_scene_output_create(root, outputHandle);
     wlr_scene_output_layout_add_output(layout, layoutOutput, sceneOutput);
-
     return sceneOutput;
 }
 

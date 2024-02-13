@@ -1,5 +1,6 @@
 #include "sycamore/input/InputManager.h"
 
+#include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 #include <spdlog/spdlog.h>
 
@@ -10,7 +11,7 @@ void InputManager::updateCapabilities() const
 {
     uint32_t caps{0};
 
-    if (!m_pointers.empty()  /* || !m_tabletTools.empty() */)
+    if (!m_pointers.empty()  /* || !m_tablets.empty() */)
     {
         caps |= WL_SEAT_CAPABILITY_POINTER;
     }
@@ -43,18 +44,18 @@ void InputManager::syncKeyboardLeds(const Keyboard& keyboard) const
     }
 }
 
-void InputManager::newDevice(wlr_input_device* handle)
+void InputManager::addDevice(wlr_input_device* handle)
 {
     switch (handle->type)
     {
         case WLR_INPUT_DEVICE_KEYBOARD:
-            newKeyboard(handle);
+            addKeyboard(handle);
             break;
         case WLR_INPUT_DEVICE_POINTER:
-            newPointer(handle);
+            addPointer(handle);
             break;
         case WLR_INPUT_DEVICE_TOUCH:
-        case WLR_INPUT_DEVICE_TABLET_TOOL:
+        case WLR_INPUT_DEVICE_TABLET:
         case WLR_INPUT_DEVICE_TABLET_PAD:
         case WLR_INPUT_DEVICE_SWITCH:
         default:
@@ -64,7 +65,7 @@ void InputManager::newDevice(wlr_input_device* handle)
     updateCapabilities();
 }
 
-void InputManager::newKeyboard(wlr_input_device* handle)
+void InputManager::addKeyboard(wlr_input_device* handle)
 {
     spdlog::info("New Keyboard: {}", handle->name);
 
@@ -74,7 +75,7 @@ void InputManager::newKeyboard(wlr_input_device* handle)
     keyboard->apply();
 }
 
-void InputManager::newPointer(wlr_input_device* handle)
+void InputManager::addPointer(wlr_input_device* handle)
 {
     spdlog::info("New Pointer: {}", handle->name);
 
@@ -86,15 +87,15 @@ void InputManager::newPointer(wlr_input_device* handle)
     core.seat->cursor.attachDevice(handle);
 }
 
-void InputManager::destroy(Keyboard* keyboard)
+void InputManager::remove(Keyboard* keyboard)
 {
-    spdlog::info("Destroy Keyboard: {}", keyboard->name());
+    spdlog::info("Remove Keyboard: {}", keyboard->name());
     m_keyboards.erase(keyboard->iter);
 }
 
-void InputManager::destroy(Pointer* pointer)
+void InputManager::remove(Pointer* pointer)
 {
-    spdlog::info("Destroy Pointer: {}", pointer->name());
+    spdlog::info("Remove Pointer: {}", pointer->name());
     core.seat->cursor.detachDevice(pointer->getBaseHandle());
     m_pointers.erase(pointer->iter);
 }

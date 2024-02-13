@@ -7,13 +7,13 @@ namespace sycamore
 
 PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
     : m_toplevel{toplevel}
-    , m_delta{seat.cursor.getPosition() - toplevel->getPosition().into<double>()}
+    , m_delta{seat.cursor.position() - static_cast<Point<double>>(toplevel->position())}
     , m_seat{seat}
 {
-    m_toplevelUnmap.notify([this](auto)
+    m_toplevelUnmap = [this](auto)
     {
         m_seat.setInput<DefaultInput>(m_seat);
-    });
+    };
     m_toplevelUnmap.connect(toplevel->events.unmap);
 }
 
@@ -32,7 +32,7 @@ void PointerMove::onDisable()
 
 void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.cursor.getPointerButtonCount() == 0)
+    if (m_seat.cursor.pointerButtonCount() == 0)
     {
         // If there is no button being pressed
         // we back to default.
@@ -43,7 +43,7 @@ void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 void PointerMove::onPointerMotion(uint32_t timeMsec)
 {
     // Move the grabbed toplevel to the new position.
-    m_toplevel->moveTo((m_seat.cursor.getPosition() - m_delta).into<int32_t>());
+    m_toplevel->moveTo(static_cast<Point<int32_t>>(m_seat.cursor.position() - m_delta));
 }
 
 }

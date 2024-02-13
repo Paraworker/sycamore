@@ -7,7 +7,7 @@
 namespace sycamore
 {
 
-inline constexpr Point<int32_t> boxGetCenterCoords(const wlr_box& box)
+inline constexpr Point<int32_t> boxGetCenter(const wlr_box& box)
 {
     return {box.x + (box.width / 2), box.y + (box.height / 2)};
 }

@@ -33,26 +33,26 @@ public:
     void syncKeyboardLeds(const Keyboard& keyboard) const;
 
     /**
-     * @brief Handle a new input device
+     * @brief Add a new input device
      */
-    void newDevice(wlr_input_device* handle);
+    void addDevice(wlr_input_device* handle);
 
     /**
-     * @brief Destroy an input device
+     * @brief Remove an input device
      */
     template<typename T>
-    void destroyDevice(T* device)
+    void removeDevice(T* device)
     {
-        destroy(device);
+        remove(device);
         updateCapabilities();
     }
 
 private:
-    void newKeyboard(wlr_input_device* handle);
-    void newPointer(wlr_input_device* handle);
+    void addKeyboard(wlr_input_device* handle);
+    void addPointer(wlr_input_device* handle);
 
-    void destroy(Keyboard* keyboard);
-    void destroy(Pointer* pointer);
+    void remove(Keyboard* keyboard);
+    void remove(Pointer* pointer);
 
 private:
     std::list<Keyboard> m_keyboards;
