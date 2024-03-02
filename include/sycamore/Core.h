@@ -1,6 +1,7 @@
 #ifndef SYCAMORE_CORE_H
 #define SYCAMORE_CORE_H
 
+#include "sycamore/input/Cursor.h"
 #include "sycamore/scene/Scene.h"
 #include "sycamore/wlroots.h"
 
@@ -65,6 +66,7 @@ public:
 
     scene::Scene             scene;
 
+    Cursor                   cursor;
     std::unique_ptr<Seat>    seat;
     wlr_pointer_gestures_v1* pointerGestures;
 

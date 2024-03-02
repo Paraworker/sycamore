@@ -10,9 +10,10 @@ namespace sycamore
 {
 
 Seat::Seat(wl_display* display, const char* name)
-    : cursor{*this}
-    , input{std::make_unique<DefaultInput>(*this)}
+    : input{std::make_unique<DefaultInput>(*this)}
     , m_handle{wlr_seat_create(display, name)}
+    , m_pointerEnabled{false}
+    , m_pointerButtonCount{0}
 {
     m_setCursor = [this](void* data)
     {
@@ -21,7 +22,7 @@ Seat::Seat(wl_display* display, const char* name)
         auto* focusedClient = m_handle->pointer_state.focused_client;
         if (focusedClient == event->seat_client)
         {
-            cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
+            core.cursor.setSurface(event->surface, {event->hotspot_x, event->hotspot_y});
         }
     };
     m_setCursor.connect(m_handle->events.request_set_cursor);
@@ -91,22 +92,67 @@ void Seat::setCapabilities(uint32_t caps)
 {
     wlr_seat_set_capabilities(m_handle, caps);
 
-    // Disable cursor if seat doesn't have pointer capability.
+    // Disable pointer if seat doesn't have pointer capability.
     if ((caps & WL_SEAT_CAPABILITY_POINTER) == 0)
     {
-        cursor.disable();
+        disablePointer();
+    }
+}
+
+void Seat::enablePointer()
+{
+    if (m_pointerEnabled)
+    {
+        return;
+    }
+
+    m_pointerEnabled = true;
+
+    input->rebasePointer();
+}
+
+void Seat::disablePointer()
+{
+    if (!m_pointerEnabled)
+    {
+        return;
+    }
+
+    // Hide cursor
+    core.cursor.hide();
+
+    // Clear pointer focus
+    wlr_seat_pointer_notify_clear_focus(m_handle);
+
+    m_pointerEnabled = false;
+}
+
+void Seat::updatePointerButtonCount(wl_pointer_button_state state)
+{
+    if (state == WL_POINTER_BUTTON_STATE_PRESSED)
+    {
+        ++m_pointerButtonCount;
+    }
+    else if (m_pointerButtonCount > 0)
+    {
+        --m_pointerButtonCount;
     }
 }
 
 void Seat::updatePointerFocus(uint32_t timeMsec)
 {
+    if (!m_pointerEnabled)
+    {
+        return;
+    }
+
     Point<double> sCoords{};
-    auto surface = scene::surfaceFromNode(core.scene.shellAt(cursor.position(), sCoords));
+    auto surface = scene::surfaceFromNode(core.scene.shellAt(core.cursor.position(), sCoords));
 
     if (!surface)
     {
-        wlr_seat_pointer_clear_focus(m_handle);
-        cursor.setXcursor("left_ptr");
+        wlr_seat_pointer_notify_clear_focus(m_handle);
+        core.cursor.setXcursor("left_ptr");
         return;
     }
 
@@ -126,7 +172,7 @@ void Seat::setKeyboardFocus(wlr_surface* surface) const
     wlr_seat_keyboard_notify_enter(m_handle, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-void Seat::updateDragIconsPosition() const
+void Seat::updateDragIcons() const
 {
     wlr_scene_node* node;
     wl_list_for_each(node, &core.scene.dragIcons->children, link)
@@ -171,7 +217,7 @@ void Seat::dragIconUpdatePosition(const DragIcon& icon) const
         case WLR_DRAG_GRAB_KEYBOARD:
             return;
         case WLR_DRAG_GRAB_KEYBOARD_POINTER:
-            icon.setPosition(static_cast<Point<int32_t>>(cursor.position()));
+            icon.setPosition(static_cast<Point<int32_t>>(core.cursor.position()));
             break;
         case WLR_DRAG_GRAB_KEYBOARD_TOUCH:
             // TODO

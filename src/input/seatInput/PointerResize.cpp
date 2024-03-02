@@ -1,6 +1,7 @@
 #include "sycamore/input/seatInput/PointerResize.h"
 
 #include "sycamore/input/seatInput/DefaultInput.h"
+#include "sycamore/Core.h"
 
 namespace sycamore
 {
@@ -21,7 +22,7 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
         static_cast<double>(m_grabGeo.y + ((edges & WLR_EDGE_BOTTOM) ? m_grabGeo.height : 0)),
     };
 
-    m_delta = m_seat.cursor.position() - border;
+    m_delta = core.cursor.position() - border;
 
     m_toplevelUnmap = [this](auto)
     {
@@ -35,8 +36,8 @@ PointerResize::~PointerResize() = default;
 void PointerResize::onEnable()
 {
     m_toplevel->setResizing(true);
-    wlr_seat_pointer_notify_clear_focus(m_seat.getHandle());
-    m_seat.cursor.setXcursor(wlr_xcursor_get_resize_name(static_cast<wlr_edges>(m_edges)));
+    wlr_seat_pointer_notify_clear_focus(m_seat.handle());
+    core.cursor.setXcursor(wlr_xcursor_get_resize_name(static_cast<wlr_edges>(m_edges)));
 }
 
 void PointerResize::onDisable()
@@ -46,7 +47,7 @@ void PointerResize::onDisable()
 
 void PointerResize::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.cursor.pointerButtonCount() == 0)
+    if (m_seat.pointerButtonCount() == 0)
     {
         // If there is no button being pressed
         // we back to default.
@@ -69,7 +70,7 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
     int newTop    = m_grabGeo.y;
     int newBottom = m_grabGeo.y + m_grabGeo.height;
 
-    auto border = m_seat.cursor.position() - m_delta;
+    auto border = core.cursor.position() - m_delta;
 
     if (m_edges & WLR_EDGE_TOP)
     {

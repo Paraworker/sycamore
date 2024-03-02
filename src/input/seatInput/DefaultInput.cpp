@@ -22,15 +22,15 @@ void DefaultInput::onDisable()
 
 void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
 {
-    wlr_seat_pointer_notify_button(m_seat.getHandle(), event->time_msec, event->button, event->state);
+    wlr_seat_pointer_notify_button(m_seat.handle(), event->time_msec, event->button, event->state);
 
-    if (event->state == WLR_BUTTON_RELEASED)
+    if (event->state == WL_POINTER_BUTTON_STATE_RELEASED)
     {
         return;
     }
 
     Point<double> sCoords{};
-    if (auto element = scene::elementFromNode(core.scene.shellAt(m_seat.cursor.position(), sCoords)); element)
+    if (auto element = scene::elementFromNode(core.scene.shellAt(core.cursor.position(), sCoords)); element)
     {
         // If pressed on a toplevel, focus it
         if (element->kind == scene::Element::TOPLEVEL)
@@ -40,7 +40,7 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
     }
 
     // Start an implicit grab if seat has a focused surface
-    if (auto& state = m_seat.getHandle()->pointer_state; state.focused_surface)
+    if (auto& state = m_seat.handle()->pointer_state; state.focused_surface)
     {
         m_seat.setInput<ImplicitGrab>(state.focused_surface, Point{state.sx, state.sy}, m_seat);
     }
@@ -49,12 +49,12 @@ void DefaultInput::onPointerButton(wlr_pointer_button_event* event)
 void DefaultInput::onPointerMotion(uint32_t timeMsec)
 {
     m_seat.updatePointerFocus(timeMsec);
-    m_seat.updateDragIconsPosition();
+    m_seat.updateDragIcons();
 }
 
 void DefaultInput::onPointerAxis(wlr_pointer_axis_event* event)
 {
-    wlr_seat_pointer_notify_axis(m_seat.getHandle(),
+    wlr_seat_pointer_notify_axis(m_seat.handle(),
         event->time_msec, event->orientation, event->delta,
         event->delta_discrete, event->source, event->relative_direction);
 }
@@ -62,35 +62,35 @@ void DefaultInput::onPointerAxis(wlr_pointer_axis_event* event)
 void DefaultInput::onPointerSwipeBegin(wlr_pointer_swipe_begin_event* event)
 {
     wlr_pointer_gestures_v1_send_swipe_begin(core.pointerGestures,
-                                             m_seat.getHandle(),
+                                             m_seat.handle(),
                                              event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerSwipeUpdate(wlr_pointer_swipe_update_event* event)
 {
     wlr_pointer_gestures_v1_send_swipe_update(core.pointerGestures,
-                                              m_seat.getHandle(),
+                                              m_seat.handle(),
                                               event->time_msec, event->dx, event->dy);
 }
 
 void DefaultInput::onPointerSwipeEnd(wlr_pointer_swipe_end_event* event)
 {
     wlr_pointer_gestures_v1_send_swipe_end(core.pointerGestures,
-                                           m_seat.getHandle(),
+                                           m_seat.handle(),
                                            event->time_msec, event->cancelled);
 }
 
 void DefaultInput::onPointerPinchBegin(wlr_pointer_pinch_begin_event* event)
 {
     wlr_pointer_gestures_v1_send_pinch_begin(core.pointerGestures,
-                                             m_seat.getHandle(),
+                                             m_seat.handle(),
                                              event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 {
     wlr_pointer_gestures_v1_send_pinch_update(core.pointerGestures,
-                                              m_seat.getHandle(),
+                                              m_seat.handle(),
                                               event->time_msec, event->dx, event->dy,
                                               event->scale, event->rotation);
 }
@@ -98,30 +98,27 @@ void DefaultInput::onPointerPinchUpdate(wlr_pointer_pinch_update_event* event)
 void DefaultInput::onPointerPinchEnd(wlr_pointer_pinch_end_event* event)
 {
     wlr_pointer_gestures_v1_send_pinch_end(core.pointerGestures,
-                                           m_seat.getHandle(),
+                                           m_seat.handle(),
                                            event->time_msec, event->cancelled);
 }
 
 void DefaultInput::onPointerHoldBegin(wlr_pointer_hold_begin_event* event)
 {
     wlr_pointer_gestures_v1_send_hold_begin(core.pointerGestures,
-                                            m_seat.getHandle(),
+                                            m_seat.handle(),
                                             event->time_msec, event->fingers);
 }
 
 void DefaultInput::onPointerHoldEnd(wlr_pointer_hold_end_event* event)
 {
     wlr_pointer_gestures_v1_send_hold_end(core.pointerGestures,
-                                          m_seat.getHandle(),
+                                          m_seat.handle(),
                                           event->time_msec, event->cancelled);
 }
 
 void DefaultInput::rebasePointer()
 {
-    if (m_seat.cursor.isEnabled())
-    {
-        m_seat.updatePointerFocus(getMonotonic());
-    }
+    m_seat.updatePointerFocus(getMonotonic());
 }
 
 }

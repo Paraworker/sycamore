@@ -1,7 +1,6 @@
 #ifndef SYCAMORE_SEAT_H
 #define SYCAMORE_SEAT_H
 
-#include "sycamore/input/Cursor.h"
 #include "sycamore/input/seatInput/SeatInput.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
@@ -30,10 +29,36 @@ public:
     /**
      * @brief Get wlr_seat
      */
-    auto getHandle()
+    auto handle()
     {
         return m_handle;
     }
+
+    void setCapabilities(uint32_t caps);
+
+    void enablePointer();
+
+    void disablePointer();
+
+    bool isPointerEnabled() const
+    {
+        return m_pointerEnabled;
+    }
+
+    size_t pointerButtonCount() const
+    {
+        return m_pointerButtonCount;
+    }
+
+    void updatePointerButtonCount(wl_pointer_button_state state);
+
+    void updatePointerFocus(uint32_t timeMsec);
+
+    void setKeyboardFocus(wlr_surface* surface) const;
+
+    void updateDragIcons() const;
+
+    bool bindingEnterCheck(const Toplevel& toplevel) const;
 
     template<typename T, typename... Args>
     void setInput(Args&&... args)
@@ -42,16 +67,6 @@ public:
         input.reset(new T{std::forward<Args>(args)...});
         input->onEnable();
     }
-
-    void setCapabilities(uint32_t caps);
-
-    void updatePointerFocus(uint32_t timeMsec);
-
-    void setKeyboardFocus(wlr_surface* surface) const;
-
-    void updateDragIconsPosition() const;
-
-    bool bindingEnterCheck(const Toplevel& toplevel) const;
 
     Seat(const Seat&) = delete;
     Seat(Seat&&) = delete;
@@ -62,11 +77,12 @@ private:
     void dragIconUpdatePosition(const DragIcon& icon) const;
 
 public:
-    Cursor                     cursor;
     std::unique_ptr<SeatInput> input;
 
 private:
     wlr_seat* m_handle;
+    bool      m_pointerEnabled;
+    size_t    m_pointerButtonCount;
 
     Listener  m_setCursor;
     Listener  m_setSelection;
