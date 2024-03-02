@@ -60,6 +60,23 @@ public:
 private:
     wlr_pointer* m_pointerHandle;
 
+    Listener     m_motion;
+    Listener     m_motionAbsolute;
+    Listener     m_button;
+    Listener     m_axis;
+    Listener     m_frame;
+
+    Listener     m_swipeBegin;
+    Listener     m_swipeUpdate;
+    Listener     m_swipeEnd;
+
+    Listener     m_pinchBegin;
+    Listener     m_pinchUpdate;
+    Listener     m_pinchEnd;
+
+    Listener     m_holdBegin;
+    Listener     m_holdEnd;
+
     Listener     m_destroy;
 };
 

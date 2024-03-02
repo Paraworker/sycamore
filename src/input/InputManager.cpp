@@ -83,8 +83,6 @@ void InputManager::addPointer(wlr_input_device* handle)
 
     pointer->iter = pointer;
     pointer->apply();
-
-    core.seat->cursor.attachDevice(handle);
 }
 
 void InputManager::remove(Keyboard* keyboard)
@@ -96,7 +94,6 @@ void InputManager::remove(Keyboard* keyboard)
 void InputManager::remove(Pointer* pointer)
 {
     spdlog::info("Remove Pointer: {}", pointer->name());
-    core.seat->cursor.detachDevice(pointer->getBaseHandle());
     m_pointers.erase(pointer->iter);
 }
 

@@ -107,7 +107,7 @@ wlr_box Output::layoutGeometry() const
 
 void Output::ensureCursor() const
 {
-    core.seat->cursor.warp(static_cast<Point<double>>(boxGetCenter(layoutGeometry())));
+    core.cursor.warp(static_cast<Point<double>>(boxGetCenter(layoutGeometry())));
     core.seat->input->rebasePointer();
 }
 

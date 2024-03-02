@@ -23,7 +23,7 @@ Toplevel::~Toplevel() = default;
 Output* Toplevel::output() const
 {
     // FIXME
-    return core.seat->cursor.atOutput();
+    return core.cursor.atOutput();
 }
 
 void Toplevel::setToOutputCenter(const Output& output)

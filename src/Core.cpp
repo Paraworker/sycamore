@@ -86,8 +86,9 @@ Core::Core()
 
     scene.init(outputLayout, linuxDmabuf);
 
+    cursor.init(outputLayout);
+
     seat = std::make_unique<Seat>(display, "seat0");
-    seat->cursor.init(outputLayout);
 
     pointerGestures = wlr_pointer_gestures_v1_create(display);
 

@@ -26,7 +26,7 @@ struct LayerShellHandler
             // Confirm output
             if (!handle->output)
             {
-                auto output = core.seat->cursor.atOutput();
+                auto output = core.cursor.atOutput();
                 if (!output)
                 {
                     spdlog::error("No output under cursor for layerSurface");

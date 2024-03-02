@@ -9,7 +9,6 @@ namespace sycamore
 {
 
 class Output;
-class Seat;
 
 class Cursor
 {
@@ -17,23 +16,17 @@ public:
     /**
      * @brief Constructor
      */
-    explicit Cursor(Seat& seat);
+    Cursor();
 
     /**
      * @brief Destructor
      */
     ~Cursor();
 
+    /**
+     * @brief Attach output layout
+     */
     void init(wlr_output_layout* layout);
-
-    void enable();
-
-    void disable();
-
-    bool isEnabled() const
-    {
-        return m_enabled;
-    }
 
     /**
      * @brief Set cursor image by xcursor name
@@ -51,6 +44,38 @@ public:
     void hide();
 
     /**
+     * @brief Get cursor position in layout
+     */
+    Point<double> position() const
+    {
+        return {m_handle->x, m_handle->y};
+    }
+
+    /**
+     * @brief Move cursor by a vector in layout
+     */
+    void move(const Point<double>& delta, wlr_input_device* dev)
+    {
+        wlr_cursor_move(m_handle, dev, delta.x, delta.y);
+    }
+
+    /**
+     * @brief Warp cursor to the given position in layout
+     */
+    bool warp(const Point<double>& pos, wlr_input_device* dev = nullptr) const
+    {
+        return wlr_cursor_warp(m_handle, dev, pos.x, pos.y);
+    }
+
+    /**
+     * @brief Warp cursor to the given position in absolute[0, 1] coordinates
+     */
+    void warpAbsolute(const Point<double>& pos, wlr_input_device* dev) const
+    {
+        wlr_cursor_warp_absolute(m_handle, dev, pos.x, pos.y);
+    }
+
+    /**
      * @brief Warp and reset xcursor image again
      */
     void refreshXcursor();
@@ -62,31 +87,6 @@ public:
 
     Output* atOutput() const;
 
-    void warp(const Point<double>& coords) const
-    {
-        wlr_cursor_warp(m_handle, nullptr, coords.x, coords.y);
-    }
-
-    Point<double> position() const
-    {
-        return {m_handle->x, m_handle->y};
-    }
-
-    size_t pointerButtonCount() const
-    {
-        return m_pointerButtonCount;
-    }
-
-    void attachDevice(wlr_input_device* device) const
-    {
-        wlr_cursor_attach_input_device(m_handle, device);
-    }
-
-    void detachDevice(wlr_input_device* device) const
-    {
-        wlr_cursor_detach_input_device(m_handle, device);
-    }
-
     Cursor(const Cursor&) = delete;
     Cursor(Cursor&&) = delete;
     Cursor& operator=(const Cursor&) = delete;
@@ -95,24 +95,7 @@ public:
 private:
     wlr_cursor*          m_handle;
     wlr_xcursor_manager* m_xcursorManager;
-    bool                 m_enabled;
     const char*          m_xcursor;
-    size_t               m_pointerButtonCount;
-    Seat&                m_seat;
-
-    Listener             m_motion;
-    Listener             m_motionAbsolute;
-    Listener             m_button;
-    Listener             m_axis;
-    Listener             m_frame;
-    Listener             m_swipeBegin;
-    Listener             m_swipeUpdate;
-    Listener             m_swipeEnd;
-    Listener             m_pinchBegin;
-    Listener             m_pinchUpdate;
-    Listener             m_pinchEnd;
-    Listener             m_holdBegin;
-    Listener             m_holdEnd;
 };
 
 }
