@@ -1,20 +1,17 @@
-#ifndef SYCAMORE_IMPLICIT_GRAB_H
-#define SYCAMORE_IMPLICIT_GRAB_H
+#ifndef SYCAMORE_PASSTHROUGH_H
+#define SYCAMORE_PASSTHROUGH_H
 
-#include "sycamore/input/Seat.h"
-#include "sycamore/utils/Listener.h"
-#include "sycamore/utils/Point.h"
-#include "SeatInput.h"
+#include "InputState.h"
 
 namespace sycamore
 {
 
-class ImplicitGrab final : public SeatInput
+class Passthrough final : public InputState
 {
 public:
-    ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords, Seat& seat);
+    Passthrough() = default;
 
-    ~ImplicitGrab() override;
+    ~Passthrough() override = default;
 
     void onEnable() override;
 
@@ -42,18 +39,11 @@ public:
 
     void onPointerHoldEnd(wlr_pointer_hold_end_event* event) override;
 
-    Type type() const override
-    {
-        return PASSTHROUGH;
-    }
+    void rebasePointer() override;
 
-private:
-    wlr_surface*  m_surface;
-    Listener      m_surfaceUnmap;
-    Point<double> m_delta;
-    Seat&         m_seat;
+    bool isInteractive() const override;
 };
 
 }
 
-#endif //SYCAMORE_IMPLICIT_GRAB_H
+#endif //SYCAMORE_PASSTHROUGH_H

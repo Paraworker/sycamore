@@ -1,11 +1,8 @@
 #ifndef SYCAMORE_SEAT_H
 #define SYCAMORE_SEAT_H
 
-#include "sycamore/input/seatInput/SeatInput.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
-
-#include <memory>
 
 namespace sycamore
 {
@@ -58,16 +55,6 @@ public:
 
     void updateDragIcons() const;
 
-    bool bindingEnterCheck(const Toplevel& toplevel) const;
-
-    template<typename T, typename... Args>
-    void setInput(Args&&... args)
-    {
-        input->onDisable();
-        input.reset(new T{std::forward<Args>(args)...});
-        input->onEnable();
-    }
-
     Seat(const Seat&) = delete;
     Seat(Seat&&) = delete;
     Seat& operator=(const Seat&) = delete;
@@ -75,9 +62,6 @@ public:
 
 private:
     void dragIconUpdatePosition(const DragIcon& icon) const;
-
-public:
-    std::unique_ptr<SeatInput> input;
 
 private:
     wlr_seat* m_handle;

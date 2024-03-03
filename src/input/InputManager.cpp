@@ -1,11 +1,21 @@
 #include "sycamore/input/InputManager.h"
 
+#include "sycamore/desktop/Toplevel.h"
+#include "sycamore/desktop/WindowManager.h"
+#include "sycamore/input/state/Passthrough.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
+
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 
 namespace sycamore
 {
+
+InputManager::InputManager() : state{std::make_unique<Passthrough>()}
+{}
+
+InputManager::~InputManager() = default;
 
 void InputManager::updateCapabilities() const
 {
@@ -58,8 +68,9 @@ void InputManager::addDevice(wlr_input_device* handle)
         case WLR_INPUT_DEVICE_TABLET:
         case WLR_INPUT_DEVICE_TABLET_PAD:
         case WLR_INPUT_DEVICE_SWITCH:
-        default:
             break;
+        default:
+            throw std::runtime_error{"unreachable!"};
     }
 
     updateCapabilities();
@@ -95,6 +106,28 @@ void InputManager::remove(Pointer* pointer)
 {
     spdlog::info("Remove Pointer: {}", pointer->name());
     m_pointers.erase(pointer->iter);
+}
+
+bool InputManager::interactiveEnterCheck(const Toplevel& toplevel) const
+{
+    if (state->isInteractive())
+    {
+        return false;
+    }
+
+    if (toplevel.isPinned())
+    {
+        return false;
+    }
+
+    // Deny pointerMove/pointerResize for unfocused toplevel
+    // or there is no focused toplevel.
+    if (windowManager.focusState().toplevel != &toplevel)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }

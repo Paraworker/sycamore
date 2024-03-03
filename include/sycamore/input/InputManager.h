@@ -3,11 +3,15 @@
 
 #include "sycamore/input/Keyboard.h"
 #include "sycamore/input/Pointer.h"
+#include "sycamore/input/state/InputState.h"
 
 #include <list>
+#include <memory>
 
 namespace sycamore
 {
+
+class Toplevel;
 
 class InputManager
 {
@@ -15,12 +19,28 @@ public:
     /**
      * @brief Constructor
      */
-    InputManager() = default;
+    InputManager();
 
     /**
      * @brief Destructor
      */
-    ~InputManager() = default;
+    ~InputManager();
+
+    /**
+     * @brief Switch to a new input state
+     */
+    template<typename T, typename... Args>
+    void toState(Args&&... args)
+    {
+        state->onDisable();
+        state.reset(new T{std::forward<Args>(args)...});
+        state->onEnable();
+    }
+
+    /**
+     * @brief Check whether an 'interactive' input state should begin
+     */
+    bool interactiveEnterCheck(const Toplevel& toplevel) const;
 
     /**
      * @brief Update seat capabilities
@@ -46,6 +66,9 @@ public:
         remove(device);
         updateCapabilities();
     }
+
+public:
+    std::unique_ptr<InputState> state;
 
 private:
     void addKeyboard(wlr_input_device* handle);

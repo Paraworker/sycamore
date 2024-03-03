@@ -2,8 +2,9 @@
 
 #include "sycamore/desktop/WindowManager.h"
 #include "sycamore/desktop/Popup.h"
-#include "sycamore/input/seatInput/PointerMove.h"
-#include "sycamore/input/seatInput/PointerResize.h"
+#include "sycamore/input/state/PointerMove.h"
+#include "sycamore/input/state/PointerResize.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
@@ -92,7 +93,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel)
         if (memcmp(&m_lastGeo, &newGeo, sizeof(wlr_box)) != 0)
         {
             m_lastGeo = newGeo;
-            core.seat->input->rebasePointer();
+            inputManager.state->rebasePointer();
         }
     };
     m_commit.connect(m_surface->events.commit);
@@ -112,23 +113,19 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel)
 
     m_move = [this](auto)
     {
-        if (!core.seat->bindingEnterCheck(*this))
+        if (inputManager.interactiveEnterCheck(*this))
         {
-            return;
+            inputManager.toState<PointerMove>(this);
         }
-
-        core.seat->setInput<PointerMove>(this, *core.seat);
     };
 
     m_resize = [this](void* data)
     {
-        if (!core.seat->bindingEnterCheck(*this))
+        if (inputManager.interactiveEnterCheck(*this))
         {
-            return;
+            auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
+            inputManager.toState<PointerResize>(this, event->edges);
         }
-
-        auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
-        core.seat->setInput<PointerResize>(this, event->edges, *core.seat);
     };
 
     m_fullscreen = [this](auto)
