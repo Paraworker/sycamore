@@ -1,7 +1,7 @@
 #ifndef SYCAMORE_COMPOSITOR_HANDLER_H
 #define SYCAMORE_COMPOSITOR_HANDLER_H
 
-#include "sycamore/input/Seat.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 #include "sycamore/Core.h"
@@ -24,7 +24,7 @@ struct SurfaceHandler
 
     ~SurfaceHandler()
     {
-        core.seat->input->rebasePointer();
+        inputManager.state->rebasePointer();
     }
 };
 

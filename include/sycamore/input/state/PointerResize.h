@@ -2,16 +2,15 @@
 #define SYCAMORE_POINTER_RESIZE_H
 
 #include "sycamore/desktop/Toplevel.h"
-#include "sycamore/input/Seat.h"
-#include "SeatInput.h"
+#include "InputState.h"
 
 namespace sycamore
 {
 
-class PointerResize : public SeatInput
+class PointerResize : public InputState
 {
 public:
-    PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat);
+    PointerResize(Toplevel* toplevel, uint32_t edges);
 
     ~PointerResize() override;
 
@@ -23,10 +22,7 @@ public:
 
     void onPointerMotion(uint32_t timeMsec) override;
 
-    Type type() const override
-    {
-        return BINDING;
-    }
+    bool isInteractive() const override;
 
 private:
     Toplevel*     m_toplevel;
@@ -34,7 +30,6 @@ private:
     uint32_t      m_edges;
     wlr_box       m_grabGeo;
     Point<double> m_delta;
-    Seat&         m_seat;
 };
 
 }

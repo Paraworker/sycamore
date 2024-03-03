@@ -1,18 +1,15 @@
-#ifndef SYCAMORE_SEAT_INPUT_H
-#define SYCAMORE_SEAT_INPUT_H
+#ifndef SYCAMORE_INPUT_STATE_H
+#define SYCAMORE_INPUT_STATE_H
 
 #include "sycamore/wlroots.h"
 
 namespace sycamore
 {
 
-class SeatInput
+class InputState
 {
 public:
-    enum Type { PASSTHROUGH, BINDING };
-
-public:
-    virtual ~SeatInput() = default;
+    virtual ~InputState() = default;
 
     virtual void onEnable() = 0;
 
@@ -42,9 +39,9 @@ public:
 
     virtual void rebasePointer() {};
 
-    virtual Type type() const = 0;
+    virtual bool isInteractive() const = 0;
 };
 
 }
 
-#endif //SYCAMORE_SEAT_INPUT_H
+#endif //SYCAMORE_INPUT_STATE_H

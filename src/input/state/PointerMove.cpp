@@ -1,19 +1,20 @@
-#include "sycamore/input/seatInput/PointerMove.h"
+#include "sycamore/input/state/PointerMove.h"
 
-#include "sycamore/input/seatInput/DefaultInput.h"
+#include "sycamore/input/state/Passthrough.h"
+#include "sycamore/input/InputManager.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 
 namespace sycamore
 {
 
-PointerMove::PointerMove(Toplevel* toplevel, Seat& seat)
+PointerMove::PointerMove(Toplevel* toplevel)
     : m_toplevel{toplevel}
     , m_delta{core.cursor.position() - static_cast<Point<double>>(toplevel->position())}
-    , m_seat{seat}
 {
-    m_toplevelUnmap = [this](auto)
+    m_toplevelUnmap = [](auto)
     {
-        m_seat.setInput<DefaultInput>(m_seat);
+        inputManager.toState<Passthrough>();
     };
     m_toplevelUnmap.connect(toplevel->events.unmap);
 }
@@ -22,7 +23,7 @@ PointerMove::~PointerMove() = default;
 
 void PointerMove::onEnable()
 {
-    wlr_seat_pointer_notify_clear_focus(m_seat.handle());
+    wlr_seat_pointer_notify_clear_focus(core.seat->handle());
     core.cursor.setXcursor("grabbing");
 }
 
@@ -33,11 +34,11 @@ void PointerMove::onDisable()
 
 void PointerMove::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.pointerButtonCount() == 0)
+    if (core.seat->pointerButtonCount() == 0)
     {
         // If there is no button being pressed
-        // we back to default.
-        m_seat.setInput<DefaultInput>(m_seat);
+        // we back to passthrough
+        inputManager.toState<Passthrough>();
     }
 }
 
@@ -45,6 +46,11 @@ void PointerMove::onPointerMotion(uint32_t timeMsec)
 {
     // Move the grabbed toplevel to the new position.
     m_toplevel->moveTo(static_cast<Point<int32_t>>(core.cursor.position() - m_delta));
+}
+
+bool PointerMove::isInteractive() const
+{
+    return true;
 }
 
 }
