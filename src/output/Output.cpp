@@ -1,7 +1,7 @@
 #include "sycamore/output/Output.h"
 
 #include "sycamore/desktop/Layer.h"
-#include "sycamore/input/Seat.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/output/OutputManager.h"
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
@@ -108,7 +108,7 @@ wlr_box Output::layoutGeometry() const
 void Output::ensureCursor() const
 {
     core.cursor.warp(static_cast<Point<double>>(boxGetCenter(layoutGeometry())));
-    core.seat->input->rebasePointer();
+    inputManager.state->rebasePointer();
 }
 
 void Output::arrangeLayers()

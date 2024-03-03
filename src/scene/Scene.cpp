@@ -1,5 +1,7 @@
 #include "sycamore/scene/Scene.h"
 
+#include <stdexcept>
+
 namespace sycamore::scene
 {
 
@@ -61,6 +63,8 @@ wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
             return shell.top;
         case ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY:
             return shell.overlay;
+        default:
+            throw std::logic_error{"unreachable!"};
     }
 }
 

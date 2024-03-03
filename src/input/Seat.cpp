@@ -2,16 +2,16 @@
 
 #include "sycamore/desktop/WindowManager.h"
 #include "sycamore/desktop/Toplevel.h"
+#include "sycamore/input/state/Passthrough.h"
 #include "sycamore/input/DragIcon.h"
-#include "sycamore/input/seatInput/DefaultInput.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/Core.h"
 
 namespace sycamore
 {
 
 Seat::Seat(wl_display* display, const char* name)
-    : input{std::make_unique<DefaultInput>(*this)}
-    , m_handle{wlr_seat_create(display, name)}
+    : m_handle{wlr_seat_create(display, name)}
     , m_pointerEnabled{false}
     , m_pointerButtonCount{0}
 {
@@ -75,7 +75,7 @@ Seat::Seat(wl_display* display, const char* name)
             dragIconUpdatePosition(*icon);
         }
 
-        setInput<DefaultInput>(*this);
+        inputManager.toState<Passthrough>();
     };
     m_startDrag.connect(m_handle->events.start_drag);
 
@@ -108,7 +108,7 @@ void Seat::enablePointer()
 
     m_pointerEnabled = true;
 
-    input->rebasePointer();
+    inputManager.state->rebasePointer();
 }
 
 void Seat::disablePointer()
@@ -179,35 +179,6 @@ void Seat::updateDragIcons() const
     {
         dragIconUpdatePosition(static_cast<DragIconElement*>(node->data)->icon);
     }
-}
-
-bool Seat::bindingEnterCheck(const Toplevel& toplevel) const
-{
-    /* This function is used for checking whether an
-    * 'pointer interactive' input mode should begin. including:
-    *
-    * PointerMove
-    * PointerResize
-    */
-
-    if (input->type() == SeatInput::BINDING)
-    {
-        return false;
-    }
-
-    if (toplevel.isPinned())
-    {
-        return false;
-    }
-
-    // Deny pointerMove/pointerResize for unfocused toplevel
-    // or there is no focused toplevel.
-    if (windowManager.focusState().toplevel != &toplevel)
-    {
-        return false;
-    }
-
-    return true;
 }
 
 void Seat::dragIconUpdatePosition(const DragIcon& icon) const

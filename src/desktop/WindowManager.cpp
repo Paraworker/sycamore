@@ -2,6 +2,7 @@
 
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/desktop/Layer.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/input/Seat.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
@@ -217,7 +218,7 @@ void WindowManager::cycleToplevel()
 
     focusToplevel(*m_mappedToplevels.front());
 
-    core.seat->input->rebasePointer();
+    inputManager.state->rebasePointer();
 }
 
 void WindowManager::closeFocusedToplevel() const

@@ -2,7 +2,7 @@
 
 #include "sycamore/desktop/WindowManager.h"
 #include "sycamore/desktop/Popup.h"
-#include "sycamore/input/Seat.h"
+#include "sycamore/input/InputManager.h"
 #include "sycamore/output/Output.h"
 #include "sycamore/Core.h"
 
@@ -122,7 +122,7 @@ Layer::Layer(wlr_layer_surface_v1* handle)
 
         if (needRebase)
         {
-            core.seat->input->rebasePointer();
+            inputManager.state->rebasePointer();
         }
     };
     m_commit.connect(handle->surface->events.commit);
