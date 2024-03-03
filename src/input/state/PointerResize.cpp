@@ -1,16 +1,17 @@
-#include "sycamore/input/seatInput/PointerResize.h"
+#include "sycamore/input/state/PointerResize.h"
 
-#include "sycamore/input/seatInput/DefaultInput.h"
+#include "sycamore/input/state/Passthrough.h"
+#include "sycamore/input/InputManager.h"
+#include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 
 namespace sycamore
 {
 
-PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
+PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges)
     : m_toplevel{toplevel}
     , m_edges{edges}
     , m_grabGeo{toplevel->geometry()}
-    , m_seat{seat}
 {
     auto toplevelPos = toplevel->position();
     m_grabGeo.x += toplevelPos.x;
@@ -24,9 +25,9 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges, Seat& seat)
 
     m_delta = core.cursor.position() - border;
 
-    m_toplevelUnmap = [this](auto)
+    m_toplevelUnmap = [](auto)
     {
-        m_seat.setInput<DefaultInput>(m_seat);
+        inputManager.toState<Passthrough>();
     };
     m_toplevelUnmap.connect(toplevel->events.unmap);
 }
@@ -36,7 +37,7 @@ PointerResize::~PointerResize() = default;
 void PointerResize::onEnable()
 {
     m_toplevel->setResizing(true);
-    wlr_seat_pointer_notify_clear_focus(m_seat.handle());
+    wlr_seat_pointer_notify_clear_focus(core.seat->handle());
     core.cursor.setXcursor(wlr_xcursor_get_resize_name(static_cast<wlr_edges>(m_edges)));
 }
 
@@ -47,11 +48,11 @@ void PointerResize::onDisable()
 
 void PointerResize::onPointerButton(wlr_pointer_button_event* event)
 {
-    if (m_seat.pointerButtonCount() == 0)
+    if (core.seat->pointerButtonCount() == 0)
     {
         // If there is no button being pressed
-        // we back to default.
-        m_seat.setInput<DefaultInput>(m_seat);
+        // we back to passthrough
+        inputManager.toState<Passthrough>();
     }
 }
 
@@ -110,6 +111,11 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
 
     m_toplevel->moveTo({newLeft - toplevelGeo.x, newTop - toplevelGeo.y});
     m_toplevel->setSize(newRight - newLeft, newBottom - newTop);
+}
+
+bool PointerResize::isInteractive() const
+{
+    return true;
 }
 
 }

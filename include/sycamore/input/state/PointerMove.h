@@ -2,17 +2,16 @@
 #define SYCAMORE_POINTER_MOVE_H
 
 #include "sycamore/desktop/Toplevel.h"
-#include "sycamore/input/Seat.h"
 #include "sycamore/utils/Listener.h"
-#include "SeatInput.h"
+#include "InputState.h"
 
 namespace sycamore
 {
 
-class PointerMove final : public SeatInput
+class PointerMove final : public InputState
 {
 public:
-    PointerMove(Toplevel* toplevel, Seat& seat);
+    PointerMove(Toplevel* toplevel);
 
     ~PointerMove() override;
 
@@ -24,16 +23,12 @@ public:
 
     void onPointerMotion(uint32_t timeMsec) override;
 
-    Type type() const override
-    {
-        return BINDING;
-    }
+    bool isInteractive() const override;
 
 private:
     Toplevel*     m_toplevel;
     Listener      m_toplevelUnmap;
     Point<double> m_delta;
-    Seat&         m_seat;
 };
 
 }

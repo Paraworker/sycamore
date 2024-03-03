@@ -18,9 +18,9 @@ Pointer::Pointer(wlr_input_device* baseHandle)
         auto event = static_cast<wlr_pointer_motion_event*>(data);
 
         core.cursor.move({event->delta_x, event->delta_y}, &event->pointer->base);
-
         core.seat->enablePointer();
-        core.seat->input->onPointerMotion(event->time_msec);
+
+        inputManager.state->onPointerMotion(event->time_msec);
     };
     m_motion.connect(m_pointerHandle->events.motion);
 
@@ -29,9 +29,9 @@ Pointer::Pointer(wlr_input_device* baseHandle)
         auto event = static_cast<wlr_pointer_motion_absolute_event*>(data);
 
         core.cursor.warpAbsolute({event->x, event->y}, &event->pointer->base);
-
         core.seat->enablePointer();
-        core.seat->input->onPointerMotion(event->time_msec);
+
+        inputManager.state->onPointerMotion(event->time_msec);
     };
     m_motionAbsolute.connect(m_pointerHandle->events.motion_absolute);
 
@@ -40,16 +40,16 @@ Pointer::Pointer(wlr_input_device* baseHandle)
         auto event = static_cast<wlr_pointer_button_event*>(data);
 
         core.seat->updatePointerButtonCount(event->state);
-
         core.seat->enablePointer();
-        core.seat->input->onPointerButton(event);
+
+        inputManager.state->onPointerButton(event);
     };
     m_button.connect(m_pointerHandle->events.button);
 
     m_axis = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
+        inputManager.state->onPointerAxis(static_cast<wlr_pointer_axis_event*>(data));
     };
     m_axis.connect(m_pointerHandle->events.axis);
 
@@ -63,56 +63,56 @@ Pointer::Pointer(wlr_input_device* baseHandle)
     m_swipeBegin = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
+        inputManager.state->onPointerSwipeBegin(static_cast<wlr_pointer_swipe_begin_event*>(data));
     };
     m_swipeBegin.connect(m_pointerHandle->events.swipe_begin);
 
     m_swipeUpdate = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
+        inputManager.state->onPointerSwipeUpdate(static_cast<wlr_pointer_swipe_update_event*>(data));
     };
     m_swipeUpdate.connect(m_pointerHandle->events.swipe_update);
 
     m_swipeEnd = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
+        inputManager.state->onPointerSwipeEnd(static_cast<wlr_pointer_swipe_end_event*>(data));
     };
     m_swipeEnd.connect(m_pointerHandle->events.swipe_end);
 
     m_pinchBegin = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
+        inputManager.state->onPointerPinchBegin(static_cast<wlr_pointer_pinch_begin_event*>(data));
     };
     m_pinchBegin.connect(m_pointerHandle->events.pinch_begin);
 
     m_pinchUpdate = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
+        inputManager.state->onPointerPinchUpdate(static_cast<wlr_pointer_pinch_update_event*>(data));
     };
     m_pinchUpdate.connect(m_pointerHandle->events.pinch_update);
 
     m_pinchEnd = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
+        inputManager.state->onPointerPinchEnd(static_cast<wlr_pointer_pinch_end_event*>(data));
     };
     m_pinchEnd.connect(m_pointerHandle->events.pinch_end);
 
     m_holdBegin = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
+        inputManager.state->onPointerHoldBegin(static_cast<wlr_pointer_hold_begin_event*>(data));
     };
     m_holdBegin.connect(m_pointerHandle->events.hold_begin);
 
     m_holdEnd = [](void* data)
     {
         core.seat->enablePointer();
-        core.seat->input->onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
+        inputManager.state->onPointerHoldEnd(static_cast<wlr_pointer_hold_end_event*>(data));
     };
     m_holdEnd.connect(m_pointerHandle->events.hold_end);
 
