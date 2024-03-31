@@ -21,8 +21,6 @@ struct RootElement final : Element
         };
         destroy.connect(node.events.destroy);
     }
-
-    ~RootElement() = default;
 };
 
 Scene::Scene() : root{wlr_scene_create()}, shell{}, dragIcons{}, layout{}

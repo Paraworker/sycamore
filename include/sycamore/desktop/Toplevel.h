@@ -126,8 +126,6 @@ struct ToplevelElement final : scene::Element
         };
         destroy.connect(node.events.destroy);
     }
-
-    ~ToplevelElement() = default;
 };
 
 }

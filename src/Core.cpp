@@ -42,8 +42,6 @@ struct BackendHandler
         };
         destroy.connect(handle->events.destroy);
     }
-
-    ~BackendHandler() = default;
 };
 
 Core::Core()

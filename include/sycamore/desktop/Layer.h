@@ -95,8 +95,6 @@ struct LayerElement final : scene::Element
         };
         destroy.connect(node.events.destroy);
     }
-
-    ~LayerElement() = default;
 };
 
 }

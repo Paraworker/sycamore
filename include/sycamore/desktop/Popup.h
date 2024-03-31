@@ -75,8 +75,6 @@ struct PopupElement final : scene::Element
         };
         destroy.connect(node.events.destroy);
     }
-
-    ~PopupElement() = default;
 };
 
 }

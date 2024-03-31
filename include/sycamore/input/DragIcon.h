@@ -29,8 +29,6 @@ struct DragIconElement final : scene::Element
         };
         destroy.connect(node.events.destroy);
     }
-
-    ~DragIconElement() = default;
 };
 
 class DragIcon

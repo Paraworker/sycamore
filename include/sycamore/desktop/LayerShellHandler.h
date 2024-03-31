@@ -47,8 +47,6 @@ struct LayerShellHandler
         };
         destroy.connect(handle->events.destroy);
     }
-
-    ~LayerShellHandler() = default;
 };
 
 }

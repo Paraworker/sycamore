@@ -27,8 +27,6 @@ struct XdgShellHandler
         };
         destroy.connect(handle->events.destroy);
     }
-
-    ~XdgShellHandler() = default;
 };
 
 }

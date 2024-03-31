@@ -47,8 +47,6 @@ struct CompositorHandler
         };
         destroy.connect(handle->events.destroy);
     }
-
-    ~CompositorHandler() = default;
 };
 
 }
