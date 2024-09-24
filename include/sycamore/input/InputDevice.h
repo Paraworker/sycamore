@@ -5,34 +5,29 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
 template<typename ConcreteType>
-class InputDevice
-{
+class InputDevice {
 public:
     /**
      * @brief Get wlr_input_device_type
      */
-    auto type() const
-    {
+    auto type() const {
         return m_baseHandle->type;
     }
 
     /**
      * @brief Get device name
      */
-    auto name() const
-    {
+    auto name() const {
         return m_baseHandle->name;
     }
 
     /**
      * @brief Get wlr_input_device
      */
-    auto getBaseHandle() const
-    {
+    auto getBaseHandle() const {
         return m_baseHandle;
     }
 
@@ -44,8 +39,7 @@ protected:
      * @brief Constructor
      */
     explicit InputDevice(wlr_input_device* handle)
-        : m_baseHandle{handle}
-    {}
+        : m_baseHandle{handle} {}
 
     /**
      * @brief Destructor

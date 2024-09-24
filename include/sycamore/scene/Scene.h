@@ -5,14 +5,11 @@
 #include "sycamore/scene/Element.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore::scene
-{
+namespace sycamore::scene {
 
-struct Scene
-{
+struct Scene {
     // shell tree structure
-    struct Shell
-    {
+    struct Shell {
         wlr_scene_tree* root;
         wlr_scene_tree* background;
         wlr_scene_tree* bottom;
@@ -48,8 +45,7 @@ struct Scene
     /**
      * @brief Find the topmost node in shell tree
      */
-    wlr_scene_node* shellAt(const Point<double>& lCoords, Point<double>& sCoords) const
-    {
+    wlr_scene_node* shellAt(const Point<double>& lCoords, Point<double>& sCoords) const {
         return wlr_scene_node_at(&shell.root->node, lCoords.x, lCoords.y, &sCoords.x, &sCoords.y);
     }
 

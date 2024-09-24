@@ -8,13 +8,11 @@
 #include <list>
 #include <memory>
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Toplevel;
 
-class InputManager
-{
+class InputManager {
 public:
     /**
      * @brief Constructor
@@ -30,8 +28,7 @@ public:
      * @brief Switch to a new input state
      */
     template<typename T, typename... Args>
-    void toState(Args&&... args)
-    {
+    void toState(Args&&... args) {
         state->onDisable();
         state.reset(new T{std::forward<Args>(args)...});
         state->onEnable();
@@ -61,8 +58,7 @@ public:
      * @brief Remove an input device
      */
     template<typename T>
-    void removeDevice(T* device)
-    {
+    void removeDevice(T* device) {
         remove(device);
         updateCapabilities();
     }

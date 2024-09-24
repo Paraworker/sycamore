@@ -4,11 +4,9 @@
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/utils/Listener.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class Pointer final : public InputDevice<Pointer>
-{
+class Pointer final : public InputDevice<Pointer> {
 public:
     /**
      * @brief Constructor

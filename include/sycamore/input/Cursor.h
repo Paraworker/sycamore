@@ -5,13 +5,11 @@
 #include "sycamore/utils/Point.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Output;
 
-class Cursor
-{
+class Cursor {
 public:
     /**
      * @brief Constructor
@@ -46,32 +44,28 @@ public:
     /**
      * @brief Get cursor position in layout
      */
-    Point<double> position() const
-    {
+    Point<double> position() const {
         return {m_handle->x, m_handle->y};
     }
 
     /**
      * @brief Move cursor by a vector in layout
      */
-    void move(const Point<double>& delta, wlr_input_device* dev)
-    {
+    void move(const Point<double>& delta, wlr_input_device* dev) {
         wlr_cursor_move(m_handle, dev, delta.x, delta.y);
     }
 
     /**
      * @brief Warp cursor to the given position in layout
      */
-    bool warp(const Point<double>& pos, wlr_input_device* dev = nullptr) const
-    {
+    bool warp(const Point<double>& pos, wlr_input_device* dev = nullptr) const {
         return wlr_cursor_warp(m_handle, dev, pos.x, pos.y);
     }
 
     /**
      * @brief Warp cursor to the given position in absolute[0, 1] coordinates
      */
-    void warpAbsolute(const Point<double>& pos, wlr_input_device* dev) const
-    {
+    void warpAbsolute(const Point<double>& pos, wlr_input_device* dev) const {
         wlr_cursor_warp_absolute(m_handle, dev, pos.x, pos.y);
     }
 

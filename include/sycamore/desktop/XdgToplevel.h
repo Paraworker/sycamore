@@ -4,18 +4,15 @@
 #include "sycamore/desktop/Toplevel.h"
 #include "sycamore/utils/Listener.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class XdgToplevel final : public Toplevel
-{
+class XdgToplevel final : public Toplevel {
 public:
     explicit XdgToplevel(wlr_xdg_toplevel* toplevel);
 
     ~XdgToplevel() override;
 
-    Kind kind() const override
-    {
+    Kind kind() const override {
         return XDG;
     }
 

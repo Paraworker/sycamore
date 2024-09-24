@@ -7,41 +7,34 @@
 #include "sycamore/wlroots.h"
 #include "sycamore/Core.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
 class DragIcon;
 
-struct DragIconElement final : scene::Element
-{
+struct DragIconElement final : scene::Element {
     DragIcon& icon;
     Listener  destroy;
 
     DragIconElement(wlr_scene_node& node, DragIcon& icon)
-        : scene::Element{DRAG_ICON}, icon{icon}
-    {
+        : scene::Element{DRAG_ICON}, icon{icon} {
         // attach node
         node.data = this;
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(node.events.destroy);
     }
 };
 
-class DragIcon
-{
+class DragIcon {
 public:
     explicit DragIcon(wlr_drag_icon* handle)
         : m_handle{handle}
-        , m_tree{wlr_scene_drag_icon_create(core.scene.dragIcons, handle)}
-    {
+        , m_tree{wlr_scene_drag_icon_create(core.scene.dragIcons, handle)} {
         new DragIconElement{m_tree->node, *this};
 
-        m_destroy = [this](auto)
-        {
+        m_destroy = [this](auto) {
             delete this;
         };
         m_destroy.connect(m_handle->events.destroy);
@@ -49,13 +42,11 @@ public:
 
     ~DragIcon() = default;
 
-    void setPosition(const Point<int32_t>& pos) const
-    {
+    void setPosition(const Point<int32_t>& pos) const {
         wlr_scene_node_set_position(&m_tree->node, pos.x, pos.y);
     }
 
-    auto grabType() const
-    {
+    auto grabType() const {
         return m_handle->drag->grab_type;
     }
 

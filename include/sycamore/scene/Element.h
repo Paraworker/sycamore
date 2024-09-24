@@ -4,13 +4,10 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore::scene
-{
+namespace sycamore::scene {
 
-struct Element
-{
-    enum Kind
-    {
+struct Element {
+    enum Kind {
         ROOT,
         TOPLEVEL,
         LAYER,

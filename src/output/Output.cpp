@@ -8,20 +8,17 @@
 
 #include <spdlog/spdlog.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
 Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
     : m_handle{handle}
     , m_sceneOutput{sceneOutput}
-    , m_usableArea{}
-{
+    , m_usableArea{} {
     handle->data = this;
 
     wl_signal_init(&events.destroy);
 
-    m_frame = [this](auto)
-    {
+    m_frame = [this](auto) {
         // Render the scene if needed and commit the output
         wlr_scene_output_commit(m_sceneOutput, nullptr);
 
@@ -31,38 +28,32 @@ Output::Output(wlr_output* handle, wlr_scene_output* sceneOutput)
     };
     m_frame.connect(handle->events.frame);
 
-    m_requestState = [this](void* data)
-    {
+    m_requestState = [this](void* data) {
         wlr_output_commit_state(m_handle, static_cast<wlr_output_event_request_state*>(data)->state);
     };
     m_requestState.connect(handle->events.request_state);
 
-    m_destroy = [this](auto)
-    {
+    m_destroy = [this](auto) {
         outputManager.removeOutput(this);
     };
     m_destroy.connect(handle->events.destroy);
 }
 
-Output::~Output()
-{
+Output::~Output() {
     m_handle->data = nullptr;
 }
 
-bool Output::apply()
-{
+bool Output::apply() {
     wlr_output_state state{};
     wlr_output_state_init(&state);
 
     wlr_output_state_set_enabled(&state, true);
 
-    if (auto mode = wlr_output_preferred_mode(m_handle); mode)
-    {
+    if (auto mode = wlr_output_preferred_mode(m_handle); mode) {
         wlr_output_state_set_mode(&state, mode);
     }
 
-    if (!wlr_output_commit_state(m_handle, &state))
-    {
+    if (!wlr_output_commit_state(m_handle, &state)) {
         spdlog::error("Output: {} commit state failed", m_handle->name);
         wlr_output_state_finish(&state);
         return false;
@@ -71,8 +62,7 @@ bool Output::apply()
     wlr_output_state_finish(&state);
 
     // Center cursor if this is the first output
-    if (outputManager.outputCount() == 1)
-    {
+    if (outputManager.outputCount() == 1) {
         ensureCursor();
     }
 
@@ -81,21 +71,18 @@ bool Output::apply()
     return true;
 }
 
-wlr_box Output::relativeGeometry() const
-{
+wlr_box Output::relativeGeometry() const {
     wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
     return box;
 }
 
-wlr_box Output::layoutGeometry() const
-{
+wlr_box Output::layoutGeometry() const {
     wlr_box box{};
     wlr_output_effective_resolution(m_handle, &box.width, &box.height);
 
     auto layoutOutput = wlr_output_layout_get(core.outputLayout, m_handle);
-    if (!layoutOutput)
-    {
+    if (!layoutOutput) {
         return box;
     }
 
@@ -105,21 +92,17 @@ wlr_box Output::layoutGeometry() const
     return box;
 }
 
-void Output::ensureCursor() const
-{
+void Output::ensureCursor() const {
     core.cursor.warp(static_cast<Point<double>>(boxGetCenter(layoutGeometry())));
     inputManager.state->rebasePointer();
 }
 
-void Output::arrangeLayers()
-{
+void Output::arrangeLayers() {
     auto fullArea   = layoutGeometry();
     auto usableArea = fullArea;
 
-    for (auto& list : layerList)
-    {
-        for (auto layer : list)
-        {
+    for (auto& list : layerList) {
+        for (auto layer : list) {
             layer->configure(fullArea, usableArea);
         }
     }

@@ -4,14 +4,12 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
 class DragIcon;
 class Toplevel;
 
-class Seat
-{
+class Seat {
 public:
     /**
      * @brief Constructor
@@ -26,8 +24,7 @@ public:
     /**
      * @brief Get wlr_seat
      */
-    auto handle()
-    {
+    auto handle() {
         return m_handle;
     }
 
@@ -37,13 +34,11 @@ public:
 
     void disablePointer();
 
-    bool isPointerEnabled() const
-    {
+    bool isPointerEnabled() const {
         return m_pointerEnabled;
     }
 
-    size_t pointerButtonCount() const
-    {
+    size_t pointerButtonCount() const {
         return m_pointerButtonCount;
     }
 

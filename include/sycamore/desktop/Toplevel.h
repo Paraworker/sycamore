@@ -7,30 +7,28 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Output;
 
-class Toplevel
-{
+class Toplevel {
 public:
-    enum Kind { XDG, XWAYLAND };
+    enum Kind {
+        XDG,
+        XWAYLAND,
+    };
 
-    struct State
-    {
+    struct State {
         bool maximized  = false;
         bool fullscreen = false;
     };
 
-    struct Restore
-    {
+    struct Restore {
         wlr_box maximize;
         wlr_box fullscreen;
     };
 
-    struct Events
-    {
+    struct Events {
         wl_signal map;
         wl_signal unmap;
     };
@@ -52,33 +50,27 @@ public:
 
     void setToOutputCenter(const Output& output);
 
-    void moveTo(const Point<int32_t>& position) const
-    {
+    void moveTo(const Point<int32_t>& position) const {
         wlr_scene_node_set_position(&m_tree->node, position.x, position.y);
     }
 
-    Point<int32_t> position() const
-    {
+    Point<int32_t> position() const {
         return {m_tree->node.x, m_tree->node.y};
     }
 
-    void toFront() const
-    {
+    void toFront() const {
         wlr_scene_node_raise_to_top(&m_tree->node);
     }
 
-    auto baseSurface() const
-    {
+    auto baseSurface() const {
         return m_surface;
     }
 
-    bool isMapped() const
-    {
+    bool isMapped() const {
         return m_surface->mapped;
     }
 
-    bool isPinned() const
-    {
+    bool isPinned() const {
         return state.maximized || state.fullscreen;
     }
 
@@ -109,19 +101,16 @@ protected:
     wlr_scene_tree* m_tree;
 };
 
-struct ToplevelElement final : scene::Element
-{
+struct ToplevelElement final : scene::Element {
     Toplevel& toplevel;
     Listener  destroy;
 
     ToplevelElement(wlr_scene_node& node, Toplevel& toplevel)
-        : Element{TOPLEVEL}, toplevel{toplevel}
-    {
+        : Element{TOPLEVEL}, toplevel{toplevel} {
         // attach node
         node.data = this;
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(node.events.destroy);

@@ -4,11 +4,9 @@
 #include "sycamore/input/InputDevice.h"
 #include "sycamore/utils/Listener.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class Keyboard final : public InputDevice<Keyboard>
-{
+class Keyboard final : public InputDevice<Keyboard> {
 public:
     /**
      * @brief Constructor
@@ -25,8 +23,7 @@ public:
      */
     void apply();
 
-    uint32_t modifiers() const
-    {
+    uint32_t modifiers() const {
         return wlr_keyboard_get_modifiers(m_keyboardHandle);
     }
 
@@ -38,13 +35,11 @@ public:
     /**
      * @brief Update LEDs state
      */
-    void updateLeds(uint32_t leds) const
-    {
+    void updateLeds(uint32_t leds) const {
         wlr_keyboard_led_update(m_keyboardHandle, leds);
     }
 
-    bool operator==(const Keyboard& rhs) const
-    {
+    bool operator==(const Keyboard& rhs) const {
         return m_keyboardHandle == rhs.m_keyboardHandle;
     }
 

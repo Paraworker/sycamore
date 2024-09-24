@@ -3,11 +3,9 @@
 
 #include "InputState.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class Passthrough final : public InputState
-{
+class Passthrough final : public InputState {
 public:
     Passthrough() = default;
 

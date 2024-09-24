@@ -7,14 +7,11 @@
 
 #include <memory>
 
-namespace sycamore
-{
+namespace sycamore {
 
-class Popup
-{
+class Popup {
 public:
-    struct Handler
-    {
+    struct Handler {
         /**
          * @brief Destructor
          */
@@ -37,8 +34,7 @@ public:
      */
     ~Popup();
 
-    void unconstrainFromBox(const wlr_box& box)
-    {
+    void unconstrainFromBox(const wlr_box& box) {
         wlr_xdg_popup_unconstrain_from_box(m_handle, &box);
     }
 
@@ -58,19 +54,16 @@ private:
     Listener                 m_destroy;
 };
 
-struct PopupElement final : scene::Element
-{
+struct PopupElement final : scene::Element {
     Popup&   popup;
     Listener destroy;
 
     PopupElement(wlr_scene_node& node, Popup& popup)
-        : Element{POPUP}, popup{popup}
-    {
+        : Element{POPUP}, popup{popup} {
         // attach node
         node.data = this;
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(node.events.destroy);

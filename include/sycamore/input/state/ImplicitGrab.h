@@ -5,11 +5,9 @@
 #include "sycamore/utils/Point.h"
 #include "InputState.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class ImplicitGrab final : public InputState
-{
+class ImplicitGrab final : public InputState {
 public:
     ImplicitGrab(wlr_surface* surface, const Point<double>& sCoords);
 

@@ -9,26 +9,20 @@
 
 #include <spdlog/spdlog.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
-struct LayerShellHandler
-{
+struct LayerShellHandler {
     Listener newSurface;
     Listener destroy;
 
-    explicit LayerShellHandler(wlr_layer_shell_v1* handle)
-    {
-        newSurface = [](void* data)
-        {
+    explicit LayerShellHandler(wlr_layer_shell_v1* handle) {
+        newSurface = [](void* data) {
             auto handle = static_cast<wlr_layer_surface_v1*>(data);
 
             // Confirm output
-            if (!handle->output)
-            {
+            if (!handle->output) {
                 auto output = core.cursor.atOutput();
-                if (!output)
-                {
+                if (!output) {
                     spdlog::error("No output under cursor for layerSurface");
                     wlr_layer_surface_v1_destroy(handle);
                     return;
@@ -41,8 +35,7 @@ struct LayerShellHandler
         };
         newSurface.connect(handle->events.new_surface);
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(handle->events.destroy);

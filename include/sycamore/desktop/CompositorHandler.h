@@ -6,43 +6,34 @@
 #include "sycamore/wlroots.h"
 #include "sycamore/Core.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-struct SurfaceHandler
-{
+struct SurfaceHandler {
     Listener destroy;
 
-    explicit SurfaceHandler(wlr_surface* handle)
-    {
-        destroy = [this](auto)
-        {
+    explicit SurfaceHandler(wlr_surface* handle) {
+        destroy = [this](auto) {
             delete this;
-        };
+      };
         destroy.connect(handle->events.destroy);
     }
 
-    ~SurfaceHandler()
-    {
+    ~SurfaceHandler() {
         inputManager.state->rebasePointer();
     }
 };
 
-struct CompositorHandler
-{
+struct CompositorHandler {
     Listener newSurface;
     Listener destroy;
 
-    explicit CompositorHandler(wlr_compositor* handle)
-    {
-        newSurface = [](void* data)
-        {
+    explicit CompositorHandler(wlr_compositor* handle) {
+        newSurface = [](void* data) {
             new SurfaceHandler{static_cast<wlr_surface*>(data)};
         };
         newSurface.connect(handle->events.new_surface);
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(handle->events.destroy);

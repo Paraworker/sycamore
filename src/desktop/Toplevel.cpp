@@ -5,13 +5,11 @@
 #include "sycamore/utils/box_helper.h"
 #include "sycamore/Core.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
 Toplevel::Toplevel(wlr_surface* surface, wlr_scene_tree* tree)
     : m_surface{surface}
-    , m_tree{tree}
-{
+    , m_tree{tree} {
     new ToplevelElement{m_tree->node, *this};
 
     wl_signal_init(&events.map);
@@ -20,14 +18,12 @@ Toplevel::Toplevel(wlr_surface* surface, wlr_scene_tree* tree)
 
 Toplevel::~Toplevel() = default;
 
-Output* Toplevel::output() const
-{
+Output* Toplevel::output() const {
     // FIXME
     return core.cursor.atOutput();
 }
 
-void Toplevel::setToOutputCenter(const Output& output)
-{
+void Toplevel::setToOutputCenter(const Output& output) {
     auto outputGeo   = output.layoutGeometry();
     auto center      = boxGetCenter(outputGeo);
     auto toplevelGeo = geometry();
@@ -36,8 +32,7 @@ void Toplevel::setToOutputCenter(const Output& output)
     toplevelGeo.y = center.y - (toplevelGeo.height / 2);
 
     // Don't let top edge being out of output.
-    if (toplevelGeo.y < outputGeo.y)
-    {
+    if (toplevelGeo.y < outputGeo.y) {
         toplevelGeo.y = outputGeo.y;
     }
 

@@ -6,18 +6,15 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
 inline constexpr auto LAYER_COUNT = 4;
 
 class Layer;
 
-class Output
-{
+class Output {
 public:
-    struct Events
-    {
+    struct Events {
         wl_signal destroy;
     };
 
@@ -37,8 +34,7 @@ public:
     /**
      * @brief Get the output name
      */
-    auto name() const
-    {
+    auto name() const {
         return m_handle->name;
     }
 
@@ -63,13 +59,11 @@ public:
 
     void arrangeLayers();
 
-    auto getHandle()
-    {
+    auto getHandle() {
         return m_handle;
     }
 
-    const auto& usableArea() const
-    {
+    const auto& usableArea() const {
         return m_usableArea;
     }
 

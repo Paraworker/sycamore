@@ -8,13 +8,11 @@
 #include <memory>
 #include <string>
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Seat;
 
-class Core
-{
+class Core {
 public:
     /**
     * @brief Constructor

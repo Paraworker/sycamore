@@ -9,69 +9,58 @@
 
 #include <spdlog/spdlog.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
 static constexpr auto WLR_COMPOSITOR_VERSION = 6;
 static constexpr auto XDG_SHELL_VERSION      = 6;
 static constexpr auto LAYER_SHELL_VERSION    = 4;
 
-struct BackendHandler
-{
+struct BackendHandler {
     Listener newInput;
     Listener newOutput;
     Listener destroy;
 
-    explicit BackendHandler(wlr_backend* handle)
-    {
-        newInput = [](void* data)
-        {
+    explicit BackendHandler(wlr_backend* handle) {
+        newInput = [](void* data) {
             inputManager.addDevice(static_cast<wlr_input_device*>(data));
         };
         newInput.connect(handle->events.new_input);
 
-        newOutput = [](void* data)
-        {
+        newOutput = [](void* data) {
             outputManager.addOutput(static_cast<wlr_output*>(data));
         };
         newOutput.connect(handle->events.new_output);
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(handle->events.destroy);
     }
 };
 
-Core::Core()
-{
+Core::Core() {
     wlr_log_init(WLR_DEBUG, nullptr);
 
     display   = wl_display_create();
     eventLoop = wl_display_get_event_loop(display);
 
-    if (backend = wlr_backend_autocreate(eventLoop, &session); !backend)
-    {
+    if (backend = wlr_backend_autocreate(eventLoop, &session); !backend) {
         throw std::runtime_error{"Autocreate wlr_backend failed!"};
     }
 
     new BackendHandler{backend};
 
-    if (renderer = wlr_renderer_autocreate(backend); !renderer)
-    {
+    if (renderer = wlr_renderer_autocreate(backend); !renderer) {
         throw std::runtime_error{"Autocreate wlr_renderer failed!"};
     }
 
     wlr_renderer_init_wl_shm(renderer, display);
 
-    if (wlr_renderer_get_dmabuf_texture_formats(renderer))
-    {
+    if (wlr_renderer_get_dmabuf_texture_formats(renderer)) {
         linuxDmabuf = wlr_linux_dmabuf_v1_create_with_renderer(display, 4, renderer);
     }
 
-    if (allocator = wlr_allocator_autocreate(backend, renderer); !allocator)
-    {
+    if (allocator = wlr_allocator_autocreate(backend, renderer); !allocator) {
         throw std::runtime_error{"Autocreate wlr_allocator failed!"};
     }
 
@@ -109,14 +98,12 @@ Core::Core()
     wlr_single_pixel_buffer_manager_v1_create(display);
 }
 
-Core::~Core()
-{
+Core::~Core() {
     wl_display_destroy_clients(display);
     wl_display_destroy(display);
 }
 
-void Core::start()
-{
+void Core::start() {
     // Add socket
     if (socket = wl_display_add_socket_auto(display); socket.empty())
     {
@@ -128,26 +115,21 @@ void Core::start()
     spdlog::info("Using WAYLAND_DISPLAY={}", socket);
 
     // Start backend
-    if (!wlr_backend_start(backend))
-    {
+    if (!wlr_backend_start(backend)) {
         throw std::runtime_error{"Start Backend failed!"};
     }
 }
 
-void Core::run() const
-{
+void Core::run() const {
     wl_display_run(display);
 }
 
-void Core::terminate() const
-{
+void Core::terminate() const {
     wl_display_terminate(display);
 }
 
-void Core::switchVt(uint32_t vt) const
-{
-    if (session)
-    {
+void Core::switchVt(uint32_t vt) const {
+    if (session) {
         wlr_session_change_vt(session, vt);
     }
 }

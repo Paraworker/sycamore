@@ -5,28 +5,24 @@
 #include "sycamore/input/Seat.h"
 #include "sycamore/Core.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
 PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges)
     : m_toplevel{toplevel}
     , m_edges{edges}
-    , m_grabGeo{toplevel->geometry()}
-{
+    , m_grabGeo{toplevel->geometry()} {
     auto toplevelPos = toplevel->position();
     m_grabGeo.x += toplevelPos.x;
     m_grabGeo.y += toplevelPos.y;
 
-    Point<double> border
-    {
+    Point<double> border {
         static_cast<double>(m_grabGeo.x + ((edges & WLR_EDGE_RIGHT) ? m_grabGeo.width : 0)),
         static_cast<double>(m_grabGeo.y + ((edges & WLR_EDGE_BOTTOM) ? m_grabGeo.height : 0)),
     };
 
     m_delta = core.cursor.position() - border;
 
-    m_toplevelUnmap = [](auto)
-    {
+    m_toplevelUnmap = [](auto) {
         inputManager.toState<Passthrough>();
     };
     m_toplevelUnmap.connect(toplevel->events.unmap);
@@ -34,30 +30,25 @@ PointerResize::PointerResize(Toplevel* toplevel, uint32_t edges)
 
 PointerResize::~PointerResize() = default;
 
-void PointerResize::onEnable()
-{
+void PointerResize::onEnable() {
     m_toplevel->setResizing(true);
     wlr_seat_pointer_notify_clear_focus(core.seat->handle());
     core.cursor.setXcursor(wlr_xcursor_get_resize_name(static_cast<wlr_edges>(m_edges)));
 }
 
-void PointerResize::onDisable()
-{
+void PointerResize::onDisable() {
     m_toplevel->setResizing(false);
 }
 
-void PointerResize::onPointerButton(wlr_pointer_button_event* event)
-{
-    if (core.seat->pointerButtonCount() == 0)
-    {
+void PointerResize::onPointerButton(wlr_pointer_button_event* event) {
+    if (core.seat->pointerButtonCount() == 0) {
         // If there is no button being pressed
         // we back to passthrough
         inputManager.toState<Passthrough>();
     }
 }
 
-void PointerResize::onPointerMotion(uint32_t timeMsec)
-{
+void PointerResize::onPointerMotion(uint32_t timeMsec) {
     /* Resizing the grabbed toplevel can be a little bit complicated, because we
      * could be resizing from any corner or edge. This not only resizes the toplevel
      * on one or two axes, but can also move the toplevel if you resize from the top
@@ -73,36 +64,26 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
 
     auto border = core.cursor.position() - m_delta;
 
-    if (m_edges & WLR_EDGE_TOP)
-    {
+    if (m_edges & WLR_EDGE_TOP) {
         newTop = border.y;
-        if (newTop >= newBottom)
-        {
+        if (newTop >= newBottom) {
             newTop = newBottom - 1;
         }
-    }
-    else if (m_edges & WLR_EDGE_BOTTOM)
-    {
+    } else if (m_edges & WLR_EDGE_BOTTOM) {
         newBottom = border.y;
-        if (newBottom <= newTop)
-        {
+        if (newBottom <= newTop) {
             newBottom = newTop + 1;
         }
     }
 
-    if (m_edges & WLR_EDGE_LEFT)
-    {
+    if (m_edges & WLR_EDGE_LEFT) {
         newLeft = border.x;
-        if (newLeft >= newRight)
-        {
+        if (newLeft >= newRight) {
             newLeft = newRight - 1;
         }
-    }
-    else if (m_edges & WLR_EDGE_RIGHT)
-    {
+    } else if (m_edges & WLR_EDGE_RIGHT) {
         newRight = border.x;
-        if (newRight <= newLeft)
-        {
+        if (newRight <= newLeft) {
             newRight = newLeft + 1;
         }
     }
@@ -113,8 +94,7 @@ void PointerResize::onPointerMotion(uint32_t timeMsec)
     m_toplevel->setSize(newRight - newLeft, newBottom - newTop);
 }
 
-bool PointerResize::isInteractive() const
-{
+bool PointerResize::isInteractive() const {
     return true;
 }
 

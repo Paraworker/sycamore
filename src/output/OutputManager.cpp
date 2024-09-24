@@ -3,15 +3,12 @@
 #include "sycamore/Core.h"
 #include <spdlog/spdlog.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
-void OutputManager::addOutput(wlr_output* handle)
-{
+void OutputManager::addOutput(wlr_output* handle) {
     spdlog::info("New Output: {}", handle->name);
 
-    if (!wlr_output_init_render(handle, core.allocator, core.renderer))
-    {
+    if (!wlr_output_init_render(handle, core.allocator, core.renderer)) {
         spdlog::error("Output: {} init render failed", handle->name);
         wlr_output_destroy(handle);
         return;
@@ -30,23 +27,19 @@ void OutputManager::addOutput(wlr_output* handle)
     output->apply();
 }
 
-void OutputManager::removeOutput(Output* output)
-{
+void OutputManager::removeOutput(Output* output) {
     wl_signal_emit_mutable(&output->events.destroy, nullptr);
     wlr_output_layout_remove(core.outputLayout, output->getHandle());
     m_outputs.erase(output->iter);
 }
 
-size_t OutputManager::outputCount() const
-{
+size_t OutputManager::outputCount() const {
     return m_outputs.size();
 }
 
-Output* OutputManager::findOutputAt(const Point<double>& coords)
-{
+Output* OutputManager::findOutputAt(const Point<double>& coords) {
     auto output = wlr_output_layout_output_at(core.outputLayout, coords.x, coords.y);
-    if (!output)
-    {
+    if (!output) {
         return {};
     }
 

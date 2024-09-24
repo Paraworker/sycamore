@@ -3,11 +3,9 @@
 
 #include "sycamore/wlroots.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class InputState
-{
+class InputState {
 public:
     virtual ~InputState() = default;
 

@@ -5,28 +5,23 @@
 #include <functional>
 #include <wayland-server-core.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
 // A wrapper for wl_listener
-class Listener
-{
+class Listener {
 public:
     /**
      * @brief Constructor
      */
-    Listener() : m_wrapper{{{}, onSignal}, {}}
-    {
+    Listener() : m_wrapper{{{}, onSignal}, {}} {
         wl_list_init(&m_wrapper.listener.link);
     }
 
     /**
      * @brief Destructor
      */
-    ~Listener()
-    {
-        if (isConnected())
-        {
+    ~Listener() {
+        if (isConnected()) {
             wl_list_remove(&m_wrapper.listener.link);
         }
     }
@@ -35,8 +30,7 @@ public:
      * @brief Set callback
      */
     template<typename Fn>
-    Listener& operator=(Fn&& fn)
-    {
+    Listener& operator=(Fn&& fn) {
         m_wrapper.callback = std::forward<Fn>(fn);
         return *this;
     }
@@ -44,8 +38,7 @@ public:
     /**
      * @brief Connect to signal
      */
-    void connect(wl_signal& signal)
-    {
+    void connect(wl_signal& signal) {
         assert(!isConnected());
         wl_signal_add(&signal, &m_wrapper.listener);
     }
@@ -53,8 +46,7 @@ public:
     /**
      * @brief Disconnect form signal
      */
-    void disconnect()
-    {
+    void disconnect() {
         assert(isConnected());
         wl_list_remove(&m_wrapper.listener.link);
         wl_list_init(&m_wrapper.listener.link);
@@ -63,8 +55,7 @@ public:
     /**
      * @brief Is signal connected
      */
-    bool isConnected() const
-    {
+    bool isConnected() const {
         return !wl_list_empty(&m_wrapper.listener.link);
     }
 
@@ -74,16 +65,14 @@ public:
     Listener& operator=(Listener&&) = delete;
 
 private:
-    static void onSignal(wl_listener* listener, void* data)
-    {
+    static void onSignal(wl_listener* listener, void* data) {
         reinterpret_cast<Wrapper*>(listener)->callback(data);
     }
 
 private:
     using Callback = std::function<void(void*)>;
 
-    struct Wrapper
-    {
+    struct Wrapper {
         wl_listener listener;
         Callback    callback;
     };

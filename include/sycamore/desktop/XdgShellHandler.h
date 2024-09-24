@@ -5,24 +5,19 @@
 #include "sycamore/utils/Listener.h"
 #include "sycamore/wlroots.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-struct XdgShellHandler
-{
+struct XdgShellHandler {
     Listener newToplevel;
     Listener destroy;
 
-    explicit XdgShellHandler(wlr_xdg_shell* handle)
-    {
-        newToplevel = [](void* data)
-        {
+    explicit XdgShellHandler(wlr_xdg_shell* handle) {
+        newToplevel = [](void* data) {
             new XdgToplevel{static_cast<wlr_xdg_toplevel*>(data)};
         };
         newToplevel.connect(handle->events.new_toplevel);
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(handle->events.destroy);

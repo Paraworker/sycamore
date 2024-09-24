@@ -1,8 +1,7 @@
 #ifndef SYCAMORE_PROCESS_H
 #define SYCAMORE_PROCESS_H
 
-namespace sycamore
-{
+namespace sycamore {
 
 /**
  * @brief Create process

@@ -5,32 +5,26 @@
 #include <unordered_map>
 #include <xkbcommon/xkbcommon.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
-struct KeyInfo
-{
+struct KeyInfo {
     uint32_t     modifiers;
     xkb_keysym_t sym;
 
-    bool operator==(const KeyInfo& other) const
-    {
+    bool operator==(const KeyInfo& other) const {
         return (modifiers == other.modifiers) && (sym == other.sym);
     }
 
     explicit operator bool() const { return modifiers != 0; }
 
-    struct Hash
-    {
-        std::size_t operator()(const KeyInfo& info) const noexcept
-        {
+    struct Hash {
+        std::size_t operator()(const KeyInfo& info) const noexcept {
             return std::hash<uint32_t>()(info.modifiers) ^ std::hash<xkb_keysym_t>()(info.sym);
         }
     };
 };
 
-class KeybindingManager
-{
+class KeybindingManager {
 public:
     using Dispatcher = std::function<void(void)>;
 

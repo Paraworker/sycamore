@@ -7,11 +7,9 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
-class OutputManager
-{
+class OutputManager {
 public:
     /**
      * @brief Constructor

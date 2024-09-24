@@ -10,23 +10,18 @@
 
 #include <spdlog/spdlog.h>
 
-namespace sycamore
-{
+namespace sycamore {
 
-struct XdgPopup : Popup::Handler
-{
+struct XdgPopup : Popup::Handler {
     XdgToplevel& toplevel;
 
     explicit XdgPopup(XdgToplevel& toplevel)
-        : toplevel{toplevel}
-    {}
+        : toplevel{toplevel} {}
 
     ~XdgPopup() override = default;
 
-    void unconstrain(Popup& popup) override
-    {
-        if (auto output = toplevel.output(); output)
-        {
+    void unconstrain(Popup& popup) override {
+        if (auto output = toplevel.output(); output) {
             auto geo = toplevel.geometry();
             auto pos = toplevel.position();
             auto box = output->relativeGeometry();
@@ -41,11 +36,9 @@ struct XdgPopup : Popup::Handler
 
 XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel)
     : Toplevel{toplevel->base->surface, wlr_scene_xdg_surface_create(core.scene.shell.toplevel, toplevel->base)}
-    , m_toplevel{toplevel}
-{
+    , m_toplevel{toplevel} {
     // On creation, we only connect map, unmap, commit, destroy
-    m_map = [this](auto)
-    {
+    m_map = [this](auto) {
         const auto& req = m_toplevel->requested;
 
         m_newPopup.connect(m_toplevel->base->events.new_popup);
@@ -59,8 +52,7 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel)
     };
     m_map.connect(m_surface->events.map);
 
-    m_unmap = [this](auto)
-    {
+    m_unmap = [this](auto) {
         m_newPopup.disconnect();
         m_move.disconnect();
         m_resize.disconnect();
@@ -72,132 +64,108 @@ XdgToplevel::XdgToplevel(wlr_xdg_toplevel* toplevel)
     };
     m_unmap.connect(m_surface->events.unmap);
 
-    m_commit = [this](auto)
-    {
-        if (m_toplevel->base->initial_commit)
-        {
+    m_commit = [this](auto) {
+        if (m_toplevel->base->initial_commit) {
             // Configures the xdg_toplevel with 0,0 size
             // to let the client pick the dimensions itself
             wlr_xdg_toplevel_set_size(m_toplevel, 0, 0);
             return;
         }
 
-        if (!isMapped())
-        {
+        if (!isMapped()) {
             return;
         }
 
         auto newGeo = geometry();
 
         // geometry changed
-        if (memcmp(&m_lastGeo, &newGeo, sizeof(wlr_box)) != 0)
-        {
+        if (memcmp(&m_lastGeo, &newGeo, sizeof(wlr_box)) != 0) {
             m_lastGeo = newGeo;
             inputManager.state->rebasePointer();
         }
     };
     m_commit.connect(m_surface->events.commit);
 
-    m_destroy = [this](auto)
-    {
+    m_destroy = [this](auto) {
         delete this;
     };
     m_destroy.connect(toplevel->base->events.destroy);
 
     // All listeners below are not connected util map
 
-    m_newPopup = [this](void* data)
-    {
+    m_newPopup = [this](void* data) {
         new Popup{static_cast<wlr_xdg_popup*>(data), m_tree, std::make_shared<XdgPopup>(*this)};
     };
 
-    m_move = [this](auto)
-    {
-        if (inputManager.interactiveEnterCheck(*this))
-        {
+    m_move = [this](auto) {
+        if (inputManager.interactiveEnterCheck(*this)) {
             inputManager.toState<PointerMove>(this);
         }
     };
 
-    m_resize = [this](void* data)
-    {
-        if (inputManager.interactiveEnterCheck(*this))
-        {
+    m_resize = [this](void* data) {
+        if (inputManager.interactiveEnterCheck(*this)) {
             auto event = static_cast<wlr_xdg_toplevel_resize_event*>(data);
             inputManager.toState<PointerResize>(this, event->edges);
         }
     };
 
-    m_fullscreen = [this](auto)
-    {
-        if (!m_toplevel->requested.fullscreen)
-        {
+    m_fullscreen = [this](auto) {
+        if (!m_toplevel->requested.fullscreen) {
             windowManager.unfullscreenRequest(*this);
             return;
         }
 
-        if (auto o = output(); o)
-        {
+        if (auto o = output(); o) {
             windowManager.fullscreenRequest(*this, *o);
         }
     };
 
-    m_maximize = [this](auto)
-    {
-        if (!m_toplevel->requested.maximized)
-        {
+    m_maximize = [this](auto) {
+        if (!m_toplevel->requested.maximized) {
             WindowManager::unmaximizeRequest(*this);
             return;
         }
 
-        if (auto o = output(); o)
-        {
+        if (auto o = output(); o) {
             WindowManager::maximizeRequest(*this, *o);
         }
     };
 
-    m_minimize = [](auto)
-    {
+    m_minimize = [](auto) {
         // TODO
     };
 }
 
 XdgToplevel::~XdgToplevel() = default;
 
-uint32_t XdgToplevel::setMaximized(bool state)
-{
+uint32_t XdgToplevel::setMaximized(bool state) {
     return wlr_xdg_toplevel_set_maximized(m_toplevel, state);
 }
 
-uint32_t XdgToplevel::setFullscreen(bool state)
-{
+uint32_t XdgToplevel::setFullscreen(bool state) {
     return wlr_xdg_toplevel_set_fullscreen(m_toplevel, state);
 }
 
-uint32_t XdgToplevel::setActivated(bool state)
-{
+uint32_t XdgToplevel::setActivated(bool state) {
     return wlr_xdg_toplevel_set_activated(m_toplevel, state);
 }
 
-uint32_t XdgToplevel::setResizing(bool state)
-{
+uint32_t XdgToplevel::setResizing(bool state) {
     return wlr_xdg_toplevel_set_resizing(m_toplevel, state);
 }
 
-uint32_t XdgToplevel::setSize(uint32_t width, uint32_t height)
-{
+uint32_t XdgToplevel::setSize(uint32_t width, uint32_t height) {
     return wlr_xdg_toplevel_set_size(m_toplevel, width, height);
 }
 
-wlr_box XdgToplevel::geometry()
-{
+wlr_box XdgToplevel::geometry() {
     wlr_box box{};
     wlr_xdg_surface_get_geometry(m_toplevel->base, &box);
     return box;
 }
 
-void XdgToplevel::close()
-{
+void XdgToplevel::close() {
     wlr_xdg_toplevel_send_close(m_toplevel);
 }
 

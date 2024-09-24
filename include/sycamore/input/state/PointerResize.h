@@ -4,11 +4,9 @@
 #include "sycamore/desktop/Toplevel.h"
 #include "InputState.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class PointerResize : public InputState
-{
+class PointerResize : public InputState {
 public:
     PointerResize(Toplevel* toplevel, uint32_t edges);
 

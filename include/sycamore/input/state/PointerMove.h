@@ -5,11 +5,9 @@
 #include "sycamore/utils/Listener.h"
 #include "InputState.h"
 
-namespace sycamore
-{
+namespace sycamore {
 
-class PointerMove final : public InputState
-{
+class PointerMove final : public InputState {
 public:
     PointerMove(Toplevel* toplevel);
 

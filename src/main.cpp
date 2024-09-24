@@ -4,8 +4,7 @@
 #include <fmt/core.h>
 #include <getopt.h>
 
-static constexpr auto usage
-{
+static constexpr auto usage {
     "Usage: sycamore [options] [command]\n"
     "\n"
     "  -h, --help             Show this help message.\n"
@@ -13,22 +12,18 @@ static constexpr auto usage
     "\n"
 };
 
-static constexpr option longOptions[]
-{
+static constexpr option longOptions[] {
     {"help", no_argument, nullptr, 'h'},
     {"startup_cmd", required_argument, nullptr, 's'},
     {nullptr, 0, nullptr, 0},
 };
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     const char* command{};
 
     int c, i;
-    while ((c = getopt_long(argc, argv, "s:h", longOptions, &i)) != -1)
-    {
-        switch (c)
-        {
+    while ((c = getopt_long(argc, argv, "s:h", longOptions, &i)) != -1) {
+        switch (c) {
             case 'h':
                 fmt::print(usage);
                 return EXIT_SUCCESS;
@@ -41,8 +36,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (optind < argc)
-    {
+    if (optind < argc) {
         fmt::print(usage);
         return EXIT_SUCCESS;
     }
@@ -52,8 +46,7 @@ int main(int argc, char **argv)
 
     sycamore::core.start();
 
-    if (command)
-    {
+    if (command) {
         sycamore::spawn(command);
     }
 

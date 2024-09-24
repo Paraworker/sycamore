@@ -7,18 +7,15 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Layer;
 class Output;
 class Toplevel;
 
-class WindowManager
-{
+class WindowManager {
 public:
-    struct FocusState
-    {
+    struct FocusState {
         Toplevel* toplevel; // focused Toplevel
         Layer*    layer;    // focused Layer
     };
@@ -34,8 +31,7 @@ public:
      */
     ~WindowManager();
 
-    const auto& focusState() const
-    {
+    const auto& focusState() const {
         return m_focusState;
     }
 

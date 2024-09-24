@@ -3,12 +3,10 @@
 
 #include <chrono>
 
-namespace sycamore
-{
+namespace sycamore {
 
 template<typename D = std::chrono::milliseconds>
-auto getMonotonic()
-{
+auto getMonotonic() {
     using namespace std::chrono;
     return time_point_cast<D>(steady_clock::now()).time_since_epoch().count();
 }

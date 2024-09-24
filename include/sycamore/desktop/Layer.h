@@ -8,16 +8,13 @@
 
 #include <list>
 
-namespace sycamore
-{
+namespace sycamore {
 
 class Output;
 
-class Layer
-{
+class Layer {
 public:
-    struct Events
-    {
+    struct Events {
         wl_signal map;
         wl_signal unmap;
     };
@@ -37,18 +34,15 @@ public:
 
     bool isFocusable() const;
 
-    auto baseSurface() const
-    {
+    auto baseSurface() const {
         return m_handle->surface;
     }
 
-    Point<int32_t> position() const
-    {
+    Point<int32_t> position() const {
         return {m_sceneHelper->tree->node.x, m_sceneHelper->tree->node.y};
     }
 
-    Output* output() const
-    {
+    Output* output() const {
         return m_output;
     }
 
@@ -78,19 +72,16 @@ private:
     Listener                    m_destroy;
 };
 
-struct LayerElement final : scene::Element
-{
+struct LayerElement final : scene::Element {
     Layer&   layer;
     Listener destroy;
 
     LayerElement(wlr_scene_node& node, Layer& layer)
-        : Element{LAYER}, layer{layer}
-    {
+        : Element{LAYER}, layer{layer} {
         // attach node
         node.data = this;
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(node.events.destroy);

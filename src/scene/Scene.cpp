@@ -2,29 +2,27 @@
 
 #include <stdexcept>
 
-namespace sycamore::scene
-{
+namespace sycamore::scene {
 
-struct RootElement final : Element
-{
+struct RootElement final : Element {
     Listener destroy;
 
-    explicit RootElement(wlr_scene_node& node)
-        : Element{ROOT}
-    {
+    explicit RootElement(wlr_scene_node& node) : Element{ROOT} {
         // attach node
         node.data = this;
 
-        destroy = [this](auto)
-        {
+        destroy = [this](auto) {
             delete this;
         };
         destroy.connect(node.events.destroy);
     }
 };
 
-Scene::Scene() : root{wlr_scene_create()}, shell{}, dragIcons{}, layout{}
-{
+Scene::Scene()
+    : root{wlr_scene_create()}
+    , shell{}
+    , dragIcons{}
+    , layout{} {
     new RootElement{root->tree.node};
 
     shell.root = wlr_scene_tree_create(&root->tree);
@@ -38,21 +36,17 @@ Scene::Scene() : root{wlr_scene_create()}, shell{}, dragIcons{}, layout{}
     dragIcons = wlr_scene_tree_create(&root->tree);
 }
 
-Scene::~Scene()
-{
+Scene::~Scene() {
     wlr_scene_node_destroy(&root->tree.node);
 }
 
-void Scene::init(wlr_output_layout* outputLayout, wlr_linux_dmabuf_v1* dmabuf)
-{
+void Scene::init(wlr_output_layout* outputLayout, wlr_linux_dmabuf_v1* dmabuf) {
     layout = wlr_scene_attach_output_layout(root, outputLayout);
     wlr_scene_set_linux_dmabuf_v1(root, dmabuf);
 }
 
-wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
-{
-    switch (type)
-    {
+wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const {
+    switch (type) {
         case ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND:
             return shell.background;
         case ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM:
@@ -66,40 +60,33 @@ wlr_scene_tree* Scene::treeForLayer(zwlr_layer_shell_v1_layer type) const
     }
 }
 
-wlr_scene_output* Scene::addOutput(wlr_output* outputHandle, wlr_output_layout_output* layoutOutput)
-{
+wlr_scene_output* Scene::addOutput(wlr_output* outputHandle, wlr_output_layout_output* layoutOutput) {
     const auto sceneOutput = wlr_scene_output_create(root, outputHandle);
     wlr_scene_output_layout_add_output(layout, layoutOutput, sceneOutput);
     return sceneOutput;
 }
 
-wlr_surface* surfaceFromNode(wlr_scene_node* node)
-{
-    if (!node || node->type != WLR_SCENE_NODE_BUFFER)
-    {
+wlr_surface* surfaceFromNode(wlr_scene_node* node) {
+    if (!node || node->type != WLR_SCENE_NODE_BUFFER) {
         return {};
     }
 
     auto sceneSurface = wlr_scene_surface_try_from_buffer(wlr_scene_buffer_from_node(node));
-    if (!sceneSurface)
-    {
+    if (!sceneSurface) {
         return {};
     }
 
     return sceneSurface->surface;
 }
 
-Element* elementFromNode(wlr_scene_node* node)
-{
-    if (!node)
-    {
+Element* elementFromNode(wlr_scene_node* node) {
+    if (!node) {
         return {};
     }
 
     wlr_scene_tree* tree;
 
-    switch (node->type)
-    {
+    switch (node->type) {
         case WLR_SCENE_NODE_TREE:
             tree = wlr_scene_tree_from_node(node);
             break;
@@ -109,8 +96,7 @@ Element* elementFromNode(wlr_scene_node* node)
             break;
     }
 
-    while (!tree->node.data)
-    {
+    while (!tree->node.data) {
         tree = tree->node.parent;
     }
 
